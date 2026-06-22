@@ -1,0 +1,65 @@
+[gd_scene format=3 uid="uid://b3e2t41ye5xky"]
+
+[ext_resource type="Script" uid="uid://dult5pv0p6ipy" path="res://scripts/player/player_stats.gd" id="1_5jfix"]
+[ext_resource type="Script" uid="uid://bvxbctg2hqqbh" path="res://scripts/player/move_controller.gd" id="2_io27s"]
+[ext_resource type="Script" uid="uid://bi81b3ma6bsrn" path="res://scripts/items/inventory_manager.gd" id="4_gl7sw"]
+[ext_resource type="SpriteFrames" uid="uid://0paq516vlwv3" path="res://assets/gj/characters/player/main_char_sprite_frames.tres" id="5_myn43"]
+[ext_resource type="Script" uid="uid://bx4ej5mrh4nkt" path="res://scripts/player/player.gd" id="6_player"]
+[ext_resource type="Script" path="res://scripts/ui/health_bar.gd" id="7_healthbar"]
+[ext_resource type="Script" path="res://scripts/ui/hotbar_ui.gd" id="8_hotbar"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1paeb"]
+radius = 62.0
+height = 244.0
+
+[node name="MainCharacter" type="CharacterBody2D" unique_id=1349554660 groups=["player"]]
+z_index = 2
+scale = Vector2(0.5, 0.5)
+collision_mask = 0
+script = ExtResource("6_player")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=692970453]
+position = Vector2(0, -110)
+shape = SubResource("CapsuleShape2D_1paeb")
+
+[node name="Stats" type="Node" parent="." unique_id=1346716875]
+script = ExtResource("1_5jfix")
+base_move_speed = 500.0
+
+[node name="MoveController" type="Node" parent="." unique_id=1748757846]
+script = ExtResource("2_io27s")
+
+[node name="InventoryManager" type="Node" parent="." unique_id=565691065]
+script = ExtResource("4_gl7sw")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=38135608]
+position = Vector2(-4, 22)
+zoom = Vector2(0.8, 0.8)
+drag_horizontal_enabled = true
+drag_vertical_enabled = true
+drag_left_margin = 0.1
+drag_top_margin = 0.1
+drag_right_margin = 0.1
+drag_bottom_margin = 0.1
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=677501370]
+position = Vector2(-4, -118)
+scale = Vector2(10, 10)
+sprite_frames = ExtResource("5_myn43")
+animation = &"hurt_r"
+frame = 2
+frame_progress = 0.8149515
+
+[node name="HealthBar" type="Node2D" parent="."]
+position = Vector2(0, -340)
+script = ExtResource("7_healthbar")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Hotbar" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("8_hotbar")

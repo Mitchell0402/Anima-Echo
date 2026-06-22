@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://cyfi7qy3l1lyx"]
+
+[ext_resource type="PackedScene" uid="uid://fe60hkkiiu80" path="res://scenes/mine/gems/gem_abstract.tscn" id="1_gugpg"]
+[ext_resource type="Texture2D" uid="uid://bwd7lld1esygi" path="res://assets/gj/environment/crystal_4.png" id="2_7irok"]
+
+[node name="gem" unique_id=563308230 instance=ExtResource("1_gugpg")]
+gem_level = 3
+
+[node name="Sprite2D" parent="." index="0" unique_id=701452490]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_7irok")

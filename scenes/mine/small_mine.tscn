@@ -1,0 +1,67 @@
+[gd_scene format=3 uid="uid://cbv3gcy6d6fg"]
+
+[ext_resource type="Script" uid="uid://djoepvrg82imq" path="res://scripts/mine/mine_stats.gd" id="1_rl66i"]
+[ext_resource type="PackedScene" uid="uid://c32bph848rjiw" path="res://scenes/mine/gems/gem_l1.tscn" id="2_03nme"]
+[ext_resource type="Script" uid="uid://bumnt046gd4vj" path="res://scripts/mine/mine_interaction.gd" id="2_fmt5g"]
+[ext_resource type="PackedScene" uid="uid://8l1j1tm1ee6u" path="res://scenes/mine/gems/gem_l2.tscn" id="3_7mspx"]
+[ext_resource type="Script" uid="uid://bq67qfjk550xb" path="res://scripts/ui/progress_ui.gd" id="3_tmet0"]
+[ext_resource type="PackedScene" uid="uid://cyfi7qy3l1lyx" path="res://scenes/mine/gems/gem_l3.tscn" id="4_glmyf"]
+[ext_resource type="Texture2D" uid="uid://ttg3fl22ajvx" path="res://assets/gj/environment/stones_1.png" id="6_03nme"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kjxxc"]
+size = Vector2(263, 196)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tmet0"]
+bg_color = Color(0.6, 1, 0.7764706, 1)
+
+[node name="SmallMine" type="Area2D" unique_id=1749931594]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=204833805]
+position = Vector2(2.5, -59)
+shape = SubResource("RectangleShape2D_kjxxc")
+
+[node name="MineStats" type="Node" parent="." unique_id=1879631016]
+script = ExtResource("1_rl66i")
+gem_l1_scene = ExtResource("2_03nme")
+gem_l2_scene = ExtResource("3_7mspx")
+gem_l3_scene = ExtResource("4_glmyf")
+drop_rate_l2 = 25.0
+drop_rate_l3 = 5.0
+luck = 0.3
+
+[node name="MineInteraction" type="Node" parent="." unique_id=114946895]
+script = ExtResource("2_fmt5g")
+
+[node name="Visuals" type="Node2D" parent="." unique_id=340983159]
+position = Vector2(2, -57)
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals" unique_id=1564044819]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("6_03nme")
+
+[node name="ProgressUI" type="Control" parent="." unique_id=2052152982]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = -97.0
+offset_top = -176.0
+offset_right = 103.0
+offset_bottom = -156.0
+scale = Vector2(0.9672976, 0.97261226)
+script = ExtResource("3_tmet0")
+
+[node name="BgBar" type="ColorRect" parent="ProgressUI" unique_id=391063062]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+rotation = -0.004935738
+scale = Vector2(5.043627, 0.52000105)
+color = Color(0.6392157, 0, 0, 1)
+
+[node name="FillBar" type="ProgressBar" parent="ProgressUI" unique_id=1968963736]
+layout_mode = 0
+offset_right = 4.0
+offset_bottom = 27.0
+scale = Vector2(50.333317, 0.7943682)
+theme_override_styles/fill = SubResource("StyleBoxFlat_tmet0")
+show_percentage = false

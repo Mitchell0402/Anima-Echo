@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://fe60hkkiiu80"]
+
+[ext_resource type="Script" uid="uid://cqvqsikto40sk" path="res://scripts/items/gem_controller.gd" id="1_dckme"]
+[ext_resource type="Texture2D" path="res://assets/gj/environment/crystal_1.png" id="2_default"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_agfra"]
+size = Vector2(620, 271)
+
+[node name="gem" type="Area2D" unique_id=563308230]
+y_sort_enabled = true
+scale = Vector2(0.3, 0.3)
+script = ExtResource("1_dckme")
+pickup_speed = 800.0
+collect_distance = 20.0
+pickup_delay = 0.45
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=701452490]
+texture = ExtResource("2_default")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=557201547]
+position = Vector2(-3, -1)
+shape = SubResource("RectangleShape2D_agfra")
