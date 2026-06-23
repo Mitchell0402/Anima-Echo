@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/mine/cover.gd" id="1_cover"]
-[ext_resource type="Texture2D" path="res://assets/gj/environment/decor_6.png" id="2_sprite"]
+[ext_resource type="Texture2D" path="res://assets/mine/environment/decor_6.png" id="2_sprite"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_interact"]
 size = Vector2(260, 180)

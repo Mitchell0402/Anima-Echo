@@ -1,2 +1,3 @@
-# anima_echo
-A simple 2d mining game by anima echo.
+# Anima Echo
+
+A clean Godot 4 development base for a 2D mining game.

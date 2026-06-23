@@ -5,9 +5,9 @@ extends Node
 ## 后续可改为基于资源文件的注册表，目前用常量足够。
 
 const GEM_TEXTURES := {
-	1: preload("res://assets/gj/environment/crystal_1.png"),
-	2: preload("res://assets/gj/environment/crystal_6.png"),
-	3: preload("res://assets/gj/environment/crystal_4.png"),
+	1: preload("res://assets/mine/environment/crystal_1.png"),
+	2: preload("res://assets/mine/environment/crystal_6.png"),
+	3: preload("res://assets/mine/environment/crystal_4.png"),
 }
 
 # 每种物品类型的堆叠上限
