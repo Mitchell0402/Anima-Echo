@@ -2,6 +2,14 @@
 .godot/
 .nomedia
 
+# Local Codex/session files
+.codex/session-start.md
+.codex/environments/
+
+# Local secrets
+.env
+.env.local
+
 # Godot-specific ignores
 .import/
 export.cfg
