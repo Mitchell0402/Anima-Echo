@@ -5,8 +5,9 @@
 [ext_resource type="Script" uid="uid://bi81b3ma6bsrn" path="res://scripts/items/inventory_manager.gd" id="4_gl7sw"]
 [ext_resource type="SpriteFrames" uid="uid://0paq516vlwv3" path="res://assets/mine/characters/player/main_char_sprite_frames.tres" id="5_myn43"]
 [ext_resource type="Script" uid="uid://bx4ej5mrh4nkt" path="res://scripts/player/player.gd" id="6_player"]
-[ext_resource type="Script" path="res://scripts/ui/health_bar.gd" id="7_healthbar"]
-[ext_resource type="Script" path="res://scripts/ui/hotbar_ui.gd" id="8_hotbar"]
+[ext_resource type="Script" uid="uid://cjxofcdwo4hpy" path="res://scripts/ui/health_bar.gd" id="7_healthbar"]
+[ext_resource type="Script" uid="uid://cx5yqnxku4w6p" path="res://scripts/ui/hotbar_ui.gd" id="8_hotbar"]
+[ext_resource type="Script" uid="uid://cpjxlhubu518c" path="res://scripts/ui/weight_bar.gd" id="9_weightbar"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1paeb"]
 radius = 62.0
@@ -50,16 +51,23 @@ animation = &"hurt_r"
 frame = 2
 frame_progress = 0.8149515
 
-[node name="HealthBar" type="Node2D" parent="."]
+[node name="HealthBar" type="Node2D" parent="." unique_id=138953096]
 position = Vector2(0, -340)
 script = ExtResource("7_healthbar")
 
-[node name="HUD" type="CanvasLayer" parent="."]
+[node name="WeightBar" type="Node2D" parent="." unique_id=386155058]
+position = Vector2(0, -322)
+scale = Vector2(2, 2)
+script = ExtResource("9_weightbar")
 
-[node name="Hotbar" type="Control" parent="HUD"]
+[node name="HUD" type="CanvasLayer" parent="." unique_id=421629968]
+
+[node name="Hotbar" type="Control" parent="HUD" unique_id=1963785497]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("8_hotbar")

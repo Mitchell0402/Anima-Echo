@@ -9,6 +9,7 @@ Anima Echo is a Godot 4.x 2D mining prototype being cleaned up into a baseline f
 - [current_tasks.md](current_tasks.md): current cleanup state, risks, and next practical tasks.
 - [testing.md](testing.md): how to run the existing project checks and manual smoke tests.
 - [glossary.md](glossary.md): project-specific terms.
+- [specs/weight_system.md](specs/weight_system.md): tiered encumbrance (Light/Heavy/Overload) with speed and noise penalties.
 
 ## Templates
 

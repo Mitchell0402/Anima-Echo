@@ -10,6 +10,7 @@ Last updated: 2026-06-23
 - The current automated test entrypoint is `res://tests/project/run_all.gd`.
 - The project has a normalized layout under `assets/`, `data/`, `docs/`, `scenes/`, `scripts/`, and `tests/`.
 - The runtime economy core is already present under `scripts/core` and `scripts/economy`.
+- **Weight System**: 3-tier encumbrance (Light/Heavy/Overload) based on raw geode weight, with speed and noise penalties. [Spec](specs/weight_system.md)
 
 ## Known Risks And TODOs
 
@@ -19,6 +20,7 @@ Last updated: 2026-06-23
 - TODO: Record asset source and license metadata for generated or third-party art.
 - TODO: Define the next gameplay cleanup in a focused spec before implementation.
 - TODO: Verify `CustomerShopService.list_customers()` behavior before building customer-selection UI.
+- TODO: Complete end-to-end testing of the weight system (speed/noise/UI) in Godot editor.
 
 ## Next Cleanup Candidates
 
