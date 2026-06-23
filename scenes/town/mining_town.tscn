@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://dxjbgwnb1j7cw"]
 
-[ext_resource type="Script" path="res://scripts/town/fused_mining_town_scene.gd" id="1"]
+[ext_resource type="Script" uid="uid://dieycncl74k6o" path="res://scripts/town/fused_mining_town_scene.gd" id="1"]
 
-[node name="MiningTown" type="Node2D"]
+[node name="MiningTown" type="Node2D" unique_id=1470820021]
 script = ExtResource("1")
