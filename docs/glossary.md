@@ -16,4 +16,5 @@
 - Customer: Catalog-defined buyer used by negotiation and shop services.
 - Task: Catalog-defined objective/reward entry managed by `TaskService`.
 - NoiseSystem: Shared event system used to communicate player noise to enemy AI.
+- WeightSystem: Autoload that calculates total backpack weight from raw geodes in GameRuntime.inventory and determines encumbrance tier (Light/Heavy/Overload), affecting speed and noise.
 - Godot MCP: Editor/runtime helper addon under `addons/godot_mcp`.

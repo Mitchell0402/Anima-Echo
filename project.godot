@@ -19,6 +19,7 @@ config/features=PackedStringArray("4.6", "Forward Plus")
 NoiseSystem="*res://scripts/core/noise_system.gd"
 ItemDatabase="*res://scripts/items/item_database.gd"
 GameRuntime="*res://scripts/core/game_runtime.gd"
+WeightSystem="*res://scripts/core/weight_system.gd"
 MCPScreenshot="*res://addons/godot_mcp/mcp_screenshot_service.gd"
 MCPInputService="*res://addons/godot_mcp/mcp_input_service.gd"
 MCPGameInspector="*res://addons/godot_mcp/mcp_game_inspector_service.gd"

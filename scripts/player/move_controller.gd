@@ -8,6 +8,7 @@ extends Node
 @onready var stats: Node = $"../Stats"
 @onready var animated_sprite: AnimatedSprite2D = $"../AnimatedSprite2D"
 @onready var _noise: Node = get_node_or_null("/root/NoiseSystem")
+@onready var _weight: Node = get_node_or_null("/root/WeightSystem")
 
 const WALK_SPEED_MULTIPLIER: float = 0.5  # 按住 walk 时速度倍率
 const HURT_DECEL: float = 1200.0          # 击退速度衰减
@@ -55,6 +56,8 @@ func _physics_process(delta: float) -> void:
 	# 慢走 2.5 / 跑步 15；躲藏或挖矿时不发声（can_move 已在上方 return）
 	if input_dir != Vector2.ZERO and _noise:
 		var loudness: float = _noise.WALK * 0.5 if is_walking else _noise.RUN
+		if _weight:
+			loudness *= _weight.get_noise_multiplier()
 		_noise.emit_noise(body.global_position, loudness, body)
 
 func handle_animation(input_dir: Vector2, is_walking: bool) -> void:

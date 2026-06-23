@@ -1,250 +1,254 @@
 {
   "items": [
-    {
-      "id": "raw_common_geode",
-      "name": "Clouded Geode",
-      "category": "raw_stone",
-      "rarity": "common",
-      "rarity_weight": 60,
-      "stack_size": 99,
-      "base_price": 8,
-      "identify_table": "common_geode",
-      "tags": ["raw", "geode", "mine"]
-    },
-    {
-      "id": "raw_fine_geode",
-      "name": "Veined Geode",
-      "category": "raw_stone",
-      "rarity": "uncommon",
-      "rarity_weight": 25,
-      "stack_size": 99,
-      "base_price": 18,
-      "identify_table": "fine_geode",
-      "tags": ["raw", "geode", "mine"]
-    },
-    {
-      "id": "raw_rare_geode",
-      "name": "Resonant Geode",
-      "category": "raw_stone",
-      "rarity": "rare",
-      "rarity_weight": 10,
-      "stack_size": 99,
-      "base_price": 42,
-      "identify_table": "rare_geode",
-      "tags": ["raw", "geode", "mine"]
-    },
-    {
-      "id": "raw_anomalous_geode",
-      "name": "Anomalous Geode",
-      "category": "raw_stone",
-      "rarity": "legendary",
-      "rarity_weight": 3,
-      "stack_size": 99,
-      "base_price": 90,
-      "identify_table": "anomalous_geode",
-      "tags": ["raw", "geode", "mine", "volatile"]
-    },
-    {
-      "id": "copper_nugget",
-      "name": "Copper Nugget",
-      "category": "mineral",
-      "rarity": "common",
-      "rarity_weight": 45,
-      "stack_size": 99,
-      "base_price": 10,
-      "tags": ["metal", "craft", "safe"]
-    },
-    {
-      "id": "iron_shard",
-      "name": "Iron Shard",
-      "category": "mineral",
-      "rarity": "common",
-      "rarity_weight": 35,
-      "stack_size": 99,
-      "base_price": 15,
-      "tags": ["metal", "blacksmith", "safe"]
-    },
-    {
-      "id": "silver_vein",
-      "name": "Silver Vein",
-      "category": "mineral",
-      "rarity": "uncommon",
-      "rarity_weight": 18,
-      "stack_size": 99,
-      "base_price": 34,
-      "tags": ["metal", "jeweler", "safe"]
-    },
-    {
-      "id": "gold_vein",
-      "name": "Gold Vein",
-      "category": "mineral",
-      "rarity": "rare",
-      "rarity_weight": 8,
-      "stack_size": 99,
-      "base_price": 78,
-      "tags": ["metal", "jeweler", "safe"]
-    },
-    {
-      "id": "crystal_bloom",
-      "name": "Crystal Bloom",
-      "category": "mineral",
-      "rarity": "uncommon",
-      "rarity_weight": 20,
-      "stack_size": 99,
-      "base_price": 40,
-      "tags": ["crystal", "alchemist", "safe"]
-    },
-    {
-      "id": "moonlit_crystal",
-      "name": "Moonlit Crystal",
-      "category": "mineral",
-      "rarity": "rare",
-      "rarity_weight": 7,
-      "stack_size": 99,
-      "base_price": 115,
-      "tags": ["crystal", "alchemist", "jeweler", "sensitive"]
-    },
-    {
-      "id": "star_fragment",
-      "name": "Star Fragment",
-      "category": "mineral",
-      "rarity": "legendary",
-      "rarity_weight": 2,
-      "stack_size": 99,
-      "base_price": 260,
-      "tags": ["cosmic", "sensitive"]
-    },
-    {
-      "id": "memory_core",
-      "name": "Memory Core",
-      "category": "mineral",
-      "rarity": "legendary",
-      "rarity_weight": 1,
-      "stack_size": 99,
-      "base_price": 340,
-      "tags": ["ancient", "sensitive"]
-    }
+	{
+	  "id": "raw_common_geode",
+	  "name": "Clouded Geode",
+	  "category": "raw_stone",
+	  "rarity": "common",
+	  "rarity_weight": 60,
+	  "stack_size": 99,
+	  "base_price": 8,
+	  "weight": 5,
+	  "identify_table": "common_geode",
+	  "tags": ["raw", "geode", "mine"]
+	},
+	{
+	  "id": "raw_fine_geode",
+	  "name": "Veined Geode",
+	  "category": "raw_stone",
+	  "rarity": "uncommon",
+	  "rarity_weight": 25,
+	  "stack_size": 99,
+	  "base_price": 18,
+	  "weight": 6,
+	  "identify_table": "fine_geode",
+	  "tags": ["raw", "geode", "mine"]
+	},
+	{
+	  "id": "raw_rare_geode",
+	  "name": "Resonant Geode",
+	  "category": "raw_stone",
+	  "rarity": "rare",
+	  "rarity_weight": 10,
+	  "stack_size": 99,
+	  "base_price": 42,
+	  "weight": 8,
+	  "identify_table": "rare_geode",
+	  "tags": ["raw", "geode", "mine"]
+	},
+	{
+	  "id": "raw_anomalous_geode",
+	  "name": "Anomalous Geode",
+	  "category": "raw_stone",
+	  "rarity": "legendary",
+	  "rarity_weight": 3,
+	  "stack_size": 99,
+	  "base_price": 90,
+	  "weight": 10,
+	  "identify_table": "anomalous_geode",
+	  "tags": ["raw", "geode", "mine", "volatile"]
+	},
+	{
+	  "id": "copper_nugget",
+	  "name": "Copper Nugget",
+	  "category": "mineral",
+	  "rarity": "common",
+	  "rarity_weight": 45,
+	  "stack_size": 99,
+	  "base_price": 10,
+	  "tags": ["metal", "craft", "safe"]
+	},
+	{
+	  "id": "iron_shard",
+	  "name": "Iron Shard",
+	  "category": "mineral",
+	  "rarity": "common",
+	  "rarity_weight": 35,
+	  "stack_size": 99,
+	  "base_price": 15,
+	  "tags": ["metal", "blacksmith", "safe"]
+	},
+	{
+	  "id": "silver_vein",
+	  "name": "Silver Vein",
+	  "category": "mineral",
+	  "rarity": "uncommon",
+	  "rarity_weight": 18,
+	  "stack_size": 99,
+	  "base_price": 34,
+	  "tags": ["metal", "jeweler", "safe"]
+	},
+	{
+	  "id": "gold_vein",
+	  "name": "Gold Vein",
+	  "category": "mineral",
+	  "rarity": "rare",
+	  "rarity_weight": 8,
+	  "stack_size": 99,
+	  "base_price": 78,
+	  "tags": ["metal", "jeweler", "safe"]
+	},
+	{
+	  "id": "crystal_bloom",
+	  "name": "Crystal Bloom",
+	  "category": "mineral",
+	  "rarity": "uncommon",
+	  "rarity_weight": 20,
+	  "stack_size": 99,
+	  "base_price": 40,
+	  "tags": ["crystal", "alchemist", "safe"]
+	},
+	{
+	  "id": "moonlit_crystal",
+	  "name": "Moonlit Crystal",
+	  "category": "mineral",
+	  "rarity": "rare",
+	  "rarity_weight": 7,
+	  "stack_size": 99,
+	  "base_price": 115,
+	  "tags": ["crystal", "alchemist", "jeweler", "sensitive"]
+	},
+	{
+	  "id": "star_fragment",
+	  "name": "Star Fragment",
+	  "category": "mineral",
+	  "rarity": "legendary",
+	  "rarity_weight": 2,
+	  "stack_size": 99,
+	  "base_price": 260,
+	  "tags": ["cosmic", "sensitive"]
+	},
+	{
+	  "id": "memory_core",
+	  "name": "Memory Core",
+	  "category": "mineral",
+	  "rarity": "legendary",
+	  "rarity_weight": 1,
+	  "stack_size": 99,
+	  "base_price": 340,
+	  "tags": ["ancient", "sensitive"]
+	}
   ],
   "loot_tables": [
-    {
-      "id": "mine_wall_common",
-      "entries": [
-        {"item_id": "raw_common_geode", "quantity": 1, "weight": 70},
-        {"item_id": "raw_fine_geode", "quantity": 1, "weight": 24},
-        {"item_id": "raw_rare_geode", "quantity": 1, "weight": 6}
-      ]
-    },
-    {
-      "id": "mine_wall_deep",
-      "entries": [
-        {"item_id": "raw_common_geode", "quantity": 1, "weight": 35},
-        {"item_id": "raw_fine_geode", "quantity": 1, "weight": 40},
-        {"item_id": "raw_rare_geode", "quantity": 1, "weight": 20},
-        {"item_id": "raw_anomalous_geode", "quantity": 1, "weight": 5}
-      ]
-    }
+	{
+	  "id": "mine_wall_common",
+	  "entries": [
+		{"item_id": "raw_common_geode", "quantity": 1, "weight": 70},
+		{"item_id": "raw_fine_geode", "quantity": 1, "weight": 24},
+		{"item_id": "raw_rare_geode", "quantity": 1, "weight": 6}
+	  ]
+	},
+	{
+	  "id": "mine_wall_deep",
+	  "entries": [
+		{"item_id": "raw_common_geode", "quantity": 1, "weight": 35},
+		{"item_id": "raw_fine_geode", "quantity": 1, "weight": 40},
+		{"item_id": "raw_rare_geode", "quantity": 1, "weight": 20},
+		{"item_id": "raw_anomalous_geode", "quantity": 1, "weight": 5}
+	  ]
+	}
   ],
   "identify_tables": [
-    {
-      "id": "common_geode",
-      "entries": [
-        {"item_id": "copper_nugget", "quantity": 1, "weight": 50},
-        {"item_id": "iron_shard", "quantity": 1, "weight": 35},
-        {"item_id": "silver_vein", "quantity": 1, "weight": 12},
-        {"item_id": "crystal_bloom", "quantity": 1, "weight": 3}
-      ]
-    },
-    {
-      "id": "fine_geode",
-      "entries": [
-        {"item_id": "iron_shard", "quantity": 1, "weight": 34},
-        {"item_id": "silver_vein", "quantity": 1, "weight": 30},
-        {"item_id": "crystal_bloom", "quantity": 1, "weight": 24},
-        {"item_id": "gold_vein", "quantity": 1, "weight": 10},
-        {"item_id": "moonlit_crystal", "quantity": 1, "weight": 2}
-      ]
-    },
-    {
-      "id": "rare_geode",
-      "entries": [
-        {"item_id": "silver_vein", "quantity": 1, "weight": 30},
-        {"item_id": "gold_vein", "quantity": 1, "weight": 25},
-        {"item_id": "crystal_bloom", "quantity": 1, "weight": 25},
-        {"item_id": "moonlit_crystal", "quantity": 1, "weight": 15},
-        {"item_id": "star_fragment", "quantity": 1, "weight": 5}
-      ]
-    },
-    {
-      "id": "anomalous_geode",
-      "entries": [
-        {"item_id": "moonlit_crystal", "quantity": 1, "weight": 45},
-        {"item_id": "star_fragment", "quantity": 1, "weight": 35},
-        {"item_id": "memory_core", "quantity": 1, "weight": 20}
-      ]
-    }
+	{
+	  "id": "common_geode",
+	  "entries": [
+		{"item_id": "copper_nugget", "quantity": 1, "weight": 50},
+		{"item_id": "iron_shard", "quantity": 1, "weight": 35},
+		{"item_id": "silver_vein", "quantity": 1, "weight": 12},
+		{"item_id": "crystal_bloom", "quantity": 1, "weight": 3}
+	  ]
+	},
+	{
+	  "id": "fine_geode",
+	  "entries": [
+		{"item_id": "iron_shard", "quantity": 1, "weight": 34},
+		{"item_id": "silver_vein", "quantity": 1, "weight": 30},
+		{"item_id": "crystal_bloom", "quantity": 1, "weight": 24},
+		{"item_id": "gold_vein", "quantity": 1, "weight": 10},
+		{"item_id": "moonlit_crystal", "quantity": 1, "weight": 2}
+	  ]
+	},
+	{
+	  "id": "rare_geode",
+	  "entries": [
+		{"item_id": "silver_vein", "quantity": 1, "weight": 30},
+		{"item_id": "gold_vein", "quantity": 1, "weight": 25},
+		{"item_id": "crystal_bloom", "quantity": 1, "weight": 25},
+		{"item_id": "moonlit_crystal", "quantity": 1, "weight": 15},
+		{"item_id": "star_fragment", "quantity": 1, "weight": 5}
+	  ]
+	},
+	{
+	  "id": "anomalous_geode",
+	  "entries": [
+		{"item_id": "moonlit_crystal", "quantity": 1, "weight": 45},
+		{"item_id": "star_fragment", "quantity": 1, "weight": 35},
+		{"item_id": "memory_core", "quantity": 1, "weight": 20}
+	  ]
+	}
   ],
   "customers": [
-    {
-      "id": "buyer_blacksmith",
-      "name": "Blacksmith Rowan",
-      "price_multiplier": 1.1,
-      "preferred_tags": ["metal", "blacksmith"],
-      "rejected_tags": ["volatile"],
-      "budget": 400
-    },
-    {
-      "id": "buyer_alchemist",
-      "name": "Alchemist Iven",
-      "price_multiplier": 1.18,
-      "preferred_tags": ["crystal", "ancient"],
-      "rejected_tags": [],
-      "budget": 520
-    },
-    {
-      "id": "buyer_jeweler",
-      "name": "Jeweler Mira",
-      "price_multiplier": 1.25,
-      "preferred_tags": ["jeweler", "cosmic"],
-      "rejected_tags": ["blacksmith"],
-      "budget": 650
-    }
+	{
+	  "id": "buyer_blacksmith",
+	  "name": "Blacksmith Rowan",
+	  "price_multiplier": 1.1,
+	  "preferred_tags": ["metal", "blacksmith"],
+	  "rejected_tags": ["volatile"],
+	  "budget": 400
+	},
+	{
+	  "id": "buyer_alchemist",
+	  "name": "Alchemist Iven",
+	  "price_multiplier": 1.18,
+	  "preferred_tags": ["crystal", "ancient"],
+	  "rejected_tags": [],
+	  "budget": 520
+	},
+	{
+	  "id": "buyer_jeweler",
+	  "name": "Jeweler Mira",
+	  "price_multiplier": 1.25,
+	  "preferred_tags": ["jeweler", "cosmic"],
+	  "rejected_tags": ["blacksmith"],
+	  "budget": 650
+	}
   ],
   "tasks": [
-    {
-      "id": "task_first_identification",
-      "name": "First Reveal",
-      "description": "Identify any raw geode in town.",
-      "objectives": [
-        {"id": "identified_any", "type": "event_count", "event": "item_identified", "count": 1}
-      ],
-      "rewards": [
-        {"item_id": "raw_fine_geode", "quantity": 1}
-      ],
-      "currency_reward": 20
-    },
-    {
-      "id": "task_blacksmith_order",
-      "name": "Blacksmith Order",
-      "description": "Deliver three iron shards.",
-      "objectives": [
-        {"id": "deliver_iron", "type": "deliver_item", "item_id": "iron_shard", "count": 3}
-      ],
-      "rewards": [
-        {"item_id": "raw_rare_geode", "quantity": 1}
-      ],
-      "currency_reward": 75
-    },
-    {
-      "id": "task_market_trial",
-      "name": "Market Trial",
-      "description": "Sell minerals worth at least 120 coins.",
-      "objectives": [
-        {"id": "earn_sales", "type": "event_sum", "event": "item_sold", "field": "total_price", "target": 120}
-      ],
-      "rewards": [
-        {"item_id": "raw_fine_geode", "quantity": 2}
-      ],
-      "currency_reward": 30
-    }
+	{
+	  "id": "task_first_identification",
+	  "name": "First Reveal",
+	  "description": "Identify any raw geode in town.",
+	  "objectives": [
+		{"id": "identified_any", "type": "event_count", "event": "item_identified", "count": 1}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_fine_geode", "quantity": 1}
+	  ],
+	  "currency_reward": 20
+	},
+	{
+	  "id": "task_blacksmith_order",
+	  "name": "Blacksmith Order",
+	  "description": "Deliver three iron shards.",
+	  "objectives": [
+		{"id": "deliver_iron", "type": "deliver_item", "item_id": "iron_shard", "count": 3}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_rare_geode", "quantity": 1}
+	  ],
+	  "currency_reward": 75
+	},
+	{
+	  "id": "task_market_trial",
+	  "name": "Market Trial",
+	  "description": "Sell minerals worth at least 120 coins.",
+	  "objectives": [
+		{"id": "earn_sales", "type": "event_sum", "event": "item_sold", "field": "total_price", "target": 120}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_fine_geode", "quantity": 2}
+	  ],
+	  "currency_reward": 30
+	}
   ]
 }
