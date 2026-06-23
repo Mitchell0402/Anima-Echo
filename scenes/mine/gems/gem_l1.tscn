@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://c32bph848rjiw"]
 
 [ext_resource type="PackedScene" uid="uid://fe60hkkiiu80" path="res://scenes/mine/gems/gem_abstract.tscn" id="1_4525v"]
-[ext_resource type="Texture2D" uid="uid://dgibmcy87ju50" path="res://assets/gj/environment/crystal_1.png" id="2_rikfn"]
+[ext_resource type="Texture2D" uid="uid://dgibmcy87ju50" path="res://assets/mine/environment/crystal_1.png" id="2_rikfn"]
 
 [node name="gem" unique_id=563308230 instance=ExtResource("1_4525v")]
 

@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://8l1j1tm1ee6u" path="res://scenes/mine/gems/gem_l2.tscn" id="3_7mspx"]
 [ext_resource type="Script" uid="uid://bq67qfjk550xb" path="res://scripts/ui/progress_ui.gd" id="3_tmet0"]
 [ext_resource type="PackedScene" uid="uid://cyfi7qy3l1lyx" path="res://scenes/mine/gems/gem_l3.tscn" id="4_glmyf"]
-[ext_resource type="Texture2D" uid="uid://ttg3fl22ajvx" path="res://assets/gj/environment/stones_1.png" id="6_03nme"]
+[ext_resource type="Texture2D" uid="uid://ttg3fl22ajvx" path="res://assets/mine/environment/stones_1.png" id="6_03nme"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kjxxc"]
 size = Vector2(263, 196)

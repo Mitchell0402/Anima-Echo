@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://fe60hkkiiu80"]
 
 [ext_resource type="Script" uid="uid://cqvqsikto40sk" path="res://scripts/items/gem_controller.gd" id="1_dckme"]
-[ext_resource type="Texture2D" path="res://assets/gj/environment/crystal_1.png" id="2_default"]
+[ext_resource type="Texture2D" path="res://assets/mine/environment/crystal_1.png" id="2_default"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_agfra"]
 size = Vector2(620, 271)

@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Mine Platform V2"
+config/name="Anima Echo"
 run/main_scene="res://scenes/town/mining_town.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 

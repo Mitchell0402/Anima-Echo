@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://civec3if5irdw"]
 
 [ext_resource type="Script" uid="uid://biwqtbcyud6fw" path="res://scripts/enemies/enemy_ai.gd" id="1_yyt53"]
-[ext_resource type="Texture2D" uid="uid://cw8othrje7ipe" path="res://assets/gj/enemies/gnoll/Gnoll1_Attack_with_shadow.png" id="2_hti8k"]
-[ext_resource type="Texture2D" uid="uid://dtrdd2dfh5tgx" path="res://assets/gj/enemies/gnoll/Gnoll1_Idle_with_shadow.png" id="2_s685e"]
-[ext_resource type="Texture2D" uid="uid://dwanjrdfhby8x" path="res://assets/gj/enemies/gnoll/Gnoll1_Run_with_shadow.png" id="2_vmi60"]
-[ext_resource type="Texture2D" uid="uid://1sw0yrhiajya" path="res://assets/gj/enemies/gnoll/Gnoll1_Walk_with_shadow.png" id="3_n6qjc"]
+[ext_resource type="Texture2D" uid="uid://cw8othrje7ipe" path="res://assets/mine/enemies/gnoll/Gnoll1_Attack_with_shadow.png" id="2_hti8k"]
+[ext_resource type="Texture2D" uid="uid://dtrdd2dfh5tgx" path="res://assets/mine/enemies/gnoll/Gnoll1_Idle_with_shadow.png" id="2_s685e"]
+[ext_resource type="Texture2D" uid="uid://dwanjrdfhby8x" path="res://assets/mine/enemies/gnoll/Gnoll1_Run_with_shadow.png" id="2_vmi60"]
+[ext_resource type="Texture2D" uid="uid://1sw0yrhiajya" path="res://assets/mine/enemies/gnoll/Gnoll1_Walk_with_shadow.png" id="3_n6qjc"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_fwvss"]
 radius = 46.0
