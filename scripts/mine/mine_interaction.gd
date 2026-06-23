@@ -156,6 +156,9 @@ func _start_mining() -> void:
 	qte_first_triggered = false
 	qte_in_cooldown = false
 	_reset_qte_timer()
+	if progress_ui:
+		progress_ui.setup(stats.total_segments)
+		progress_ui.show_bar()
 	print("[Mine] 开始开采 | 进度: %.2f/%.2f" % [stats.current_progress, stats.get_max_progress()])
 	mining_started.emit()
 
@@ -168,6 +171,8 @@ func _stop_mining(should_rollback: bool) -> void:
 	if should_rollback and stats.has_method("rollback_to_previous_segment"):
 		stats.rollback_to_previous_segment()
 	progress_ui.update_progress(stats.current_progress, stats.get_max_progress())
+	if progress_ui:
+		progress_ui.hide_bar()
 	_release_player()
 	mining_stopped.emit(should_rollback)
 
@@ -275,5 +280,5 @@ func _on_mining_completed() -> void:
 		qte_ui.hide_qte()
 	_release_player()
 	if progress_ui:
-		progress_ui.visible = false
+		progress_ui.hide_bar()
 	get_parent().call_deferred("queue_free")
