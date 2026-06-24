@@ -52,7 +52,8 @@
 
 - `GameRuntime` owns the single live inventory, wallet, catalog, transaction service, identification service, shop service, negotiation service, and task service.
 - Real inventory and currency mutations must go through `GameTransactionService`.
-- `scripts/items/inventory_manager.gd` remains as the hotbar compatibility view and syncs from `GameRuntime.inventory`.
+- `scripts/items/inventory_manager.gd` remains as the hotbar compatibility view and syncs from `GameRuntime.inventory`. `is_full()` and stack-size lookups proxy through to the unified runtime so the local view cannot disagree with the source of truth. See [decisions/0002](../decisions/0002-inventory-consistency.md).
+- `scripts/items/item_database.gd` reads stack sizes from `GameRuntime.catalog` instead of holding a parallel constant table.
 - Gem pickup maps mine gem levels to runtime catalog items:
   - L1 -> `raw_common_geode`
   - L2 -> `raw_fine_geode`

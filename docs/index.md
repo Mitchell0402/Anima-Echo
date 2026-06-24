@@ -11,6 +11,7 @@ Anima Echo is a Godot 4.x 2D mining prototype being cleaned up into a baseline f
 - [glossary.md](glossary.md): project-specific terms.
 - [specs/weight_system.md](specs/weight_system.md): tiered encumbrance (Light/Heavy/Overload) with speed and noise penalties.
 - [decisions/0001-fix-doc-scene-drift.md](decisions/0001-fix-doc-scene-drift.md): why the main scene, town scene script reference, and `CustomerShopService.list_customers()` were fixed together.
+- [decisions/0002-inventory-consistency.md](decisions/0002-inventory-consistency.md): why `InventoryManager.is_full()` and `ItemDatabase.get_stack_limit` now proxy through to the unified runtime.
 
 ## Templates
 

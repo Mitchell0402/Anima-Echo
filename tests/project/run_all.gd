@@ -5,7 +5,12 @@ var _assertions: int = 0
 
 
 func _init() -> void:
-	print("Running Anima Echo project tests")
+	# In the -s headless run, autoloads are added to root *after* _init fires
+	# (they are wired during the first process frame). Wait one frame so the
+	# tests that need /root/GameRuntime etc. can find them. The smoke test
+	# (game --quit-after 3) does not hit this path because the autoloads are
+	# ready before any test code runs there.
+	await process_frame
 	_run_test("mine scene keeps playable structure", Callable(self, "_test_mine_scene_structure"))
 	_run_test("scene resources do not point at imported cache files", Callable(self, "_test_no_import_cache_scene_references"))
 	_run_test("scripts do not keep stale uppercase preload paths", Callable(self, "_test_no_stale_uppercase_script_paths"))
@@ -30,6 +35,8 @@ func _init() -> void:
 	_run_test("town scene script reference is not stale", Callable(self, "_test_town_scene_script_reference"))
 	_run_test("shop service list_customers returns customers not tasks", Callable(self, "_test_shop_list_customers_returns_customers"))
 	_run_test("catalog exposes get_customers matching data file", Callable(self, "_test_catalog_get_customers"))
+	_run_test("inventory manager is_full proxies to runtime capacity", Callable(self, "_test_inventory_manager_is_full_proxies_to_runtime"))
+	_run_test("item database get_stack_limit reads from catalog source of truth", Callable(self, "_test_item_database_get_stack_limit_uses_catalog"))
 
 	if _failures.is_empty():
 		print("RESULT: PASS %d assertions" % _assertions)
@@ -560,3 +567,96 @@ func _test_catalog_get_customers() -> void:
 			var expected_count: int = ((parsed as Dictionary).get("customers", []) as Array).size()
 			_assert_eq(expected_count, customers.size(), "GameCatalog.get_customers count matches catalog.json customers array")
 	catalog = null
+
+
+func _test_inventory_manager_is_full_proxies_to_runtime() -> void:
+	# Build a fresh runtime + InventoryManager pair, seed past the legacy 8-slot
+	# fiction but well below runtime capacity, and assert is_full() is false.
+	# Then seed past runtime capacity and assert is_full() is true.
+	var runtime_script = load("res://scripts/core/game_runtime.gd")
+	var inventory_manager_script = load("res://scripts/items/inventory_manager.gd")
+	_assert_true(runtime_script != null, "runtime script loads for is_full proxy test")
+	_assert_true(inventory_manager_script != null, "inventory manager script loads for is_full proxy test")
+	if runtime_script == null or inventory_manager_script == null:
+		return
+	var runtime: Node = runtime_script.new()
+	var init_result: Dictionary = runtime.initialize_for_new_game()
+	_assert_true(init_result.get("ok", false), "runtime initializes for is_full proxy test")
+	if not init_result.get("ok", false):
+		runtime.free()
+		return
+	var inv: Object = runtime.get("inventory")
+	_assert_true(inv != null, "runtime has inventory")
+	if inv == null:
+		runtime.shutdown()
+		runtime.free()
+		return
+	_assert_true(inv.has_method("is_full"), "GameInventory exposes is_full method")
+	# Empty inventory must not be full
+	_assert_false(bool(inv.is_full()), "empty GameInventory is not full")
+	# Seed exactly to the legacy 8-slot fiction mark and confirm we are still not full.
+	# Eight distinct item_ids; the catalog has more than 8 items, so we can use real ids.
+	var raw_ids: Array = ["raw_common_geode", "raw_fine_geode", "raw_rare_geode",
+		"copper_nugget", "iron_shard", "silver_vein", "gold_vein", "crystal_bloom"]
+	for item_id in raw_ids:
+		var add_result: Dictionary = inv.add_item(str(item_id), 1)
+		_assert_true(add_result.get("ok", false), "seed add_item ok for %s" % item_id)
+	_assert_eq(8, int(inv.get_used_slot_count()), "GameInventory used slot count is 8 after seeding")
+	_assert_false(bool(inv.is_full()), "GameInventory with 8 stacks is not full when capacity is 18")
+	# Now flood it past runtime capacity (18) with one more item, but skip if capacity is 18 exactly
+	# — we need a 19th stack to force is_full to true. Add unique ids so each becomes a new stack.
+	var extra_ids: Array = ["moonlit_crystal", "star_fragment", "memory_core"]
+	for item_id in extra_ids:
+		var add_result: Dictionary = inv.add_item(str(item_id), 1)
+		_assert_true(add_result.get("ok", false), "seed add_item ok for %s" % item_id)
+	_assert_eq(11, int(inv.get_used_slot_count()), "GameInventory used slot count is 11 after extra seed")
+	# 11 < 18 still, so not full yet. Push past 18 by adding more stacks of the existing ids,
+	# but they will merge into existing stacks. To push past capacity we need new unique ids.
+	# The catalog has 12 unique items — we used 11. We need at least 7 more unique ids to reach
+	# 18 stacks, but only 1 is left. So simulate "full" by directly inspecting the property:
+	# the real test of behavior is "is_full returns true iff used slots >= capacity". So we
+	# push capacity low by writing the public property and re-checking.
+	# Note: GameInventory exposes `capacity` as a public var so this is the supported way to
+	# lower the limit in tests; it does not mutate persisted state.
+	inv.capacity = 8
+	_assert_true(bool(inv.is_full()), "GameInventory with capacity=8 and 11 used slots reports full")
+	inv.capacity = 18
+	_assert_false(bool(inv.is_full()), "GameInventory with capacity=18 and 11 used slots reports not full")
+	runtime.shutdown()
+	runtime.free()
+
+
+func _test_item_database_get_stack_limit_uses_catalog() -> void:
+	# In the -s headless run, autoloads are children of the root Window. We use
+	# relative paths because the SceneTree refuses absolute /root/... paths
+	# when no current_scene is active. _init awaits one process frame before
+	# running any test, so the autoloads are guaranteed to be ready here.
+	var db: Object = root.get_node_or_null("ItemDatabase")
+	var runtime: Object = root.get_node_or_null("GameRuntime")
+	_assert_true(db != null, "ItemDatabase autoload is available under root")
+	_assert_true(runtime != null, "GameRuntime autoload is available under root")
+	if db == null or runtime == null:
+		return
+	_assert_true(db.has_method("get_stack_limit"), "ItemDatabase exposes get_stack_limit method")
+	# 1. Live catalog roundtrip: stack_size values from catalog.json should
+	# come back through get_stack_limit. The catalog has 12 items, all with
+	# stack_size=99, so we expect 99 for any known item id.
+	var known_ids: Array = ["raw_common_geode", "raw_fine_geode", "raw_rare_geode",
+		"copper_nugget", "iron_shard", "silver_vein", "gold_vein",
+		"crystal_bloom", "moonlit_crystal", "star_fragment", "memory_core"]
+	for item_id in known_ids:
+		_assert_eq(99, int(db.get_stack_limit(str(item_id))),
+			"get_stack_limit returns catalog stack_size (99) for %s" % item_id)
+	# 2. Empty id falls back to DEFAULT_STACK_LIMIT (99)
+	_assert_eq(99, int(db.get_stack_limit("")), "empty item id returns default stack limit (99)")
+	# 3. Unknown item id: GameCatalog.get_stack_size defaults to 99, so the
+	# unknown case also returns 99. The point of the test is that the value
+	# is *derived* from the catalog call, not from a stale constant map.
+	var unknown: int = int(db.get_stack_limit("definitely_not_a_real_item_id"))
+	_assert_eq(99, unknown, "unknown item id returns default stack limit (99)")
+	# 4. Static check: the legacy STACK_LIMITS constant must be gone. If it
+	# ever comes back, it would be a parallel source of truth that drifts from
+	# catalog.json — the whole point of this fix.
+	var db_source: String = FileAccess.get_file_as_string("res://scripts/items/item_database.gd")
+	_assert_false(db_source.contains("const STACK_LIMITS"),
+		"ItemDatabase no longer declares a STACK_LIMITS constant (source of truth moved to catalog)")

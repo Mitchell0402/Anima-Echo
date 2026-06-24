@@ -33,9 +33,9 @@ func _stack_key(type: String, data: Dictionary) -> String:
 		return _db.get_stack_key(type, data)
 	return type
 
-func _stack_limit(type: String) -> int:
+func _stack_limit(item_id: String) -> int:
 	if _db:
-		return _db.get_stack_limit(type)
+		return _db.get_stack_limit(item_id)
 	return 99
 
 # 添加物品（自动堆叠 / 找空格），返回是否成功
@@ -123,11 +123,18 @@ func _find_empty_slot() -> int:
 
 # 真正满：无空解锁槽且所有解锁栈都达上限
 func is_full() -> bool:
+	# Source of truth is the unified runtime inventory. The local slot mirror
+	# (synced from GameRuntime.inventory) only covers the first MAX_SLOTS
+	# entries, so it cannot be used to answer "is the backpack full" on its
+	# own — GameRuntime.inventory.capacity is 18, MAX_SLOTS is 12.
+	if _runtime != null and _runtime.get("inventory") != null and _runtime.get("inventory").has_method("is_full"):
+		return bool(_runtime.get("inventory").is_full())
+	# Fallback when runtime is unavailable: local view is best-effort
 	for i in range(unlocked_slots):
 		var s = slots[i]
 		if s == null:
 			return false
-		if s["count"] < _stack_limit(s["type"]):
+		if s["count"] < _stack_limit(str(s.get("item_id", s.get("type", "")))):
 			return false
 	return true
 

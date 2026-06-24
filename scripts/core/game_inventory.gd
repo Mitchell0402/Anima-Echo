@@ -88,6 +88,10 @@ func get_used_slot_count() -> int:
 	return _slots.size()
 
 
+func is_full() -> bool:
+	return get_used_slot_count() >= capacity
+
+
 func get_stacks() -> Array:
 	return _slots.duplicate(true)
 
