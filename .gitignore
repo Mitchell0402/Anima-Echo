@@ -23,3 +23,11 @@ export_credentials.cfg
 .mono/
 data_*/
 mono_crash.*.json
+
+# OpenCode / Godot MCP Pro nested install copy
+# The real plugin lives at addons/godot_mcp/. OpenCode installs a duplicate
+# at addons/godot_mcp/godot_mcp/ on first run; ignore that nested copy.
+addons/godot_mcp/godot_mcp/
+
+# Local OpenCode config (per-machine, not part of the project)
+opencode.json
