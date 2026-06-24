@@ -31,3 +31,4 @@ addons/godot_mcp/godot_mcp/
 
 # Local OpenCode config (per-machine, not part of the project)
 opencode.json
+scripts/__pycache__/

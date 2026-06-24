@@ -97,6 +97,12 @@ func preview_move(direction: Vector2, delta: float) -> bool:
 
 
 func _process(delta: float) -> void:
+	# movement_paused is set by the town scene when an overlay (popup or
+	# warehouse) is open. The town scene has a single source of truth for
+	# "should the player be able to move" and we just honour it.
+	if movement_paused:
+		_set_idle_frame()
+		return
 	preview_move(_read_direction(), delta)
 
 

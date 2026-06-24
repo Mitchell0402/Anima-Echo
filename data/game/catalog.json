@@ -3,6 +3,7 @@
 	{
 	  "id": "raw_common_geode",
 	  "name": "Clouded Geode",
+	  "description": "A dull stone pulled from the wall. The veins inside are barely visible, but the weight suggests there is more than meets the eye.",
 	  "category": "raw_stone",
 	  "rarity": "common",
 	  "rarity_weight": 60,
@@ -15,6 +16,7 @@
 	{
 	  "id": "raw_fine_geode",
 	  "name": "Veined Geode",
+	  "description": "Polished lines of mineral thread through the surface. A practiced eye can sometimes guess what hides inside before cutting it open.",
 	  "category": "raw_stone",
 	  "rarity": "uncommon",
 	  "rarity_weight": 25,
@@ -27,6 +29,7 @@
 	{
 	  "id": "raw_rare_geode",
 	  "name": "Resonant Geode",
+	  "description": "The stone hums faintly when held. Something inside is responding to the air around it.",
 	  "category": "raw_stone",
 	  "rarity": "rare",
 	  "rarity_weight": 10,
@@ -39,6 +42,7 @@
 	{
 	  "id": "raw_anomalous_geode",
 	  "name": "Anomalous Geode",
+	  "description": "The miner who found this one refuses to go back to the same wall. It is cold in the hand and warm nowhere else.",
 	  "category": "raw_stone",
 	  "rarity": "legendary",
 	  "rarity_weight": 3,
@@ -51,6 +55,7 @@
 	{
 	  "id": "copper_nugget",
 	  "name": "Copper Nugget",
+	  "description": "Soft, dull, ubiquitous. The smith buys these by the sack.",
 	  "category": "mineral",
 	  "rarity": "common",
 	  "rarity_weight": 45,
@@ -61,6 +66,7 @@
 	{
 	  "id": "iron_shard",
 	  "name": "Iron Shard",
+	  "description": "Heavy, cold, and sharp at the edges. Useful for tools, less so for jewellery.",
 	  "category": "mineral",
 	  "rarity": "common",
 	  "rarity_weight": 35,
@@ -71,6 +77,7 @@
 	{
 	  "id": "silver_vein",
 	  "name": "Silver Vein",
+	  "description": "A long, pale streak of metal pulled from inside a common geode. The jeweler likes it more than the smith does.",
 	  "category": "mineral",
 	  "rarity": "uncommon",
 	  "rarity_weight": 18,
@@ -81,6 +88,7 @@
 	{
 	  "id": "gold_vein",
 	  "name": "Gold Vein",
+	  "description": "Soft, bright, and heavier than the silver vein in the same rock. Always welcome at the counter.",
 	  "category": "mineral",
 	  "rarity": "rare",
 	  "rarity_weight": 8,
@@ -91,6 +99,7 @@
 	{
 	  "id": "crystal_bloom",
 	  "name": "Crystal Bloom",
+	  "description": "A cluster of small, sharp crystals. The alchemist crushes them; the jeweler sets them; the smith does not want them.",
 	  "category": "mineral",
 	  "rarity": "uncommon",
 	  "rarity_weight": 20,
@@ -101,6 +110,7 @@
 	{
 	  "id": "moonlit_crystal",
 	  "name": "Moonlit Crystal",
+	  "description": "Pale blue, faintly glowing, and noticeably heavier than it looks. The alchemist and the jeweler both want it; the smith does not know what to do with it.",
 	  "category": "mineral",
 	  "rarity": "rare",
 	  "rarity_weight": 7,
@@ -111,6 +121,7 @@
 	{
 	  "id": "star_fragment",
 	  "name": "Star Fragment",
+	  "description": "Black glass, warm to the touch, and almost weightless. The jeweler handles it with bare fingers and a long pause.",
 	  "category": "mineral",
 	  "rarity": "legendary",
 	  "rarity_weight": 2,
@@ -121,6 +132,7 @@
 	{
 	  "id": "memory_core",
 	  "name": "Memory Core",
+	  "description": "It hums at a frequency the body can almost feel. Nobody knows what to do with it, but a few buyers pretend they do.",
 	  "category": "mineral",
 	  "rarity": "legendary",
 	  "rarity_weight": 1,
