@@ -60,5 +60,6 @@ Because `GameRuntime` is an autoload, wallet, inventory, event history, task pro
 - TODO: Document the intended save/load or persistence model. Current runtime state is session-local.
 - TODO: Decide whether `addons/godot_mcp` is vendor-managed, manually maintained, or periodically refreshed.
 - TODO: Clarify the long-term product/gameplay direction before adding large new systems.
-- TODO: Verify whether `CustomerShopService.list_customers()` should return customers instead of tasks before any feature relies on it.
+- ~~TODO: Verify whether `CustomerShopService.list_customers()` should return customers instead of tasks before any feature relies on it.~~ **Fixed** by PR "[codex/fix-doc-scene-drift]" — see [decisions/0001](../decisions/0001-fix-doc-scene-drift.md).
 - TODO: Document asset generation/source metadata if these assets will be regenerated or replaced.
+- TODO: Add an `Enemy` (and `Enemy3`) instance under `EnemyCollection` in `scenes/mine/test_scene.tscn` so `_test_mine_scene_structure` passes again. Pre-existing on `main`, tracked here so it does not get lost.

@@ -26,6 +26,10 @@ func _init() -> void:
 	_run_test("mine scene exposes return route to town", Callable(self, "_test_mine_return_route"))
 	_run_test("core economy supports mine to town progression loop", Callable(self, "_test_core_economy_loop"))
 	_run_test("runtime code keeps one inventory and currency mutation boundary", Callable(self, "_test_single_mutation_boundary"))
+	_run_test("main scene points to mining town not the mine route", Callable(self, "_test_main_scene_is_town"))
+	_run_test("town scene script reference is not stale", Callable(self, "_test_town_scene_script_reference"))
+	_run_test("shop service list_customers returns customers not tasks", Callable(self, "_test_shop_list_customers_returns_customers"))
+	_run_test("catalog exposes get_customers matching data file", Callable(self, "_test_catalog_get_customers"))
 
 	if _failures.is_empty():
 		print("RESULT: PASS %d assertions" % _assertions)
@@ -465,3 +469,94 @@ func _assert_eq(expected, actual, message: String) -> void:
 	_assertions += 1
 	if expected != actual:
 		_failures.append("%s: expected %s, got %s" % [message, str(expected), str(actual)])
+
+
+func _test_main_scene_is_town() -> void:
+	var main_scene: String = str(ProjectSettings.get_setting("application/run/main_scene", ""))
+	_assert_eq("uid://dxjbgwnb1j7cw", main_scene, "main scene uid is the town scene")
+	# Resolve the configured uid back to a path so we prove the two sides agree
+	# without depending on PackedScene.resource_path (which returns the uid form
+	# in Godot 4.6). This is read-only — we never create a new uid.
+	var uid_int: int = ResourceUID.text_to_id(main_scene)
+	if ResourceUID.has_id(uid_int):
+		var resolved: String = ResourceUID.get_id_path(uid_int)
+		_assert_eq("res://scenes/town/mining_town.tscn", resolved, "main scene uid resolves to mining_town.tscn")
+	else:
+		_assert_true(false, "main scene uid %s is registered in ResourceUID cache" % main_scene)
+	# Also instantiate the town scene to prove it actually loads as a real scene
+	var packed: PackedScene = load("res://scenes/town/mining_town.tscn")
+	_assert_true(packed != null, "town scene file exists and loads for main scene uid")
+	if packed != null:
+		var probe: Node = packed.instantiate()
+		if probe != null:
+			_assert_eq("MiningTown", str(probe.name), "town scene root node is named MiningTown")
+			probe.free()
+		else:
+			_assert_true(false, "town scene instantiates to a non-null node")
+
+
+func _test_town_scene_script_reference() -> void:
+	var town_scene_text := FileAccess.get_file_as_string("res://scenes/town/mining_town.tscn")
+	_assert_false(town_scene_text.contains("fused_mining_town_scene"), "town scene does not reference stale fused script")
+	_assert_true(town_scene_text.contains("res://scripts/town/mining_town_scene.gd"), "town scene references current mining_town_scene.gd script")
+	_assert_true(FileAccess.file_exists("res://scripts/town/mining_town_scene.gd"), "mining_town_scene.gd exists")
+	_assert_false(FileAccess.file_exists("res://scripts/town/fused_mining_town_scene.gd"), "stale fused script file is gone")
+
+
+func _test_shop_list_customers_returns_customers() -> void:
+	var catalog_script = load("res://scripts/core/game_catalog.gd")
+	var shop_script = load("res://scripts/economy/customer_shop_service.gd")
+	_assert_true(catalog_script != null, "catalog script loads for shop list_customers test")
+	_assert_true(shop_script != null, "shop script loads for shop list_customers test")
+	if catalog_script == null or shop_script == null:
+		return
+	var catalog: Object = catalog_script.new()
+	var load_result: Dictionary = catalog.load_defaults()
+	_assert_true(load_result.get("ok", false), "catalog loads for shop list_customers test")
+	if not load_result.get("ok", false):
+		catalog = null
+		return
+	var shop: Object = shop_script.new(catalog, null, null)
+	var customers: Array = shop.list_customers()
+	_assert_true(customers.size() > 0, "shop.list_customers returns at least one customer")
+	var saw_customer_id := false
+	for entry in customers:
+		var entry_id: String = str((entry as Dictionary).get("id", ""))
+		if entry_id.begins_with("buyer_"):
+			saw_customer_id = true
+			break
+	_assert_true(saw_customer_id, "shop.list_customers entries are customers (id starts with buyer_)")
+	# Negative check: should NOT return task entries
+	var saw_task_id := false
+	for entry in customers:
+		var entry_id: String = str((entry as Dictionary).get("id", ""))
+		if entry_id.begins_with("task_"):
+			saw_task_id = true
+			break
+	_assert_false(saw_task_id, "shop.list_customers does not return task entries")
+	shop = null
+	catalog = null
+
+
+func _test_catalog_get_customers() -> void:
+	var catalog_script = load("res://scripts/core/game_catalog.gd")
+	_assert_true(catalog_script != null, "catalog script loads for get_customers test")
+	if catalog_script == null:
+		return
+	var catalog: Object = catalog_script.new()
+	var load_result: Dictionary = catalog.load_defaults()
+	_assert_true(load_result.get("ok", false), "catalog loads for get_customers test")
+	if not load_result.get("ok", false):
+		catalog = null
+		return
+	_assert_true(catalog.has_method("get_customers"), "GameCatalog exposes get_customers method")
+	if catalog.has_method("get_customers"):
+		var customers: Array = catalog.get_customers()
+		_assert_true(customers.size() > 0, "GameCatalog.get_customers returns at least one entry")
+		# Cross-check with raw JSON to make sure counts line up
+		var json_text := FileAccess.get_file_as_string("res://data/game/catalog.json")
+		var parsed: Variant = JSON.parse_string(json_text)
+		if typeof(parsed) == TYPE_DICTIONARY:
+			var expected_count: int = ((parsed as Dictionary).get("customers", []) as Array).size()
+			_assert_eq(expected_count, customers.size(), "GameCatalog.get_customers count matches catalog.json customers array")
+	catalog = null

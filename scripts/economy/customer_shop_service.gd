@@ -29,4 +29,4 @@ func sell_to_customer(customer_id: String, item_id: String, quantity: int = 1, c
 
 
 func list_customers() -> Array:
-	return catalog.get_tasks()
+	return catalog.get_customers()

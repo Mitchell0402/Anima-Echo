@@ -10,6 +10,7 @@ Anima Echo is a Godot 4.x 2D mining prototype being cleaned up into a baseline f
 - [testing.md](testing.md): how to run the existing project checks and manual smoke tests.
 - [glossary.md](glossary.md): project-specific terms.
 - [specs/weight_system.md](specs/weight_system.md): tiered encumbrance (Light/Heavy/Overload) with speed and noise penalties.
+- [decisions/0001-fix-doc-scene-drift.md](decisions/0001-fix-doc-scene-drift.md): why the main scene, town scene script reference, and `CustomerShopService.list_customers()` were fixed together.
 
 ## Templates
 

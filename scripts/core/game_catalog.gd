@@ -55,6 +55,10 @@ func get_customer(customer_id: String) -> Dictionary:
 	return _customers.get(customer_id, {}).duplicate(true)
 
 
+func get_customers() -> Array:
+	return _customers.values().duplicate(true)
+
+
 func get_task(task_id: String) -> Dictionary:
 	return _tasks.get(task_id, {}).duplicate(true)
 
