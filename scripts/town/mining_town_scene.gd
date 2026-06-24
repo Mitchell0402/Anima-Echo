@@ -8,6 +8,12 @@ const WAREHOUSE_UI_SCRIPT = preload("res://scripts/ui/warehouse_ui.gd")
 
 const TOWN_MAP := "res://assets/town/map/town_map.png"
 const PLAYER_SPRITE_FRAMES := "res://assets/mine/characters/player/main_char_sprite_frames.tres"
+const TOWN_CHARACTER_SCALE := 1.25
+# Vertical offset for the NPC name label. -40 places the label just
+# above the sprite head (sprite is 80x80 at scale 1.25). Scaling the
+# value with TOWN_CHARACTER_SCALE keeps the label glued to the head
+# when the scale changes.
+const TOWN_NPC_LABEL_VERTICAL_OFFSET := 40.0 * TOWN_CHARACTER_SCALE + 8.0
 const NPC_SPRITES := {
 	"miner": "res://assets/town/npcs/npc_miner_sprites.png",
 	"buyer": "res://assets/town/npcs/npc_buyer_sprites.png",
@@ -22,7 +28,6 @@ const NPC_NAMES := {
 }
 const MINE_SCENE := "res://scenes/mine/test_scene.tscn"
 const INTERACTION_RADIUS := 86.0
-const TOWN_CHARACTER_SCALE := 1.25
 
 var _runtime: Node
 var _walkable_map
@@ -111,6 +116,8 @@ func _unhandled_input(event: InputEvent) -> void:
 func _build_world() -> void:
 	var map := TextureRect.new()
 	map.texture = load(TOWN_MAP)
+	# Size matches the world bounds (1152x648). The camera handles
+	# what is actually visible; the texture is the world background.
 	map.size = Vector2(1152, 648)
 	map.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	map.stretch_mode = TextureRect.STRETCH_SCALE
@@ -133,21 +140,35 @@ func _build_world() -> void:
 	player_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_player.add_child(player_sprite)
 	_player.configure_animated_sprite(player_sprite)
-	var camera := Camera2D.new()
-	camera.enabled = true
-	camera.zoom = Vector2(1.0, 1.0)
-	_player.add_child(camera)
+	# Top-level game camera. Attached to the scene root (not to the
+	# player) so the camera can pan independently when needed and so
+	# the player subtree stays focused on movement, not camera state.
+	# The camera's _ready defers the integer zoom fit so it has a
+	# valid viewport.
+	var GameCameraScript = load("res://scripts/camera_2d.gd")
+	var camera: Camera2D = GameCameraScript.new()
+	camera.name = "GameCamera"
+	camera.world_bounds = Rect2(Vector2.ZERO, Vector2(1152, 648))
+	camera.set_target(_player)
+	add_child(camera)
 
 
 func _build_ui() -> void:
+	# UI lives on its own CanvasLayer so it is independent of camera zoom
+	# and world bounds. All positions are anchor-based so the layout
+	# stays correct when the viewport rescales.
 	var layer := CanvasLayer.new()
+	layer.layer = 10
 	add_child(layer)
+	# Top bar: prompt (left) + status (right). Stretches across the
+	# viewport with a 16 px margin.
 	var top := HBoxContainer.new()
 	top.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	top.offset_left = 16
 	top.offset_top = 10
 	top.offset_right = -16
 	top.offset_bottom = 42
+	top.add_theme_constant_override("separation", 16)
 	layer.add_child(top)
 	_prompt_label = Label.new()
 	_prompt_label.custom_minimum_size = Vector2(360, 26)
@@ -156,14 +177,22 @@ func _build_ui() -> void:
 	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_status_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(_status_label)
+	# Bottom-left warehouse label, anchored to the top-left corner of
+	# the viewport. The old hard-coded position (16, 48) only worked
+	# at 1280x720; with anchor it tracks any viewport size.
 	_inventory_label = Label.new()
-	_inventory_label.position = Vector2(16, 48)
+	_inventory_label.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_inventory_label.offset_left = 16
+	_inventory_label.offset_top = 48
 	_inventory_label.custom_minimum_size = Vector2(520, 120)
 	layer.add_child(_inventory_label)
+	# NPC popup. Centred via anchor instead of a hard-coded position so
+	# it does not drift off-screen when the viewport rescales.
 	_popup = PanelContainer.new()
 	_popup.visible = false
-	_popup.position = Vector2(690, 328)
+	_popup.set_anchors_preset(Control.PRESET_CENTER)
 	_popup.custom_minimum_size = Vector2(420, 280)
+	_popup.size = Vector2(420, 280)
 	layer.add_child(_popup)
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 12)
@@ -192,8 +221,15 @@ func _add_npc(npc_id: String) -> void:
 	npc.add_child(sprite)
 	var label := Label.new()
 	label.text = str(NPC_NAMES.get(npc_id, npc_id))
-	label.position = Vector2(-28, -52)
-	npc.add_child(label)
+	# Local offset relative to the NPC node. The label is a child of
+	# the NPC Node2D, so its position is in world coordinates
+	# relative to the NPC origin. -28 puts the left edge of the
+	# label near the left side of the sprite (sprite is 80 px wide
+	# at scale 1.25 so the label centres naturally above it).
+	# -TOWN_NPC_LABEL_VERTICAL_OFFSET places the label just above
+	# the sprite head; the constant scales with the sprite so that
+	# if TOWN_CHARACTER_SCALE changes the label tracks the sprite.
+	label.position = Vector2(-28, -TOWN_NPC_LABEL_VERTICAL_OFFSET)
 
 
 func _open_popup(npc_id: String) -> void:

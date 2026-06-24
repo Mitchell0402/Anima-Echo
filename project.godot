@@ -16,13 +16,18 @@ config/features=PackedStringArray("4.6", "Forward Plus")
 
 [display]
 
+# Pixel-perfect display mode. Godot keeps the internal viewport at
+# 1280x720 (world coordinates) and letterbox-scales the window to fit.
+# `viewport` mode + `keep` aspect ratio + `integer` scale mode are the
+# 2D-pixel-game standard (Stardew Valley, Celeste, Undertale pattern).
+# The actual zoom is chosen by GameCamera2D in scripts/camera_2d.gd.
 window/size/viewport_width=1280
 window/size/viewport_height=720
-# Min size is chosen so the warehouse panel (clamped 360x280) plus the
-# town scene title bar fit comfortably. The viewport can be resized
-# beyond these values freely.
 window/size/minimum_width=900
 window/size/minimum_height=600
+window/stretch/mode="viewport"
+window/stretch/aspect="keep"
+window/stretch/scale_mode="integer"
 
 [autoload]
 

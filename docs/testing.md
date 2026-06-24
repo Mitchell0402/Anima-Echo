@@ -74,6 +74,16 @@ After `godot --headless --path . --quit-after 3` (town smoke), run the game in t
 7. **Budget exhaustion.** Sell repeatedly until the buyer's `budget` is exhausted. The grid greys out and clicks are no-ops.
 8. **Task delivery.** Talk to the task clerk. Only the task whose requirements are currently in the warehouse is shown as clickable. Other active tasks are visible but greyed. Completed tasks are hidden. Press `Enter` on the deliverable task; a toast confirms the reward.
 
+## Display System Manual Verification
+
+The three-layer display model is verified by `scripts/mcp_warehouse_regression.py` automatically and should also be checked visually after a code change:
+
+1. **1280x720 baseline.** Launch town. The town map fills the viewport horizontally and vertically. No black bars at the top or bottom of the map.
+2. **Resize to 1920x1080.** Drag the window wider. The map stays centred and pixel-perfect; the player and NPCs stay anchored to their world positions.
+3. **Resize to 900x600.** Drag to the minimum size. The map still fills the viewport; the warehouse panel (opened with `I`) is at least 360x280 and centred. The NPC popup is centred.
+4. **Camera follow.** Walk the player to the four corners of the map. The camera follows with a smooth lerp and never lets the map edges go off-screen (no black bars).
+5. **NPC labels.** NPC name labels stay glued to the sprite head at any window size; they do not drift off when the sprite is scaled.
+
 ## TODO
 
 - TODO: Add GitHub Actions or another CI runner if this project needs enforced checks on pull requests.

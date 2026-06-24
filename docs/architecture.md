@@ -17,9 +17,9 @@ Important scenes:
 The display system is a strict three-layer model. See [decisions/0004-display-system.md](../decisions/0004-display-system.md) for the rationale.
 
 - **World** is fixed at 1152x648 in the town. Sprite positions, NPC positions, and player movement live here. The town map texture covers the full world.
-- **GameCamera** (`scripts/camera_2d.gd`) follows the player with smooth lerp, clamps inside the world bounds, and picks an integer zoom that fits the world inside the viewport. The camera is attached to the scene root, not to the player.
+- **GameCamera** (`scripts/camera_2d.gd`) follows the player with a smooth lerp, clamps inside the world bounds so the player never sees black edges, and picks an integer zoom that fits the world inside the viewport. The camera is attached to the scene root, not to the player.
 - **UI** lives on its own CanvasLayer (layer 10) and uses anchor presets (`PRESET_TOP_WIDE` for the top bar, `PRESET_CENTER` for the NPC popup, `PRESET_TOP_LEFT` for the warehouse label). No absolute positions for UI.
-- `project.godot` declares `window/stretch/mode="viewport"`, `aspect="keep"`, and `scale_mode="integer"` so pixel art stays sharp at any window size.
+- `project.godot` declares `window/stretch/mode="viewport"`, `aspect="keep"`, and `scale_mode="integer"`. Combined with `TEXTURE_FILTER_NEAREST` this keeps pixel art sharp at 1x, 2x, 3x, ... scaling.
 
 ## Autoloads
 

@@ -65,7 +65,6 @@ async def open_scene_and_wait(session, scene_path: str):
     await call_retry(session, "open_scene", {"path": scene_path})
     await asyncio.sleep(0.5)
 
-
 async def play_scene_and_settle(session, mode: str = "current"):
     """Start the current scene as a playtest. Settle for a moment so the
     runtime has a chance to instantiate nodes (autoloads, scene tree).
@@ -74,7 +73,8 @@ async def play_scene_and_settle(session, mode: str = "current"):
     finishes connecting) does not abort the test run. We also keep trying
     if the runtime says "No scene is currently playing" because the
     play_scene result can return success before the runtime has wired
-    signals."""
+    signals.
+    """
     print(f"play_scene mode={mode}", flush=True)
     # Try a sequence of strategies. The most reliable is to keep calling
     # play_scene mode=current after open_scene until the runtime tree
@@ -100,6 +100,19 @@ async def play_scene_and_settle(session, mode: str = "current"):
         print(f"  play_scene failed after retries: {last_err}", flush=True)
     # Final settle so signals wire up.
     await asyncio.sleep(1.0)
+    # Warm-up call: a no-op execute_game_script primes the GameInspector
+    # service so the first real call after this succeeds. Without this
+    # prime, freshly-launched Godot editors can return
+    # "Godot editor is not connected" for the first 1-2 seconds even
+    # though the WebSocket handshake succeeded.
+    for warm in range(15):
+        try:
+            await session.call_tool("execute_game_script", {"code": "_mcp_print(\"ready\")"})
+            print(f"  warm-up succeeded after {warm+1} attempts", flush=True)
+            break
+        except Exception as e:
+            print(f"  warm-up {warm+1}/15: {e!s:.60}", flush=True)
+            await asyncio.sleep(1.0)
 
 
 async def stop_scene(session):
@@ -349,8 +362,6 @@ async def test_small_viewport(session):
     """Verify the warehouse UI computes a sane slot_size at a smaller
     viewport by running the playtest and asking the warehouse UI directly."""
     print("\n=== test_small_viewport: warehouse UI sanity check ===", flush=True)
-    await session.call_tool("open_scene", {"path": "res://scenes/town/mining_town.tscn"})
-    await asyncio.sleep(0.5)
     await play_scene_and_settle(session, mode="current")
     try:
         result = await call_retry(session, "execute_game_script", {
@@ -368,6 +379,156 @@ async def test_small_viewport(session):
         assert_true("children=48" in txt, "warehouse grid has 48 slots")
     finally:
         await stop_scene(session)
+
+
+async def _read_camera_payload(session, marker: str) -> str:
+    """Send a runtime script whose only output is `marker=<payload>`,
+    extract the payload from the MCP-wrapped JSON echo.
+
+    The MCP wrapper escapes the payload twice (once for the JSON-RPC
+    frame and once for Godot's _mcp_print stringification). We strip the
+    outer trailing JSON cruft and unescape the inner quotes so the
+    returned string is the literal payload as Godot wrote it.
+    """
+    # call_retry default is 10 retries x 1s; bump here because the
+    # Godot editor can briefly disconnect right after play_scene.
+    res = await call_retry(session, "execute_game_script", {
+        "code": (
+            "var root = get_tree().current_scene\n"
+            "if root == null:\n"
+            f'    _mcp_print("{marker}=NO_SCENE")\n'
+            "    return\n"
+            "var cam = root.get_node_or_null('GameCamera')\n"
+            "if cam == null:\n"
+            f'    _mcp_print("{marker}=NO_CAMERA|scene=" + root.name + ")")\n'
+            "    return\n"
+            f'    _mcp_print("{marker}=" + str(cam.global_position) + "|" + str(cam.zoom) + "|" + str(cam.world_bounds) + "|" + str(cam.is_current()))\n'
+        ),
+    }, max_attempts=30, delay=1.0)
+    # Force-print the response text for diagnostics when payload is
+    # unexpectedly empty.
+    if not res or not getattr(res, "content", None):
+        print(f"  raw response is empty for _read_camera_payload", flush=True)
+    else:
+        txt_diag = "".join(b.text for b in res.content if hasattr(b, "text"))
+        if not txt_diag:
+            print(f"  raw response text empty for _read_camera_payload", flush=True)
+    txt = "".join(b.text for b in res.content if hasattr(b, "text"))
+    idx = txt.find(marker)
+    if idx < 0:
+        return ""
+    # Slice after the marker, take the first line (the payload is on
+    # one line). Strip the JSON cruft that the MCP wrapper appends.
+    after = txt[idx + len(marker):]
+    first_line = after.split("\n", 1)[0].strip()
+    # The wrapper often appends a closing `"` after the array/object.
+    # Find the last meaningful bracket to keep just the payload.
+    for end_marker in ("]\n", "}\n", "\n", "]\"", "}\""):
+        if end_marker in first_line:
+            first_line = first_line.split(end_marker, 1)[0]
+            break
+    return first_line
+
+
+async def test_camera_present(session):
+    """GameCamera exists at the town scene root, is current, and has
+    the canonical world_bounds (0, 0, 1152, 648)."""
+    print("\n=== test_camera_present: GameCamera exists and is current ===", flush=True)
+    await play_scene_and_settle(session, mode="current")
+    marker = f"CAM_MARK_{int.from_bytes(os.urandom(2), 'big')}"
+    payload = await _read_camera_payload(session, marker)
+    print(f"  camera payload: {payload!r}", flush=True)
+    assert_true("NO_CAMERA" not in payload, "town scene has a GameCamera child")
+    assert_true("True" in payload, "GameCamera.is_current() is true")
+    assert_true("[P: (0, 0), S: (1152, 648)]" in payload or "[P: [0, 0], S: [1152, 648]]" in payload or "1152, 648" in payload,
+                "GameCamera.world_bounds is the canonical 1152x648 rect")
+    await stop_scene(session)
+
+
+async def test_camera_clamps_inside_world(session):
+    """Force the camera to a position outside the world bounds and
+    verify _clamp_to_world() pulls it back."""
+    print("\n=== test_camera_clamps_inside_world: clamp works ===", flush=True)
+    await play_scene_and_settle(session, mode="current")
+    marker = f"CLAMP_MARK_{int.from_bytes(os.urandom(2), 'big')}"
+    res = await call_retry(session, "execute_game_script", {
+        "code": (
+            "var cam = get_tree().current_scene.get_node('GameCamera')\n"
+            "cam.set_target(null)\n"
+            "cam.global_position = Vector2(2000, 2000)\n"
+            "cam._clamp_to_world()\n"
+            f'_mcp_print("{marker}=" + str(cam.global_position))'
+        ),
+    })
+    txt = "".join(b.text for b in result.content if hasattr(b, "text"))
+    idx = txt.find(marker)
+    payload = txt[idx + len(marker):].split("\n", 1)[0].strip() if idx >= 0 else ""
+    print(f"  clamped position: {payload!r}", flush=True)
+    import re
+    nums = re.findall(r"-?\d+\.?\d*", payload)
+    if len(nums) >= 2:
+        x = float(nums[0])
+        y = float(nums[1])
+        assert_true(0 <= x <= 1152, f"camera.x = {x} is inside [0, 1152]")
+        assert_true(0 <= y <= 648, f"camera.y = {y} is inside [0, 648]")
+    await stop_scene(session)
+
+
+async def test_camera_integer_zoom(session):
+    """The camera's initial zoom is an integer that fits the world
+    inside the viewport."""
+    print("\n=== test_camera_integer_zoom: zoom is integer >= 1 ===", flush=True)
+    await play_scene_and_settle(session, mode="current")
+    marker = f"ZOOM_MARK_{int.from_bytes(os.urandom(2), 'big')}"
+    res = await call_retry(session, "execute_game_script", {
+        "code": (
+            "var cam = get_tree().current_scene.get_node('GameCamera')\n"
+            f'_mcp_print("{marker}=" + str(cam.zoom))'
+        ),
+    })
+    txt = "".join(b.text for b in result.content if hasattr(b, "text"))
+    idx = txt.find(marker)
+    payload = txt[idx + len(marker):].split("\n", 1)[0].strip() if idx >= 0 else ""
+    print(f"  zoom payload: {payload!r}", flush=True)
+    import re
+    nums = re.findall(r"\d+", payload)
+    assert_true(len(nums) >= 1, "camera reports a zoom value")
+    if nums:
+        z = int(nums[0])
+        assert_true(z >= 1, f"camera zoom x = {z} is >= 1")
+        assert_true(z == int(z), f"camera zoom x = {z} is an integer")
+    await stop_scene(session)
+
+
+async def test_camera_follows_player(session):
+    """Walk the player to (1000, 300) and verify the camera converges."""
+    print("\n=== test_camera_follows_player: camera converges to player ===", flush=True)
+    await play_scene_and_settle(session, mode="current")
+    res = await call_retry(session, "execute_game_script", {
+        "code": (
+            "var town = get_tree().current_scene\n"
+            "var cam = town.get_node('GameCamera')\n"
+            "var player = town.get_node('TownPlayer')\n"
+            "cam.set_target(player)\n"
+            "player.position = Vector2(1000, 300)\n"
+            "for i in range(30):\n"
+            "    cam._process(0.05)\n"
+            '    _mcp_print("FOLLOW=" + str(cam.global_position)) if i == 29 else null\n'
+        ),
+    })
+    txt = "".join(b.text for b in result.content if hasattr(b, "text"))
+    idx = txt.find("FOLLOW=")
+    payload = txt[idx + 6:].split("\n", 1)[0].strip() if idx >= 0 else ""
+    print(f"  camera after walk: {payload!r}", flush=True)
+    import re
+    nums = re.findall(r"-?\d+\.?\d*", payload)
+    assert_true(len(nums) >= 2, "camera reports a position after follow")
+    if len(nums) >= 2:
+        x = float(nums[0])
+        y = float(nums[1])
+        assert_true(abs(x - 1000) < 50, f"camera.x = {x} converged near player.x = 1000")
+        assert_true(abs(y - 300) < 50, f"camera.y = {y} converged near player.y = 300")
+    await stop_scene(session)
 
 
 async def main():
@@ -389,6 +550,10 @@ async def main():
                 "hud_refresh": test_hud_refresh,
                 "sell_picker": test_sell_picker,
                 "small_viewport": test_small_viewport,
+                "camera_present": test_camera_present,
+                "camera_clamps": test_camera_clamps_inside_world,
+                "camera_zoom": test_camera_integer_zoom,
+                "camera_follows": test_camera_follows_player,
             }
             if TEST == "all":
                 for t in tests.values():

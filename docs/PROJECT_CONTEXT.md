@@ -79,6 +79,16 @@
 - `scripts/items/gem_controller.gd` supports both Area2D pickup and distance pickup so gem collection still works while map collision is relaxed.
 - Enemy attack and detection remain distance/state based and do not require player map collision.
 
+## Display System
+
+The game uses a strict three-layer model. See [decisions/0004-display-system.md](../decisions/0004-display-system.md) for the rationale.
+
+- **World**: fixed at 1152x648 in the town. Sprite positions, NPC positions, walkable bounds, and player movement all live here.
+- **Camera**: `scripts/camera_2d.gd` (`GameCamera`) follows the player with smooth lerp, clamps inside the world bounds, and exposes `fit_world_to_viewport_integer()` for pixel-perfect scaling. The camera is attached to the town scene root, not to the player.
+- **UI**: lives on its own `CanvasLayer` (layer 10) and uses anchor presets (`PRESET_TOP_WIDE` for the top bar, `PRESET_CENTER` for the NPC popup, `PRESET_TOP_LEFT` for the warehouse label). No absolute positions for UI elements.
+- `project.godot` declares `window/stretch/mode="viewport"`, `aspect="keep"`, and `scale_mode="integer"` so the world renders pixel-perfectly at any window size and aspect ratio.
+- The mine scene currently still uses the old hard-coded TileMap size and a Camera2D attached to the player; bring it into this model in a follow-up.
+
 ## Town Systems
 
 - Town map asset: `res://assets/town/map/town_map.png`.
