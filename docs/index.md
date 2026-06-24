@@ -12,6 +12,8 @@ Anima Echo is a Godot 4.x 2D mining prototype being cleaned up into a baseline f
 - [specs/weight_system.md](specs/weight_system.md): tiered encumbrance (Light/Heavy/Overload) with speed and noise penalties.
 - [decisions/0001-fix-doc-scene-drift.md](decisions/0001-fix-doc-scene-drift.md): why the main scene, town scene script reference, and `CustomerShopService.list_customers()` were fixed together.
 - [decisions/0002-inventory-consistency.md](decisions/0002-inventory-consistency.md): why `InventoryManager.is_full()` and `ItemDatabase.get_stack_limit` now proxy through to the unified runtime.
+- [specs/warehouse-system.md](specs/warehouse-system.md): 48-slot in-town warehouse + 12-slot in-mine hotbar split, with hotbar <-> warehouse handoff and town NPC actions reading the warehouse.
+- [decisions/0003-warehouse-system.md](decisions/0003-warehouse-system.md): why the inventory is split into two collections, why the 999 cap is a soft guard rather than a hard wall, and why the weight system gates on the mine scene name.
 
 ## Templates
 

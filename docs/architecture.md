@@ -14,24 +14,26 @@ Important scenes:
 
 ## Autoloads
 
-- `GameRuntime`: creates and owns the live catalog, event bus, inventory, wallet, RNG, transaction service, identification service, negotiation service, shop service, and task service.
+- `GameRuntime`: creates and owns the live catalog, event bus, **hotbar** (12-slot in-mine backpack), **warehouse** (48-slot at-home storage, soft 999-item cap), wallet, RNG, transaction service, identification service, negotiation service, shop service, and task service. See [decisions/0003](../decisions/0003-warehouse-system.md).
 - `NoiseSystem`: shared noise event system used by movement, mining, and enemy detection.
-- `ItemDatabase`: compatibility item icon, stack limit, display-name, and stack-key helper for the hotbar/inventory UI.
+- `ItemDatabase`: compatibility item icon, stack limit, display-name, description, and stack-key helper for the hotbar/inventory UI.
 - `MCPScreenshot`, `MCPInputService`, `MCPGameInspector`: Godot MCP helper autoloads from `addons/godot_mcp`.
 
 ## Runtime Data Flow
 
-`data/game/catalog.json` is the current runtime data source for items, loot tables, identification tables, customers, and tasks.
+- `data/game/catalog.json` is the current runtime data source for items, loot tables, identification tables, customers, and tasks. Every item carries a `description` (string) used by warehouse tooltips; new items must include it.
 
 `GameRuntime` initializes:
 
 1. `GameCatalog` from `data/game/catalog.json`.
 2. `GameEventBus`.
-3. `GameInventory` and `GameWallet`.
-4. `GameTransactionService`.
-5. Economy services for identification, negotiation, shops, and tasks.
+3. `GameHotbar` (12 slots, in-mine backpack) and `GameWallet`.
+4. `GameWarehouse` (48 slots, 999-item soft cap, in-town storage).
+5. `GameTransactionService`.
+6. Economy services for identification, negotiation, shops, and tasks.
+7. `customer_remaining_budget` map, initialized from each catalog customer's `budget` field.
 
-Inventory and currency changes should go through `GameTransactionService`. `scripts/items/inventory_manager.gd` remains as a hotbar compatibility view that syncs from `GameRuntime.inventory`.
+Inventory and currency changes should go through `GameTransactionService`. The hotbar (`scripts/items/inventory_manager.gd`) is a thin view that mirrors `GameRuntime.hotbar` for the in-mine UI; the warehouse has no hotbar-style mirror and is read directly from `GameRuntime.warehouse` by the warehouse UI and by NPC popups. See [decisions/0003](../decisions/0003-warehouse-system.md).
 
 ## Scene Flow
 
@@ -45,19 +47,19 @@ Because `GameRuntime` is an autoload, wallet, inventory, event history, task pro
 
 ## Directory Boundaries
 
-- `scripts/core`: runtime state, catalog, wallet, inventory, transaction boundary, event bus, and noise system.
+- `scripts/core`: runtime state, catalog, wallet, hotbar, warehouse, transaction boundary, event bus, and noise system.
 - `scripts/economy`: identification, shop, negotiation, and task rules.
-- `scripts/items`: item database, gem pickup behavior, and hotbar inventory compatibility.
+- `scripts/items`: item database, gem pickup behavior, and hotbar compatibility.
 - `scripts/player`: mine player state, stats, and movement.
 - `scripts/mine`: mineable nodes, covers, and mine stats.
 - `scripts/town`: generated town scene logic, town movement, NPC interaction, and mine return route.
 - `scripts/enemies`: enemy AI.
-- `scripts/ui`: health bar, hotbar, and progress UI.
+- `scripts/ui`: health bar, hotbar, warehouse UI, NPC warehouse popups, and progress UI.
 - `assets/mine`, `assets/town`, `assets/props`: current authored art assets.
 
 ## Known Architecture TODOs
 
-- TODO: Document the intended save/load or persistence model. Current runtime state is session-local.
+- TODO: Document the intended save/load or persistence model. Current runtime state is session-local. The warehouse spec makes the question more urgent: warehouse is a perfect candidate for save/load, but cross-process persistence is explicitly out of scope for the first cut. Re-evaluate after the warehouse ships.
 - TODO: Decide whether `addons/godot_mcp` is vendor-managed, manually maintained, or periodically refreshed.
 - TODO: Clarify the long-term product/gameplay direction before adding large new systems.
 - ~~TODO: Verify whether `CustomerShopService.list_customers()` should return customers instead of tasks before any feature relies on it.~~ **Fixed** by PR "[codex/fix-doc-scene-drift]" — see [decisions/0001](../decisions/0001-fix-doc-scene-drift.md).
