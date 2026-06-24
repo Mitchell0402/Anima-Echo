@@ -12,6 +12,7 @@ Last updated: 2026-06-24
 - The runtime economy core is already present under `scripts/core` and `scripts/economy`.
 - **Weight System**: 3-tier encumbrance (Light/Heavy/Overload) based on raw geode weight, with speed and noise penalties. [Spec](specs/weight_system.md)
 - **Doc/Scene/Service Drift**: Three silent inconsistencies (main scene, town scene script reference, `CustomerShopService.list_customers()`) are fixed by the `[codex/fix-doc-scene-drift]` branch and locked down with four new regression tests. [Decision](../decisions/0001-fix-doc-scene-drift.md)
+- **Inventory Consistency**: `InventoryManager.is_full()` and `ItemDatabase.get_stack_limit` now proxy through to `GameRuntime.inventory` and `GameRuntime.catalog` instead of holding a local 8-slot fiction or a parallel constant table. See [Decision](../decisions/0002-inventory-consistency.md).
 
 ## Known Risks And TODOs
 
@@ -23,6 +24,7 @@ Last updated: 2026-06-24
 - TODO: Complete end-to-end testing of the weight system (speed/noise/UI) in Godot editor.
 - TODO: Restore the missing `Enemy` / `Enemy3` instances under `EnemyCollection` in `scenes/mine/test_scene.tscn` so the pre-existing `_test_mine_scene_structure` failure is cleared. Same baseline state on `origin/main`; not part of the drift-fix PR.
 - TODO: Migrate `_test_project_scene_routes` to compare the main scene uid (`uid://dxjbgwnb1j7cw`) instead of the `res://` path string, so the test passes under Godot 4.6. Pre-existing on `origin/main`; the drift-fix PR adds a new uid-aware test instead.
+- TODO: Re-evaluate autoload order in `project.godot`. `ItemDatabase` now reads from `GameRuntime.catalog` and so depends on `GameRuntime` being initialized. Current order (`NoiseSystem` → `ItemDatabase` → `GameRuntime` → `WeightSystem`) is safe today because `get_stack_limit` is only called after the player enters a scene, but the dependency should be made explicit (move `ItemDatabase` after `GameRuntime`) or eliminated (pass the catalog in via a setter) to keep the contract clear. See [decisions/0002](../decisions/0002-inventory-consistency.md).
 
 ## Next Cleanup Candidates
 

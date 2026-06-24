@@ -62,4 +62,5 @@ Because `GameRuntime` is an autoload, wallet, inventory, event history, task pro
 - TODO: Clarify the long-term product/gameplay direction before adding large new systems.
 - ~~TODO: Verify whether `CustomerShopService.list_customers()` should return customers instead of tasks before any feature relies on it.~~ **Fixed** by PR "[codex/fix-doc-scene-drift]" — see [decisions/0001](../decisions/0001-fix-doc-scene-drift.md).
 - TODO: Document asset generation/source metadata if these assets will be regenerated or replaced.
-- TODO: Add an `Enemy` (and `Enemy3`) instance under `EnemyCollection` in `scenes/mine/test_scene.tscn` so `_test_mine_scene_structure` passes again. Pre-existing on `main`, tracked here so it does not get lost.
+- TODO: Add an `Enemy` (and `Enemy3`) instance under `EnemyCollection` in `scenes/mine/test_scene.tscn` so `_test_mine_scene_structure` passes again. Pre-existing on `origin/main`, tracked here so it does not get lost.
+- TODO: Make `ItemDatabase` autoload order explicit: either move it after `GameRuntime` in `project.godot`, or eliminate the runtime dependency by injecting the catalog. See [decisions/0002](../decisions/0002-inventory-consistency.md).

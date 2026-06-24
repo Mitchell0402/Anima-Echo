@@ -7,9 +7,9 @@
 - GameRuntime: Autoload that owns current session state and runtime services.
 - GameCatalog: Runtime loader/index for `data/game/catalog.json`.
 - GameTransactionService: Central mutation boundary for inventory and currency changes.
-- GameInventory: Runtime inventory model owned by `GameRuntime`.
+- GameInventory: Runtime inventory model owned by `GameRuntime`. Exposes `is_full()` (returns `get_used_slot_count() >= capacity`) plus the standard `add_item` / `remove_item` / `has_item` / `count_item` / `get_stacks` / `get_used_slot_count` / `snapshot` / `restore` / `clear` accessors. Slot capacity is configured at construction.
 - GameWallet: Runtime currency model owned by `GameRuntime`.
-- ItemDatabase: Compatibility helper for hotbar item icons, stack keys, display names, and stack limits.
+- ItemDatabase: Compatibility helper for hotbar item icons, stack keys, display names. Stack limits are read from `GameRuntime.catalog` (not held locally) so the catalog stays the single source of truth.
 - Raw geode: Unidentified mine pickup item, such as `raw_common_geode`.
 - Mineral: Identified sellable item, such as `copper_nugget` or `silver_vein`.
 - Identification: Economy service action that converts a raw geode into a mineral.
@@ -17,4 +17,5 @@
 - Task: Catalog-defined objective/reward entry managed by `TaskService`.
 - NoiseSystem: Shared event system used to communicate player noise to enemy AI.
 - WeightSystem: Autoload that calculates total backpack weight from raw geodes in GameRuntime.inventory and determines encumbrance tier (Light/Heavy/Overload), affecting speed and noise.
+- InventoryManager: Player-attached node that mirrors the first 12 runtime inventory slots for the hotbar UI. `is_full()` and stack-size lookups proxy through to `GameRuntime.inventory` so the local view cannot disagree with the source of truth. Holds `unlocked_slots` (cosmetic, drives the lock-icon UI for slots 9-12).
 - Godot MCP: Editor/runtime helper addon under `addons/godot_mcp`.
