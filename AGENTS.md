@@ -116,8 +116,27 @@ When finishing a feature:
 3. Update `docs/testing.md` if verification steps changed.
 4. Update `docs/architecture.md` only if architecture, module boundaries, or data flow changed.
 5. Add a decision record under `docs/decisions/` only for important decisions that affect future work.
+6. If the feature introduces or relies on visual art, update `docs/visual_assets.md` and the row in `docs/visual_assets/inventory.md` for every new or removed asset.
 
 Do not update architecture or decision docs for trivial implementation details.
+
+## Visual Assets
+
+The project tracks every image the game needs to draw so an external image-generation AI can produce missing art in a coherent style. The contract is split across two files:
+
+- `docs/visual_assets.md` — naming convention, style guide, status legend, generation workflow, and the metadata sidecar schema. Read this before adding or replacing art.
+- `docs/visual_assets/inventory.md` — the single source of truth for which assets exist today, which are placeholders, and which still need to be drawn. Includes the metadata sidecar schema and the review checklist that runs before any new `load()` / `preload()` is merged.
+
+Hard rules:
+
+* Every asset lives under `assets/<category>/` and follows the `assets/<category>/<sub-category>/<name>_<state>[_<variant>].png` naming convention.
+* Every asset has a sidecar metadata file at `<asset>.png.meta.md` next to it. The sidecar is required for `implemented` and `placeholder` assets; recommended for `todo` assets.
+* A sidecar must contain all required fields listed in `inventory.md` (id, category, sub-category, source, license, status, width/height, palette, description, style-notes, created-by, last-reviewed-by, last-reviewed-on, plus `audit-on` for implemented/obsolete and `replacement` for placeholder/obsolete). `license: TBD` is rejected.
+* Status is one of `implemented`, `placeholder`, `todo`, `obsolete`. The `implemented` rows must match the files on disk exactly; the `todo` rows are the AI's work order.
+* Sprite resolution defaults are 64×64 px for characters, 32×32 px for tiles and UI icons, 48×48 px for larger UI icons. `TEXTURE_FILTER_NEAREST` is set in code; do not add bilinear filtering to the source PNG.
+* The repository and the inventory must never disagree about which files exist. Hand-update the inventory until the auto-generation script lands.
+* **Review the sidecar before loading the asset.** A reviewer or the author of a code change that adds a new `load()` / `preload()` for a visual asset must walk the review checklist in `inventory.md` (inventory row exists, sidecar exists, all required fields filled, palette matches, source indicates origin, last-reviewed-on within 90 days, intended use matches, resolution matches the import scale).
+* Existing assets must be audited and graded. The first pass on this document also re-examines every `assets/**/*.png` already in the repository, gives each one a metadata sidecar, and assigns it a status (`implemented` / `placeholder` / `obsolete`). Anything that no longer matches the style guide is downgraded to `placeholder` until the AI produces a replacement.
 
 ## Godot Project Rules
 

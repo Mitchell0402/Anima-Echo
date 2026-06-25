@@ -282,7 +282,9 @@ func _open_warehouse_picker(title: String, category_filter: String, on_pick: Cal
 		if str(item.get("category", "")) != category_filter:
 			continue
 		var label_text: String = "%s x%d" % [str(item.get("name", item_id)), int(stack.get("quantity", 0))]
-		if item.has("base_price"):
+		# Only sellable categories show a price tag. Raw stones are
+		# identified, not sold, so a price tag would mislead the player.
+		if item.get("category", "") == "mineral" and item.has("base_price"):
 			label_text += "  [底价 %d]" % int(item.get("base_price", 0))
 		# Bind a single argument (item_id) into the call.
 		var bound: Callable = on_pick.bind(item_id)
@@ -465,7 +467,7 @@ func _sell_item_negotiate(item_id: String) -> void:
 	# Reuse the mine-style QTE parameters: 90-deg zone, 65-deg wide,
 	# random start angle. The visual is the same as the mine QTE.
 	var start_angle: float = randf_range(20.0, 340.0 - 65.0)
-	qte._start_qte(start_angle, 65.0, Callable(self, "_on_sell_qte_finished"))
+	qte.start_qte(start_angle, 65.0, Callable(self, "_on_sell_qte_finished"))
 
 
 # Single place that converts a sell result dict into toast + HUD refresh.
@@ -487,7 +489,7 @@ func _on_sell_qte_finished(success: bool) -> void:
 	var item_id: String = _qte_pending_item_id
 	_qte_pending_item_id = ""
 	if _qte_circle != null and is_instance_valid(_qte_circle):
-		_qte_circle._stop_qte()
+		_qte_circle.stop_qte()
 	_qte_circle = null
 	if item_id.is_empty() or _runtime == null:
 		return

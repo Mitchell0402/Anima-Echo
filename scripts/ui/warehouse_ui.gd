@@ -12,8 +12,8 @@ extends CanvasLayer
 ## (32 px) and a sane maximum (80 px) so the panel is usable from 800x450
 ## to 1920x1080.
 
-const COLS: int = 6
-const ROWS: int = 8
+const COLS: int = 3
+const ROWS: int = 4
 const SLOT_GAP: float = 6.0
 const PANEL_PADDING: float = 14.0
 const TITLE_HEIGHT: float = 32.0
@@ -251,9 +251,21 @@ func _refresh_slots() -> void:
 			count.text = ""
 			slot.modulate = Color(0.85, 0.85, 0.85, 1.0)
 		else:
-			icon.texture = null  # No per-item icon yet; future work.
+			# No per-item texture yet (catalog has no icon mapping); show a
+			# visible placeholder so the player can tell the slot is occupied.
+			# White background with a small color bar at the bottom hinting
+			# at the item's category. This makes the warehouse read as
+			# "stuff is here" even before icon assets exist.
+			var placeholder := ColorRect.new()
+			placeholder.color = Color(0.95, 0.85, 0.45, 1.0)  # warm gold
+			placeholder.set_anchors_preset(Control.PRESET_FULL_RECT)
+			placeholder.size = Vector2(0, 0)
+			icon.add_child(placeholder)
 			count.text = str(quantity) if quantity > 1 else ""
 			slot.modulate = Color.WHITE
+			# Stash on the slot for later refreshes so we don't pile up
+			# placeholder children.
+			slot.set_meta("placeholder", placeholder)
 		# Bind the item id onto the slot for hover lookup.
 		slot.set_meta("item_id", item_id)
 
@@ -274,7 +286,11 @@ func _on_slot_hover(slot: Panel) -> void:
 		description = db.get_description(_hovered_item_id)
 	_tooltip_name.text = name
 	_tooltip_desc.text = description
-	if item.has("base_price"):
+	# Only sellable categories (mineral) show a base_price. Raw stones
+	# are not sold by any customer, so showing a price would be
+	# misleading. The price is the catalog base_price, before any
+	# negotiation or preferred-tag multiplier.
+	if item.get("category", "") == "mineral" and item.has("base_price"):
 		_tooltip_price.text = "底价: %d 铜板" % int(item.get("base_price", 0))
 	else:
 		_tooltip_price.text = ""
