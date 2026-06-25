@@ -205,6 +205,23 @@ Hard rules:
   MCP tool over hand-editing the record; both will fail loudly if
   the keycode is wrong rather than silently binding to the wrong
   key.
+- `Input.get_vector` and `event.is_action_pressed` silently return
+  zero / false when an action name is unknown — they do not raise
+  an error. A code change that renames or deletes an input action
+  breaks every consumer that references the old name without any
+  compile-time or runtime signal. The fix is to grep for the
+  action name in `scripts/` and `tests/` before renaming or
+  removing an action, and to add a regression test that calls
+  `InputMap.has_action(name)` for every action any script
+  references. The move bug that this bullet records is in
+  `scripts/player/move_controller.gd:40` — it calls
+  `Input.get_vector("move_left", "move_right", "move_up",
+  "move_down")` even though `project.godot` only has
+  `left` / `right` / `up` / `down` (and never had `move_*`).
+  `Input.get_vector` returns `(0, 0)` for unknown actions, so the
+  player cannot move inside the mine. The fix is to use the
+  canonical action names and to add a `down` action to the input
+  map.
 
 Prefer modular systems:
 

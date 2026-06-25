@@ -42,7 +42,7 @@ func _physics_process(delta: float) -> void:
 		handle_animation(Vector2.ZERO, false)
 		return
 
-	var input_dir := _to_cardinal_direction(Input.get_vector("move_left", "move_right", "move_up", "move_down"))
+	var input_dir := _to_cardinal_direction(Input.get_vector("left", "right", "up", "down"))
 
 	var is_walking := Input.is_action_pressed("walk")
 	var effective_speed: float = stats.get_effective_speed()
