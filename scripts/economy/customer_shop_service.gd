@@ -1,4 +1,12 @@
 extends RefCounted
+## Customer shop service. Sells items from the warehouse to a customer
+## buyer, routed through the transaction service so the wallet, warehouse
+## and customer budget are all updated atomically.
+##
+## The budget check and decrement are handled inside GameTransactionService
+## (so a failure anywhere in the apply() call rolls back the budget
+## snapshot). This service is a thin wrapper that resolves the offer and
+## delegates to the transaction boundary.
 
 var catalog: Object
 var transactions: Object
@@ -21,6 +29,7 @@ func sell_to_customer(customer_id: String, item_id: String, quantity: int = 1, c
 		"item_id": item_id,
 		"quantity": quantity,
 		"unit_price": int(offer.get("unit_price", 0)),
+		"source": "warehouse",
 	})
 	if not result.get("ok", false):
 		return result

@@ -3,22 +3,30 @@
 - Anima Echo: Godot 2D mining prototype in this repository.
 - Town: Main hub scene at `res://scenes/town/mining_town.tscn`.
 - Mine: Current playable mine route at `res://scenes/mine/test_scene.tscn`.
-- MinecartExit: Mine scene node that returns the player to the town.
-- GameRuntime: Autoload that owns current session state and runtime services.
-- GameCatalog: Runtime loader/index for `data/game/catalog.json`.
-- GameTransactionService: Central mutation boundary for inventory and currency changes.
-- GameInventory: Runtime inventory model owned by `GameRuntime`. Exposes `is_full()` (returns `get_used_slot_count() >= capacity`) plus the standard `add_item` / `remove_item` / `has_item` / `count_item` / `get_stacks` / `get_used_slot_count` / `snapshot` / `restore` / `clear` accessors. Slot capacity is configured at construction.
-- GameWallet: Runtime currency model owned by `GameRuntime`.
-- ItemDatabase: Compatibility helper for hotbar item icons, stack keys, display names. Stack limits are read from `GameRuntime.catalog` (not held locally) so the catalog stays the single source of truth.
+- MinecartExit: Mine scene node that, on interact, calls `GameRuntime.end_mine_run()` (hotbar -> warehouse) and returns the player to the town.
+- GameRuntime: Autoload that owns current session state (hotbar, warehouse, wallet, customer budgets) and the runtime services. Exposes the mine-run lifecycle methods `begin_mine_run`, `end_mine_run`, and `on_player_killed_in_mine`.
+- GameCatalog: Runtime loader/index for `data/game/catalog.json`. Source of truth for items, loot tables, identification tables, customers, and tasks. Every item carries a `description` field.
+- GameTransactionService: Central mutation boundary for hotbar, warehouse, wallet, and customer budget changes. Every change goes through `apply(request)`. Snapshots and restores all four containers atomically on failure.
+- GameInventory: RefCounted model that backs both the hotbar and the warehouse (same class, different capacity and `max_items`). Capacity is configured at construction; `max_items` is a soft item-count cap (0 = no cap). Exposes `add_item` / `remove_item` / `has_item` / `has_requirements` / `count_item` / `get_stacks` / `get_used_slot_count` / **`is_full`** / `get_total_items` / `is_over_soft_cap` / `snapshot` / `restore` / `clear`. `is_full()` returns `get_used_slot_count() >= capacity`. See [decisions/0003](../decisions/0003-warehouse-system.md).
+- GameHotbar: The 12-slot `GameInventory` instance exposed as `GameRuntime.hotbar`. Cleared on `begin_mine_run` and on `on_player_killed_in_mine`. Drained into the warehouse by `end_mine_run`.
+- GameWarehouse: The 48-slot, 999-item-soft-cap `GameInventory` instance exposed as `GameRuntime.warehouse`. Never touched by mine-scoped events. Read directly by the warehouse UI and by town NPC popups.
+- GameWallet: Runtime currency model owned by `GameRuntime`. Balance is the player's coins.
+- customer_remaining_budget: `GameRuntime.customer_remaining_budget` — a `customer_id -> int` map. Each value starts at the catalog customer's `budget` field and is decremented inside the sell transaction. Not regenerated during a session. See [decisions/0003](../decisions/0003-warehouse-system.md).
+- ItemDatabase: Compatibility helper for hotbar item icons, stack keys, display names, and descriptions. Stack limits and descriptions are read from `GameRuntime.catalog` (not held locally) so the catalog stays the single source of truth.
 - Raw geode: Unidentified mine pickup item, such as `raw_common_geode`.
 - Mineral: Identified sellable item, such as `copper_nugget` or `silver_vein`.
 - Identification: Economy service action that converts a raw geode into a mineral.
-- Customer: Catalog-defined buyer used by negotiation and shop services.
-- Task: Catalog-defined objective/reward entry managed by `TaskService`.
+- Customer: Catalog-defined buyer used by negotiation and shop services. Has a `budget` (starting currency) and `preferred_tags` / `rejected_tags` for offer resolution.
+- Task: Catalog-defined objective/reward entry managed by `TaskService`. Active tasks are visible to the task_clerk NPC; only those whose `requirements` are currently satisfied by the warehouse are clickable.
 - NoiseSystem: Shared event system used to communicate player noise to enemy AI.
-- WeightSystem: Autoload that calculates total backpack weight from raw geodes in GameRuntime.inventory and determines encumbrance tier (Light/Heavy/Overload), affecting speed and noise.
+- WeightSystem: Autoload that calculates total backpack weight from raw geodes in `GameRuntime.hotbar` and determines encumbrance tier (Light/Heavy/Overload), affecting speed and noise. The update is gated to the mine scene; the warehouse does not contribute to weight. See [decisions/0003](../decisions/0003-warehouse-system.md).
 - OxygenSystem: Autoload carry-on oxygen tank. Consumed in mine scenes at variable rates by activity state and weight tier. Depletion causes HP drain. Death in mine triggers inventory clear and town return.
 - OxygenPump: One-shot interactable placed in mine scenes. Player presses E nearby to fully refill oxygen.
 - OxygenBar: Player-attached Node2D UI bar showing current oxygen percentage with color gradient (blue → yellow → red) and flashing low-oxygen warning.
-- InventoryManager: Player-attached node that mirrors the first 12 runtime inventory slots for the hotbar UI. `is_full()` and stack-size lookups proxy through to `GameRuntime.inventory` so the local view cannot disagree with the source of truth. Holds `unlocked_slots` (cosmetic, drives the lock-icon UI for slots 9-12).
+- InventoryManager: Player-attached node that mirrors `GameRuntime.hotbar` (12 slots) for the hotbar UI. `is_full()` and stack-size lookups proxy through to `GameRuntime.hotbar` so the local view cannot disagree with the source of truth. Holds `unlocked_slots` (cosmetic, drives the lock-icon UI for slots 9-12, which are actually empty in `GameRuntime.hotbar`).
+- WarehouseUI: Town-scoped `CanvasLayer` opened by the `I` key (or closed by `Esc` / `I`). Shows a 6x8 grid backed by `GameRuntime.warehouse`. Pauses the player's input while open. A no-op in the mine scene.
+- Mine run: A single town-to-mine-to-town cycle. Begins with `begin_mine_run` (clears the hotbar) and ends with `end_mine_run` (dumps the hotbar to the warehouse). Death during a mine run calls `on_player_killed_in_mine` (clears the hotbar; warehouse is untouched).
 - Godot MCP: Editor/runtime helper addon under `addons/godot_mcp`.
+- GameCamera: `scripts/camera_2d.gd`. A Camera2D that follows a Node2D target with smooth lerp, clamps inside a Rect2 world_bounds so the player never sees black edges, and exposes `fit_world_to_viewport_integer()` for pixel-perfect scaling. See [decisions/0004](../decisions/0004-display-system.md).
+- Display system: the three-layer world / camera / UI model. World is fixed (1152x648 in the town). GameCamera decides what is visible. UI lives on its own CanvasLayer and uses anchor presets. `project.godot` declares `window/stretch/mode="viewport"`, `aspect="keep"`, and `scale_mode="integer"`. See [decisions/0004](../decisions/0004-display-system.md).
+- Window stretch mode: Godot's `viewport` mode keeps the internal coordinate system at 1280x720 regardless of window size. `keep` aspect letter-boxes if the window is a different aspect. `integer` scale mode only allows 1x, 2x, 3x, ... scaling.

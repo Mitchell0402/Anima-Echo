@@ -103,6 +103,12 @@ func die() -> void:
 	state = State.DEAD
 	velocity = Vector2.ZERO
 	_knockback = Vector2.ZERO
+	# Drop the hotbar on death. The warehouse is untouched — only the
+	# in-mine backpack is lost, matching the Tarkov-style "you take it
+	# back to town or you lose it" rule.
+	var runtime: Node = get_node_or_null("/root/GameRuntime")
+	if runtime != null and runtime.has_method("on_player_killed_in_mine"):
+		runtime.on_player_killed_in_mine()
 	died.emit()
 	print("[Player] 💀 死亡")
 

@@ -50,15 +50,25 @@
 
 ## Economy Core Contract
 
-- `GameRuntime` owns the single live inventory, wallet, catalog, transaction service, identification service, shop service, negotiation service, and task service.
-- Real inventory and currency mutations must go through `GameTransactionService`.
-- `scripts/items/inventory_manager.gd` remains as the hotbar compatibility view and syncs from `GameRuntime.inventory`. `is_full()` and stack-size lookups proxy through to the unified runtime so the local view cannot disagree with the source of truth. See [decisions/0002](../decisions/0002-inventory-consistency.md).
-- `scripts/items/item_database.gd` reads stack sizes from `GameRuntime.catalog` instead of holding a parallel constant table.
+- `GameRuntime` owns the live hotbar (12 slots, in-mine backpack), the warehouse (48 slots, 999-item soft cap, in-town storage), the wallet, the catalog, the customer remaining-budget map, the transaction service, the identification service, the shop service, the negotiation service, and the task service. The hotbar and warehouse are two instances of the same `GameInventory` RefCounted.
+- Real hotbar, warehouse, wallet, and customer budget mutations must go through `GameTransactionService.apply()`. The service snapshots all four containers and rolls them back together on any failure.
+- `scripts/items/inventory_manager.gd` is a thin view that mirrors the 12-slot `GameRuntime.hotbar` for the hotbar UI. `is_full()` and stack-size lookups proxy through to the unified runtime so the local view cannot disagree with the source of truth. See [decisions/0002](../decisions/0002-inventory-consistency.md) and [decisions/0003](../decisions/0003-warehouse-system.md).
+- `scripts/items/item_database.gd` reads stack sizes and item descriptions from `GameRuntime.catalog` instead of holding parallel constants.
 - Gem pickup maps mine gem levels to runtime catalog items:
   - L1 -> `raw_common_geode`
   - L2 -> `raw_fine_geode`
   - L3 -> `raw_rare_geode`
-- Town identification, selling, and task claim actions call `GameRuntime` services directly.
+- In town, identification, selling, and task delivery all read from the warehouse. The hotbar is empty while the player is in town by design. NPC popups present the warehouse as a grid picker. The task clerk only shows tasks that are currently deliverable; the rest are visible but greyed.
+
+## Warehouse System
+
+- The 48-slot warehouse is `GameRuntime.warehouse` (`GameInventory` instance). Item cap is 999, applied through `GameInventory.add_item` (returns `inventory_soft_cap` error on overflow).
+- The hotbar is `GameRuntime.hotbar` (12-slot `GameInventory` instance). No item cap; only the 12-slot capacity applies.
+- On mine entry (`begin_mine_run`): hotbar is cleared.
+- On mine exit (`end_mine_run`): every hotbar stack moves to the warehouse through a `move_stack_from_hotbar_to_warehouse` transaction. If the warehouse is full, the untransferred items remain in the hotbar and the town scene prints a warning.
+- On mine death (`on_player_killed_in_mine`): hotbar is cleared; warehouse is untouched.
+- `CustomerShopService.sell_to_customer` decrements the customer's `customer_remaining_budget` inside the sell transaction. The budget is initialized at startup from each catalog customer's `budget` field and is not regenerated during a session.
+- The standalone warehouse UI is opened by the `I` key (or closed by `I` / `Esc`) from town. It is a no-op in the mine. While open, the player's input is frozen (movement and NPC interactions are dropped). See [decisions/0003](../decisions/0003-warehouse-system.md) for the design rationale and [specs/warehouse-system](../specs/warehouse-system.md) for the full behavior contract.
 
 ## Mine Systems
 
@@ -68,6 +78,16 @@
 - `scripts/mine/cover.gd` hides/unhides the player when inside cover Area2D and pressing interact.
 - `scripts/items/gem_controller.gd` supports both Area2D pickup and distance pickup so gem collection still works while map collision is relaxed.
 - Enemy attack and detection remain distance/state based and do not require player map collision.
+
+## Display System
+
+The game uses a strict three-layer model. See [decisions/0004-display-system.md](../decisions/0004-display-system.md) for the rationale.
+
+- **World**: fixed at 1152x648 in the town. Sprite positions, NPC positions, walkable bounds, and player movement all live here.
+- **Camera**: `scripts/camera_2d.gd` (`GameCamera`) follows the player with smooth lerp, clamps inside the world bounds, and exposes `fit_world_to_viewport_integer()` for pixel-perfect scaling. The camera is attached to the town scene root, not to the player.
+- **UI**: lives on its own `CanvasLayer` (layer 10) and uses anchor presets (`PRESET_TOP_WIDE` for the top bar, `PRESET_CENTER` for the NPC popup, `PRESET_TOP_LEFT` for the warehouse label). No absolute positions for UI elements.
+- `project.godot` declares `window/stretch/mode="viewport"`, `aspect="keep"`, and `scale_mode="integer"` so the world renders pixel-perfectly at any window size and aspect ratio.
+- The mine scene currently still uses the old hard-coded TileMap size and a Camera2D attached to the player; bring it into this model in a follow-up.
 
 ## Town Systems
 

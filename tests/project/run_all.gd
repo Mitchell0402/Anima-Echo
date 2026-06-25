@@ -310,6 +310,10 @@ func _test_mine_return_route() -> void:
 
 
 func _test_core_economy_loop() -> void:
+	# Updated for the warehouse system (PR #8). The full mine -> town loop:
+	# in-mine pickup lands in the hotbar; returning to town dumps the hotbar
+	# into the warehouse; NPC actions (identify, sell, deliver) read the
+	# warehouse. Task rewards land in the warehouse.
 	var runtime_script = load("res://scripts/core/game_runtime.gd")
 	_assert_true(runtime_script != null, "runtime script loads for economy loop")
 	if runtime_script == null:
@@ -317,26 +321,38 @@ func _test_core_economy_loop() -> void:
 	var runtime: Node = runtime_script.new()
 	var init_result: Dictionary = runtime.initialize_for_new_game()
 	_assert_true(init_result.get("ok", false), "runtime initializes core services")
+	# In-mine pickup lands in the hotbar.
 	var collect_result: Dictionary = runtime.get("transactions").apply({
 		"type": "collect_item",
 		"item_id": "raw_common_geode",
 		"quantity": 1,
 		"source": "project_test_mine",
 	})
-	_assert_true(collect_result.get("ok", false), "mine collection enters unified inventory")
-	_assert_true(runtime.get("inventory").has_item("raw_common_geode", 1), "raw geode is in unified inventory")
+	_assert_true(collect_result.get("ok", false), "mine collection lands in hotbar")
+	_assert_true(runtime.get("hotbar").has_item("raw_common_geode", 1), "raw geode is in hotbar after mine pickup")
+	_assert_eq(0, int(runtime.get("warehouse").get_total_items()), "warehouse is empty before town return")
+	# End the mine run: hotbar -> warehouse.
+	var leftover: int = int(runtime.end_mine_run())
+	_assert_eq(0, leftover, "end_mine_run transfers every hotbar stack to the warehouse")
+	_assert_eq(0, int(runtime.get("hotbar").get_total_items()), "hotbar is empty after end_mine_run")
+	_assert_true(runtime.get("warehouse").has_item("raw_common_geode", 1), "raw geode is in warehouse after town return")
+	# Town identification reads from the warehouse.
 	var identify_result: Dictionary = runtime.get("identification_service").identify("raw_common_geode", {"station": "project_test_town"})
 	_assert_true(identify_result.get("ok", false), "town identification consumes raw and creates mineral")
-	_assert_eq(0, _count_item(runtime, "raw_common_geode"), "raw geode consumed after identification")
+	_assert_false(runtime.get("warehouse").has_item("raw_common_geode", 1), "raw geode consumed after identification")
 	var mineral_id := str(identify_result.get("item_id", ""))
-	_assert_true(_count_item(runtime, mineral_id) >= 1, "identified mineral is in unified inventory")
-	var balance_before_sale := int(runtime.get("wallet").get_balance())
+	_assert_true(runtime.get("warehouse").has_item(mineral_id, 1), "identified mineral is in warehouse")
+	# Town sale reads from the warehouse.
+	var balance_before_sale: int = int(runtime.get("wallet").get_balance())
 	var sale_result: Dictionary = runtime.get("shop_service").sell_to_customer("buyer_blacksmith", mineral_id, 1, {"timing": "good"})
 	_assert_true(sale_result.get("ok", false), "town buyer sells identified mineral through unified transaction")
 	_assert_true(int(runtime.get("wallet").get_balance()) > balance_before_sale, "sale increases unified wallet")
+	_assert_false(runtime.get("warehouse").has_item(mineral_id, 1), "mineral is removed from warehouse after sale")
+	# Task reward lands in the warehouse.
 	var task_claim: Dictionary = runtime.get("task_service").claim_reward("task_first_identification")
 	_assert_true(task_claim.get("ok", false), "identification task can be claimed after town loop")
-	_assert_true(runtime.get("inventory").has_item("raw_fine_geode", 1), "task reward enters unified inventory")
+	_assert_true(runtime.get("warehouse").has_item("raw_fine_geode", 1), "task reward lands in warehouse")
+	_assert_eq(0, int(runtime.get("hotbar").get_total_items()), "hotbar remains empty throughout the town loop")
 	runtime.shutdown()
 	runtime.free()
 
@@ -453,7 +469,7 @@ func _cleanup_autoloads() -> void:
 
 func _count_item(runtime: Node, item_id: String) -> int:
 	var total := 0
-	for stack_variant in runtime.get("inventory").get_stacks():
+	for stack_variant in runtime.get("hotbar").get_stacks():
 		var stack: Dictionary = stack_variant
 		if str(stack.get("item_id", "")) == item_id:
 			total += int(stack.get("quantity", 0))
@@ -585,7 +601,7 @@ func _test_inventory_manager_is_full_proxies_to_runtime() -> void:
 	if not init_result.get("ok", false):
 		runtime.free()
 		return
-	var inv: Object = runtime.get("inventory")
+	var inv: Object = runtime.get("hotbar")
 	_assert_true(inv != null, "runtime has inventory")
 	if inv == null:
 		runtime.shutdown()

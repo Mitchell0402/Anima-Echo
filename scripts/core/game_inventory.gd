@@ -15,6 +15,8 @@ func add_item(item_id: String, quantity: int = 1, metadata: Dictionary = {}) -> 
 		return _fail("item_id_missing", "Item id is required.")
 	if quantity <= 0:
 		return _fail("quantity_invalid", "Quantity must be positive.")
+	if is_over_soft_cap(quantity):
+		return _fail("inventory_soft_cap", "Item cap exceeded.")
 	var remaining := quantity
 	for index in range(_slots.size()):
 		var slot := _slots[index]
@@ -90,6 +92,23 @@ func get_used_slot_count() -> int:
 
 func is_full() -> bool:
 	return get_used_slot_count() >= capacity
+
+
+# Soft item-count cap. add_item checks this; selling or delivering reduces
+# naturally via remove_item. Optional: when <= 0 the cap is treated as "no
+# cap" so the class can be used unchanged in older call sites.
+var max_items: int = 0
+
+func get_total_items() -> int:
+	var total: int = 0
+	for slot in _slots:
+		total += int(slot.get("quantity", 0))
+	return total
+
+func is_over_soft_cap(extra: int) -> bool:
+	if max_items <= 0:
+		return false
+	return get_total_items() + extra > max_items
 
 
 func get_stacks() -> Array:

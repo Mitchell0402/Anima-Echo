@@ -18,8 +18,8 @@ func _ready() -> void:
 	_initialize_inventory()
 	if _runtime != null and _runtime.get("catalog") == null and _runtime.has_method("initialize_for_new_game"):
 		_runtime.initialize_for_new_game()
-	if _runtime != null and _runtime.get("inventory") != null:
-		_runtime.get("inventory").changed.connect(_sync_from_runtime)
+	if _runtime != null and _runtime.get("hotbar") != null:
+		_runtime.get("hotbar").changed.connect(_sync_from_runtime)
 	_sync_from_runtime()
 
 func _initialize_inventory() -> void:
@@ -124,11 +124,11 @@ func _find_empty_slot() -> int:
 # 真正满：无空解锁槽且所有解锁栈都达上限
 func is_full() -> bool:
 	# Source of truth is the unified runtime inventory. The local slot mirror
-	# (synced from GameRuntime.inventory) only covers the first MAX_SLOTS
+	# (synced from GameRuntime.hotbar) only covers the first MAX_SLOTS
 	# entries, so it cannot be used to answer "is the backpack full" on its
-	# own — GameRuntime.inventory.capacity is 18, MAX_SLOTS is 12.
-	if _runtime != null and _runtime.get("inventory") != null and _runtime.get("inventory").has_method("is_full"):
-		return bool(_runtime.get("inventory").is_full())
+	# own — GameRuntime.hotbar.capacity is 12, MAX_SLOTS is 12.
+	if _runtime != null and _runtime.get("hotbar") != null and _runtime.get("hotbar").has_method("is_full"):
+		return bool(_runtime.get("hotbar").is_full())
 	# Fallback when runtime is unavailable: local view is best-effort
 	for i in range(unlocked_slots):
 		var s = slots[i]
@@ -188,11 +188,11 @@ func clear_inventory() -> void:
 	print("[背包] 🗑 背包已清空")
 
 func _sync_from_runtime() -> void:
-	if _runtime == null or _runtime.get("inventory") == null:
+	if _runtime == null or _runtime.get("hotbar") == null:
 		return
 	_initialize_inventory()
 	var index := 0
-	for stack_variant in _runtime.get("inventory").get_stacks():
+	for stack_variant in _runtime.get("hotbar").get_stacks():
 		if index >= MAX_SLOTS:
 			break
 		var stack: Dictionary = stack_variant

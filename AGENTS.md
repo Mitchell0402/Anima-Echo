@@ -116,8 +116,27 @@ When finishing a feature:
 3. Update `docs/testing.md` if verification steps changed.
 4. Update `docs/architecture.md` only if architecture, module boundaries, or data flow changed.
 5. Add a decision record under `docs/decisions/` only for important decisions that affect future work.
+6. If the feature introduces or relies on visual art, update `docs/visual_assets.md` and the row in `docs/visual_assets/inventory.md` for every new or removed asset.
 
 Do not update architecture or decision docs for trivial implementation details.
+
+## Visual Assets
+
+The project tracks every image the game needs to draw so an external image-generation AI can produce missing art in a coherent style. The contract is split across two files:
+
+- `docs/visual_assets.md` — naming convention, style guide, status legend, generation workflow, and the metadata sidecar schema. Read this before adding or replacing art.
+- `docs/visual_assets/inventory.md` — the single source of truth for which assets exist today, which are placeholders, and which still need to be drawn. Includes the metadata sidecar schema and the review checklist that runs before any new `load()` / `preload()` is merged.
+
+Hard rules:
+
+* Every asset lives under `assets/<category>/` and follows the `assets/<category>/<sub-category>/<name>_<state>[_<variant>].png` naming convention.
+* Every asset has a sidecar metadata file at `<asset>.png.meta.md` next to it. The sidecar is required for `implemented` and `placeholder` assets; recommended for `todo` assets.
+* A sidecar must contain all required fields listed in `inventory.md` (id, category, sub-category, source, license, status, width/height, palette, description, style-notes, created-by, last-reviewed-by, last-reviewed-on, plus `audit-on` for implemented/obsolete and `replacement` for placeholder/obsolete). `license: TBD` is rejected.
+* Status is one of `implemented`, `placeholder`, `todo`, `obsolete`. The `implemented` rows must match the files on disk exactly; the `todo` rows are the AI's work order.
+* Sprite resolution defaults are 64×64 px for characters, 32×32 px for tiles and UI icons, 48×48 px for larger UI icons. `TEXTURE_FILTER_NEAREST` is set in code; do not add bilinear filtering to the source PNG.
+* The repository and the inventory must never disagree about which files exist. Hand-update the inventory until the auto-generation script lands.
+* **Review the sidecar before loading the asset.** A reviewer or the author of a code change that adds a new `load()` / `preload()` for a visual asset must walk the review checklist in `inventory.md` (inventory row exists, sidecar exists, all required fields filled, palette matches, source indicates origin, last-reviewed-on within 90 days, intended use matches, resolution matches the import scale).
+* Existing assets must be audited and graded. The first pass on this document also re-examines every `assets/**/*.png` already in the repository, gives each one a metadata sidecar, and assigns it a status (`implemented` / `placeholder` / `obsolete`). Anything that no longer matches the style guide is downgraded to `placeholder` until the AI produces a replacement.
 
 ## Godot Project Rules
 
@@ -133,6 +152,76 @@ Be careful with:
 * generated/editor-local files
 
 Avoid unnecessary scene rewrites. Do not re-save or reformat unrelated scenes.
+
+### `project.godot` is special: do not rewrite the whole file
+
+`project.godot` is a plain-text file but Godot 4 owns the format. The editor rewrites it on every save, and its rewriting rules are stricter than the file format allows. Three concrete things happen if you overwrite the whole file with `write_file` or a `patch` that touches unrelated sections:
+
+- **The editor deletes keys it does not recognise.** Forgetting one
+  parameter (for example `window/size/viewport_width=1280`) causes
+  the editor to fall back to the default. The town then renders at
+  1152×648 even though the code and the rest of the file still
+  assume 1280×720 — the player is in the wrong place, NPCs are out
+  of range, and pressing `E` does nothing because
+  `town_npc_interactor._nearby_npc_id` is empty.
+- **The editor drops "unused" sections on save.** `[physics]`,
+  `[rendering]/renderer/rendering_method`, and any custom keys that
+  are not in the editor's known set get removed the next time the
+  project is opened and saved. This is silent and not in the diff
+  you just made.
+- **The editor compresses a comment block and a setting onto the
+  same line** when the section has been touched. The diff shows a
+  single long line that mixes `# Pixel-perfect...` with
+  `window/size/viewport_width=1280` and breaks readability.
+
+Hard rules:
+
+- Prefer targeted `patch` calls that add or change a single key
+  over `write_file` rewrites. The smaller the diff, the less the
+  editor has to clean up later.
+- When you must add a new key to `project.godot`, place it inside
+  the correct section with a `patch` rather than re-typing the
+  file. The existing file already has the sections the editor
+  expects, in the order it expects.
+- If a previous `write_file` rewrite has mangled the file, fix the
+  specific missing key (for example
+  `window/size/viewport_width=1280`,
+  `window/stretch/aspect="keep"`, `[physics]/3d/default_gravity=9.8`,
+  `[rendering]/renderer/rendering_method="forward_plus"`) instead
+  of writing the file again. Re-rewriting the same sections the
+  editor rewrote is what got us into trouble in the first place.
+- After any change to `project.godot`, run the project's smoke
+  command and confirm the player can still walk to an NPC and
+  trigger the interaction popup. This catches a missing
+  `viewport_width` before the bug lands.
+- After any change to `[input]`, the `physical_keycode` values are
+  also a common source of bugs. The `InputEventKey` record is a
+  long, comma-separated object literal; copy-pasting one record
+  into another action is easy to miss and silently binds the wrong
+  key. Confirm the mapping with `InputMap.action_get_events(act)`
+  in a `play_scene` runtime probe: the physical keycode must match
+  the action's intent (`A=65`, `D=68`, `E=69`, `I=73`, `S=83`,
+  `W=87`). Prefer `set_project_setting` or the `set_input_action`
+  MCP tool over hand-editing the record; both will fail loudly if
+  the keycode is wrong rather than silently binding to the wrong
+  key.
+- `Input.get_vector` and `event.is_action_pressed` silently return
+  zero / false when an action name is unknown — they do not raise
+  an error. A code change that renames or deletes an input action
+  breaks every consumer that references the old name without any
+  compile-time or runtime signal. The fix is to grep for the
+  action name in `scripts/` and `tests/` before renaming or
+  removing an action, and to add a regression test that calls
+  `InputMap.has_action(name)` for every action any script
+  references. The move bug that this bullet records is in
+  `scripts/player/move_controller.gd:40` — it calls
+  `Input.get_vector("move_left", "move_right", "move_up",
+  "move_down")` even though `project.godot` only has
+  `left` / `right` / `up` / `down` (and never had `move_*`).
+  `Input.get_vector` returns `(0, 0)` for unknown actions, so the
+  player cannot move inside the mine. The fix is to use the
+  canonical action names and to add a `down` action to the input
+  map.
 
 Prefer modular systems:
 

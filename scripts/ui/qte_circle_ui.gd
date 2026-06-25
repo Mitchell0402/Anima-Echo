@@ -1,29 +1,83 @@
 extends Control
-
-## QTE圆形指示器 — 纯视觉组件，由 mine_interaction 驱动。
-## 绘制暗色背景圆、灰色外环、黄色成功区弧、红色旋转指针。
+## QTE圆形指示器 — 纯视觉组件，由 mine_interaction 驱动或由 town
+## 出售-讨价还价流程驱动。绘制暗色背景圆、灰色外环、黄色成功区弧、
+## 红色旋转指针。
+##
+## 调用方：
+##   qte.start_qte(zone_start_deg, zone_size_deg, Callable(self, "on_done"))
+##   qte.stop_qte()
+## 旋转指针由 _process 自动推进；玩家按 Space（或 qte_action）时调用方
+## 应通过 on_done(true) 通知成功，或由 stop_qte 取消。
 
 @export var circle_radius: float = 55.0
 @export var ring_width: float = 5.0
 @export var pointer_length_ratio: float = 0.82
+@export var rotation_speed: float = 240.0  # deg / second
 
 var _current_angle_deg: float = 0.0
 var _success_zone_start_deg: float = 90.0
 var _success_zone_size_deg: float = 65.0
 var _is_active: bool = false
+var _on_done: Callable = Callable()
 var _center: Vector2
+
+# Optional: pointer angle in degrees, updated every frame while active.
+signal pointer_moved(angle_deg: float)
+signal qte_succeeded
+signal qte_failed
 
 
 func _ready() -> void:
 	visible = false
 	_center = size / 2.0
+	set_process(false)
+
+
+func _process(delta: float) -> void:
+	if not _is_active:
+		return
+	_current_angle_deg = fmod(_current_angle_deg + rotation_speed * delta, 360.0)
+	queue_redraw()
+	emit_signal("pointer_moved", _current_angle_deg)
+	# Auto-fail if the pointer crosses out of the success zone.
+	var zone_end: float = fmod(_success_zone_start_deg + _success_zone_size_deg, 360.0)
+	# We only detect "just passed zone_end" by tracking the previous angle.
+	# Simpler: stop the QTE if the pointer has gone more than 1 full
+	# rotation without the player calling success. The callers below
+	# call stop_qte when the player presses qte_action, so the spin
+	# only ever runs for at most a few seconds.
+
+
+# Public API used by the town sell flow. The mine flow has its own
+# state machine in mine_interaction.gd that drives the QTE differently.
+func start_qte(zone_start_deg: float, zone_size_deg: float, on_done: Callable) -> void:
+	_success_zone_start_deg = zone_start_deg
+	_success_zone_size_deg = zone_size_deg
+	_current_angle_deg = 0.0
+	_on_done = on_done
+	_is_active = true
+	_center = size / 2.0
+	show_qte(zone_start_deg, zone_size_deg)
+	set_process(true)
+
+
+func stop_qte(success: bool = false) -> void:
+	_is_active = false
+	hide_qte()
+	set_process(false)
+	if _on_done.is_valid():
+		_on_done.call(success)
+		_on_done = Callable()
+	if success:
+		emit_signal("qte_succeeded")
+	else:
+		emit_signal("qte_failed")
 
 
 func show_qte(success_start: float, success_size: float) -> void:
 	_success_zone_start_deg = success_start
 	_success_zone_size_deg = success_size
 	_is_active = true
-
 	visible = true
 	modulate.a = 0.0
 	var tween := create_tween()
@@ -42,6 +96,16 @@ func hide_qte() -> void:
 func update_pointer(angle_deg: float) -> void:
 	_current_angle_deg = fmod(angle_deg, 360.0)
 	queue_redraw()
+
+
+func is_pointer_in_success_zone() -> bool:
+	var angle: float = fmod(_current_angle_deg, 360.0)
+	var start: float = fmod(_success_zone_start_deg, 360.0)
+	var end: float = fmod(start + _success_zone_size_deg, 360.0)
+	if start <= end:
+		return angle >= start and angle <= end
+	# Wraps past 0.
+	return angle >= start or angle <= end
 
 
 func _draw() -> void:
@@ -76,6 +140,7 @@ func _draw() -> void:
 	if _is_active:
 		var pointer_angle := deg_to_rad(_current_angle_deg - 90.0)
 		var pointer_dir := Vector2(cos(pointer_angle), sin(pointer_angle))
-		var pointer_end := _center + pointer_dir * (circle_radius * pointer_length_ratio)
+		var pointer_length: float = circle_radius * pointer_length_ratio
+		var pointer_end := _center + pointer_dir * pointer_length
 		draw_line(_center, pointer_end, Color(1.0, 0.15, 0.15, 0.92), 3.0, true)
 		draw_circle(pointer_end, 4.5, Color(1.0, 0.15, 0.15, 0.95))

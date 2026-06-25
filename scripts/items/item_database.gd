@@ -33,6 +33,17 @@ func get_stack_key(type: String, data: Dictionary) -> String:
 		return "gem_L%d" % int(data.get("level", 1))
 	return type
 
+## 描述:从 GameRuntime.catalog 读取(不持有本地副本)。
+## Fallback 返回空字符串,ItemDatabase 永远不该自己写描述。
+func get_description(item_id: String) -> String:
+	if item_id.is_empty():
+		return ""
+	var runtime: Node = get_node_or_null("/root/GameRuntime")
+	if runtime != null and runtime.get("catalog") != null:
+		var item: Dictionary = runtime.get("catalog").get_item(item_id)
+		return str(item.get("description", ""))
+	return ""
+
 func get_icon(type: String, data: Dictionary) -> Texture2D:
 	if type == "gem":
 		var lvl: int = int(data.get("level", 1))
