@@ -16,6 +16,7 @@ Important scenes:
 
 - `GameRuntime`: creates and owns the live catalog, event bus, inventory, wallet, RNG, transaction service, identification service, negotiation service, shop service, and task service.
 - `NoiseSystem`: shared noise event system used by movement, mining, and enemy detection.
+- `OxygenSystem`: carry-on oxygen tank consumed in mine scenes. Consumption rate is base_rate × state_multiplier × weight_multiplier. Depletion triggers HP drain; mine death clears inventory and returns to town.
 - `ItemDatabase`: compatibility item icon, stack limit, display-name, and stack-key helper for the hotbar/inventory UI.
 - `MCPScreenshot`, `MCPInputService`, `MCPGameInspector`: Godot MCP helper autoloads from `addons/godot_mcp`.
 
@@ -57,6 +58,7 @@ Because `GameRuntime` is an autoload, wallet, inventory, event history, task pro
 
 ## Known Architecture TODOs
 
+- [ ] **Oxygen System**: Added `OxygenSystem` autoload, `OxygenBar` UI, and `OxygenPump` interactable. See [specs/oxygen_system.md](specs/oxygen_system.md).
 - TODO: Document the intended save/load or persistence model. Current runtime state is session-local.
 - TODO: Decide whether `addons/godot_mcp` is vendor-managed, manually maintained, or periodically refreshed.
 - TODO: Clarify the long-term product/gameplay direction before adding large new systems.

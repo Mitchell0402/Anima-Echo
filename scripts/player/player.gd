@@ -106,6 +106,34 @@ func die() -> void:
 	died.emit()
 	print("[Player] 💀 死亡")
 
+	# 播放死亡动画，延迟后回城
+	_play_death_animation()
+	get_tree().create_timer(1.8).timeout.connect(_on_death_transition)
+
+
+func _play_death_animation() -> void:
+	var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D")
+	if sprite == null or sprite.sprite_frames == null:
+		return
+	var dir: String = "f"
+	var current: String = sprite.animation
+	var parts: PackedStringArray = current.split("_")
+	if parts.size() >= 2:
+		dir = parts[-1]
+	var death_anim: String = "death_" + dir
+	if sprite.sprite_frames.has_animation(death_anim):
+		sprite.play(death_anim)
+
+
+func _on_death_transition() -> void:
+	var oxygen: Node = get_node_or_null("/root/OxygenSystem")
+	if oxygen and oxygen.has_method("is_in_mine_scene") and oxygen.is_in_mine_scene():
+		var runtime: Node = get_node_or_null("/root/GameRuntime")
+		if runtime and runtime.get("inventory") and runtime.get("inventory").has_method("clear"):
+			runtime.get("inventory").clear()
+			print("[Player] 背包已清空，返回城镇")
+		get_tree().change_scene_to_file("res://scenes/town/mining_town.tscn")
+
 ## 由移动控制器每帧驱动：返回当前击退速度；衰减并在计时结束后回到 FREE。
 ## 返回 true 表示仍在受击中。死亡时立即结束受击驱动。
 func tick_hurt(delta: float, decel: float) -> bool:
