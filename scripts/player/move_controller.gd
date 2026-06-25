@@ -31,6 +31,11 @@ func _physics_process(delta: float) -> void:
 		body.tick_hurt(delta, HURT_DECEL)
 		return
 
+	# 死亡：停止移动、不覆盖动画（保留 death 动画播放）
+	if body.has_method("is_dead") and body.is_dead():
+		body.velocity = Vector2.ZERO
+		return
+
 	# 被锁定（挖矿/躲藏）时停止移动，但仍保持脚本运行
 	if body.has_method("can_move") and not body.can_move():
 		body.velocity = Vector2.ZERO

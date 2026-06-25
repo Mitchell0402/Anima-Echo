@@ -17,5 +17,8 @@
 - Task: Catalog-defined objective/reward entry managed by `TaskService`.
 - NoiseSystem: Shared event system used to communicate player noise to enemy AI.
 - WeightSystem: Autoload that calculates total backpack weight from raw geodes in GameRuntime.inventory and determines encumbrance tier (Light/Heavy/Overload), affecting speed and noise.
+- OxygenSystem: Autoload carry-on oxygen tank. Consumed in mine scenes at variable rates by activity state and weight tier. Depletion causes HP drain. Death in mine triggers inventory clear and town return.
+- OxygenPump: One-shot interactable placed in mine scenes. Player presses E nearby to fully refill oxygen.
+- OxygenBar: Player-attached Node2D UI bar showing current oxygen percentage with color gradient (blue → yellow → red) and flashing low-oxygen warning.
 - InventoryManager: Player-attached node that mirrors the first 12 runtime inventory slots for the hotbar UI. `is_full()` and stack-size lookups proxy through to `GameRuntime.inventory` so the local view cannot disagree with the source of truth. Holds `unlocked_slots` (cosmetic, drives the lock-icon UI for slots 9-12).
 - Godot MCP: Editor/runtime helper addon under `addons/godot_mcp`.

@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://cp1iehu7h26yi" path="res://assets/mine/environment/2D_Top_Down_Cave_Tileset.png" id="11_tileset"]
 [ext_resource type="Script" uid="uid://cmm5vxys2ey2q" path="res://scripts/town/mine_exit.gd" id="12_mine_exit"]
 [ext_resource type="Texture2D" uid="uid://dsqmmmqhit2ar" path="res://assets/props/minecart_return_to_town.png" id="13_minecart_sprite"]
+[ext_resource type="PackedScene" path="res://scenes/mine/oxygen_pump.tscn" id="14_oxygen_pump"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pi18e"]
 texture = ExtResource("11_tileset")
@@ -123,6 +124,9 @@ position = Vector2(1764, 650)
 
 [node name="SmallMine5" parent="." unique_id=579606295 instance=ExtResource("2_cpwdd")]
 position = Vector2(2467, 662)
+
+[node name="OxygenPump" parent="." unique_id=1928374651 instance=ExtResource("14_oxygen_pump")]
+position = Vector2(1900, 800)
 
 [node name="MinecartExit" type="Node2D" parent="." unique_id=2117143751]
 position = Vector2(816, 756)

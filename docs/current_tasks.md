@@ -11,6 +11,7 @@ Last updated: 2026-06-24
 - The project has a normalized layout under `assets/`, `data/`, `docs/`, `scenes/`, `scripts/`, and `tests/`.
 - The runtime economy core is already present under `scripts/core` and `scripts/economy`.
 - **Weight System**: 3-tier encumbrance (Light/Heavy/Overload) based on raw geode weight, with speed and noise penalties. [Spec](specs/weight_system.md)
+- **Oxygen System**: Carry-on oxygen tank consumed in mine scenes. 3.0× drain while mining, 2.0× while running, 0.5× while hidden. Weight multiplier 1.3/1.7 from WeightSystem. Depletion → HP drain → mine death → inventory clear + return to town. OxygenPump interactable placed in test scene. [Spec](specs/oxygen_system.md)
 - **Doc/Scene/Service Drift**: Three silent inconsistencies (main scene, town scene script reference, `CustomerShopService.list_customers()`) are fixed by the `[codex/fix-doc-scene-drift]` branch and locked down with four new regression tests. [Decision](../decisions/0001-fix-doc-scene-drift.md)
 - **Inventory Consistency**: `InventoryManager.is_full()` and `ItemDatabase.get_stack_limit` now proxy through to `GameRuntime.inventory` and `GameRuntime.catalog` instead of holding a local 8-slot fiction or a parallel constant table. See [Decision](../decisions/0002-inventory-consistency.md).
 
