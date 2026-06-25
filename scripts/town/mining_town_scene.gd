@@ -424,7 +424,7 @@ func _identify_item(item_id: String) -> void:
 func _sell_item(item_id: String) -> void:
 	if _runtime == null:
 		return
-	var result: Dictionary = _runtime.get("shop_service").sell_to_customer("buyer_blacksmith", item_id, 1, {"timing": "good"})
+	var result: Dictionary = _runtime.get("shop_service").sell_to_customer("buyer_blacksmith", item_id, 1, {"timing": "normal"})
 	if result.get("ok", false):
 		var total: int = int(result.get("total_price", 0))
 		_show_toast("已出售 %s +%d 铜板" % [item_id, total])
@@ -436,13 +436,14 @@ func _sell_item(item_id: String) -> void:
 	_close_popup()
 
 
-# Direct-sell path: skip the QTE, use the "good" timing bonus (1.08x)
-# plus the standard variance (~0.96-1.04). Net effect: the player gets
-# something close to the base price with no risk.
+# Direct-sell path: skip the QTE, sell at the catalog base_price plus the
+# standard variance (~0.96-1.04). "normal" timing maps to 1.0x in
+# NegotiationService._timing_bonus; the variance alone produces the
+# final price.
 func _sell_item_direct(item_id: String) -> void:
 	if _runtime == null:
 		return
-	var result: Dictionary = _runtime.get("shop_service").sell_to_customer("buyer_blacksmith", item_id, 1, {"timing": "good"})
+	var result: Dictionary = _runtime.get("shop_service").sell_to_customer("buyer_blacksmith", item_id, 1, {"timing": "normal"})
 	_apply_sell_result(item_id, result)
 
 
@@ -456,7 +457,7 @@ func _sell_item_negotiate(item_id: String) -> void:
 	# generic one and add it to the town scene root.
 	var qte := _ensure_town_qte()
 	if qte == null:
-		# Fallback: sell at the good timing if we cannot build a QTE.
+		# Fallback: sell at base price if we cannot build a QTE.
 		_sell_item_direct(item_id)
 		return
 	# Pop the popup so the QTE is the only thing on screen.

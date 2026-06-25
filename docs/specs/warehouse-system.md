@@ -43,9 +43,13 @@ This separates "what I took into the mine" from "what I have at home", which is 
   - The popup can be closed with the existing "离开" button.
 - [ ] **Buyer NPC** popup shows the same symmetric warehouse window:
   - Title: "出售矿物".
-  - Body: same 6x8 grid, filtered to items the buyer's `preferred_tags` and `rejected_tags` accept.
-  - Hover tooltip shows `base_price` (from catalog). On click, the actual negotiated price is shown in a confirm dialog ("以 X 铜板卖给 Blacksmith Rowan?"), and the player confirms by pressing the same key. Pressing it applies `CustomerShopService.sell_to_customer(buyer_id, item_id, 1)`.
+  - Body: same grid, filtered to items the buyer's `preferred_tags` and `rejected_tags` accept.
+  - Hover tooltip shows `base_price` (from catalog). On click, the picker advances to a sell-mode popup with two options:
+    1. **直接卖** — sell at `base_price * variance` where `variance` is a single random factor in `[0.96, 1.04]`. No QTE, no risk.
+    2. **讨价还价（QTE）** — pop a QTE circle (same visuals as the mine mining QTE). On success the sale closes with `timing = perfect` (+18% over `base_price`); on failure `timing = bad` (-15% under `base_price`). The QTE result feeds straight into `CustomerShopService.sell_to_customer(buyer_id, item_id, 1, {timing: ...})`.
+  - Pressing it applies `CustomerShopService.sell_to_customer(buyer_id, item_id, 1)`. The toast reports the final amount, never the base price.
   - If the buyer has no remaining budget, every item in the grid is greyed out with the tooltip `"商人已无预算"`. The click does nothing.
+  - The direct-sell price must be **at most `base_price * 1.04`** (the high end of the variance) so the player can never do better by skipping the QTE than by succeeding it. This is a hard correctness rule: `timing = normal` maps to 1.0x in `NegotiationService._timing_bonus`, so the price is exactly `base_price * variance`.
 - [ ] **Task Clerk NPC** popup lists only the active tasks whose `requirements` are currently satisfied by the warehouse. Each task is a focusable row: name, brief description, and a `交付` button (or Enter on the focused row).
   - Pressing Enter or clicking `交付` calls `TaskService.deliver_items(task_id)` then `TaskService.claim_reward(task_id)`. On success a toast appears `"获得 ... +N 铜板"` and the row disappears from the popup.
   - Tasks that are not currently deliverable are still visible but greyed. They can be focused (so the player can read the tooltip explaining what is missing) but Enter on them does nothing. They do not show a `交付` button.

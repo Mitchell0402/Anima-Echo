@@ -44,12 +44,23 @@ func _preferred_bonus(item_tags: Array, preferred_tags: Array) -> float:
 	return 1.0
 
 
+# Timing multiplier on top of the base price. "normal" is the
+# default path used by the direct-sell button (no QTE, no
+# negotiation). "perfect" is the bonus the QTE gives on success
+# and "bad" is the discount it gives on failure.
 func _timing_bonus(timing: String) -> float:
 	match timing:
 		"perfect":
 			return 1.18
 		"good":
-			return 1.08
+			# Kept for backward compatibility: "good" used to mean
+			# 1.08x. The direct-sell path now passes "normal" so the
+			# 1.08x branch is no longer reached; map "good" to 1.0x
+			# so any future caller that still says "good" gets the
+			# expected base price instead of an unexplained 8% bonus.
+			return 1.0
+		"normal":
+			return 1.0
 		"bad":
 			return 0.85
 		_:

@@ -153,6 +153,59 @@ Be careful with:
 
 Avoid unnecessary scene rewrites. Do not re-save or reformat unrelated scenes.
 
+### `project.godot` is special: do not rewrite the whole file
+
+`project.godot` is a plain-text file but Godot 4 owns the format. The editor rewrites it on every save, and its rewriting rules are stricter than the file format allows. Three concrete things happen if you overwrite the whole file with `write_file` or a `patch` that touches unrelated sections:
+
+- **The editor deletes keys it does not recognise.** Forgetting one
+  parameter (for example `window/size/viewport_width=1280`) causes
+  the editor to fall back to the default. The town then renders at
+  1152×648 even though the code and the rest of the file still
+  assume 1280×720 — the player is in the wrong place, NPCs are out
+  of range, and pressing `E` does nothing because
+  `town_npc_interactor._nearby_npc_id` is empty.
+- **The editor drops "unused" sections on save.** `[physics]`,
+  `[rendering]/renderer/rendering_method`, and any custom keys that
+  are not in the editor's known set get removed the next time the
+  project is opened and saved. This is silent and not in the diff
+  you just made.
+- **The editor compresses a comment block and a setting onto the
+  same line** when the section has been touched. The diff shows a
+  single long line that mixes `# Pixel-perfect...` with
+  `window/size/viewport_width=1280` and breaks readability.
+
+Hard rules:
+
+- Prefer targeted `patch` calls that add or change a single key
+  over `write_file` rewrites. The smaller the diff, the less the
+  editor has to clean up later.
+- When you must add a new key to `project.godot`, place it inside
+  the correct section with a `patch` rather than re-typing the
+  file. The existing file already has the sections the editor
+  expects, in the order it expects.
+- If a previous `write_file` rewrite has mangled the file, fix the
+  specific missing key (for example
+  `window/size/viewport_width=1280`,
+  `window/stretch/aspect="keep"`, `[physics]/3d/default_gravity=9.8`,
+  `[rendering]/renderer/rendering_method="forward_plus"`) instead
+  of writing the file again. Re-rewriting the same sections the
+  editor rewrote is what got us into trouble in the first place.
+- After any change to `project.godot`, run the project's smoke
+  command and confirm the player can still walk to an NPC and
+  trigger the interaction popup. This catches a missing
+  `viewport_width` before the bug lands.
+- After any change to `[input]`, the `physical_keycode` values are
+  also a common source of bugs. The `InputEventKey` record is a
+  long, comma-separated object literal; copy-pasting one record
+  into another action is easy to miss and silently binds the wrong
+  key. Confirm the mapping with `InputMap.action_get_events(act)`
+  in a `play_scene` runtime probe: the physical keycode must match
+  the action's intent (`A=65`, `D=68`, `E=69`, `I=73`, `S=83`,
+  `W=87`). Prefer `set_project_setting` or the `set_input_action`
+  MCP tool over hand-editing the record; both will fail loudly if
+  the keycode is wrong rather than silently binding to the wrong
+  key.
+
 Prefer modular systems:
 
 * UI should call service/module APIs instead of directly mutating unrelated state.
