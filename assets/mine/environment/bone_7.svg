@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="115" height="42" viewBox="0 0 115 42" shape-rendering="crispEdges">
+  <ellipse cx="57.50" cy="36.54" rx="43.70" ry="2.94" fill="#00000055"/>
+  <line x1="20.70" y1="14.70" x2="89.70" y2="18.06" stroke="#d6c9a0" stroke-width="3" stroke-linecap="square"/>
+  <line x1="29.90" y1="18.90" x2="85.10" y2="22.26" stroke="#d6c9a0" stroke-width="3" stroke-linecap="square"/>
+  <line x1="39.10" y1="23.10" x2="80.50" y2="26.46" stroke="#d6c9a0" stroke-width="3" stroke-linecap="square"/>
+</svg>
