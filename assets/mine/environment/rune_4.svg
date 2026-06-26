@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="79" height="68" viewBox="0 0 79 68" shape-rendering="crispEdges">
-  <ellipse cx="39.50" cy="59.16" rx="30.02" ry="4.76" fill="#00000055"/>
-  <polygon points="17.38,12.24 61.62,14.96 55.30,55.76 22.12,53.04" fill="#6f6863" stroke="#2d1d18" stroke-width="2"/>
-  <line x1="30.02" y1="24.48" x2="47.40" y2="42.16" stroke="#e0b64b" stroke-width="4" stroke-linecap="square"/>
-  <line x1="47.40" y1="24.48" x2="30.02" y2="42.16" stroke="#e0b64b" stroke-width="4" stroke-linecap="square"/>
-</svg>

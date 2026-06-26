@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="78" viewBox="0 0 100 78" shape-rendering="crispEdges">
-  <ellipse cx="50.00" cy="67.86" rx="38.00" ry="5.46" fill="#00000055"/>
-  <polygon points="23.00,35.10 45.00,28.86 57.00,42.90 41.00,54.60 21.00,49.14" fill="#a79b8f" stroke="#2d1d18" stroke-width="2"/>
-  <polygon points="51.00,35.10 73.00,28.86 85.00,42.90 69.00,54.60 49.00,49.14" fill="#6f6863" stroke="#2d1d18" stroke-width="2"/>
-  <polygon points="19.00,46.02 41.00,39.78 53.00,53.82 37.00,65.52 17.00,60.06" fill="#a79b8f" stroke="#2d1d18" stroke-width="2"/>
-  <polygon points="50.00,46.02 72.00,39.78 84.00,53.82 68.00,65.52 48.00,60.06" fill="#6f6863" stroke="#2d1d18" stroke-width="2"/>
-</svg>

@@ -1,22 +1,15 @@
 # Visual Assets
 
-The repository tracks every visual asset the game needs to draw so an
-asset-generation AI or vector-art workflow can produce the missing ones
-in a coherent style.
+The repository tracks every image the game needs to draw so an
+asset-generation AI can produce the missing ones in a coherent style.
 The game itself is a 2D top-down pixel prototype, so every asset
 falls into one of two categories:
 
 - **World art** (sprites, tiles, environments) that the player sees
   in the scene. Lives under `assets/`.
 - **UI art** (icons, panels, buttons) that the menus draw. Lives
-  under `assets/ui/`.
-
-The project is now **vector-source first**. The canonical editable
-asset should be an SVG or another committed vector source. PNG files
-are runtime/export artifacts for Godot compatibility, import caching,
-and pixel-perfect preview. A generated PNG without a vector source can
-be used as a temporary visual reference, but it is not considered a
-finished long-term source asset.
+  under `assets/ui/` (this directory does not exist yet — it is the
+  default landing spot for new UI assets).
 
 The companion inventory list is `docs/visual_assets/inventory.md`.
 That file is the **single source of truth** for "what is implemented
@@ -29,26 +22,21 @@ These rules apply to every visual asset in the repository. They are
 also the first thing a reviewer should check before any new asset is
 loaded by the game.
 
-1. **Every asset has a vector source.** New or regenerated assets
-   commit an editable vector source such as `foo.svg`. If Godot needs
-   a raster texture, export `foo.png` from that vector source and keep
-   both files together.
-2. **Every runtime PNG has a sidecar metadata file.** A `foo.png`
-   lives next to a `foo.png.meta.md` in the same directory. The
-   sidecar names the vector source, export target, and everything an
-   AI generator, a reviewer, or a future code change would need to
-   know about the asset.
-3. **Review the metadata before loading the asset.** A code change
+1. **Every asset has a sidecar metadata file.** A `foo.png` lives
+   next to a `foo.png.meta.md` in the same directory. The sidecar
+   describes everything an AI generator, a reviewer, or a future
+   code change would need to know about the asset.
+2. **Review the metadata before loading the asset.** A code change
    that adds a new `load()` / `preload()` for a visual asset must
    cite the asset's metadata file in the code review and confirm
    the file's status, palette, and intended use match the new use
    site.
-4. **The inventory is canonical.** Every asset on disk appears in
+3. **The inventory is canonical.** Every asset on disk appears in
    `docs/visual_assets/inventory.md`. The inventory's status must
    match what is on disk: an `implemented` row whose file is missing,
    or a `todo` row whose file already exists, both break the
    contract. A reviewer should reject either.
-5. **Existing assets must be audited and graded.** The first pass on
+4. **Existing assets must be audited and graded.** The first pass on
    this document also re-examines every `assets/**/*.png` already
    in the repository, gives each one a metadata sidecar, and
    assigns it a status (`implemented` / `placeholder` / `obsolete`).
@@ -57,10 +45,10 @@ loaded by the game.
 
 ## Naming convention
 
-Every visual source asset follows this structure:
+Every visual asset follows this structure:
 
 ```
-assets/<category>/<sub-category>/<name>_<state>[_<variant>].svg
+assets/<category>/<sub-category>/<name>_<state>[_<variant>].png
 ```
 
 - `<category>` is one of `mine/`, `town/`, `props/`, `ui/`.
@@ -75,23 +63,23 @@ assets/<category>/<sub-category>/<name>_<state>[_<variant>].svg
 
 Examples (existing):
 
-- `assets/town/npcs/npc_miner_sprites.svg` — desired vector source.
-- `assets/town/npcs/npc_miner_sprites.png` — runtime export.
+- `assets/mine/characters/player/Sword_Walk_with_shadow.png`
+- `assets/mine/enemies/gnoll/Gnoll1_Attack_with_shadow.png`
+- `assets/town/npcs/npc_miner_sprites.png`
 
 Examples (planned, not yet drawn):
 
-- `assets/ui/icons/raw_common_geode.svg` — the warehouse slot icon
+- `assets/ui/icons/raw_common_geode.png` — the warehouse slot icon
   for a tier-1 raw geode.
-- `assets/ui/icons/copper_nugget.svg` — the warehouse slot icon for
+- `assets/ui/icons/copper_nugget.png` — the warehouse slot icon for
   the equivalent mineral.
 
 ## Sidecar metadata
 
-Every runtime PNG has a sidecar `<same-name>.png.meta.md` next to it.
-The sidecar is required for `implemented` and `placeholder` assets; it
-is optional but recommended for `todo` assets (the AI/vector generator
-can read it as a brief). For vector-first assets, the sidecar records
-the editable source path and the exported runtime path.
+Every PNG has a sidecar `<same-name>.png.meta.md` next to it. The
+sidecar is required for `implemented` and `placeholder` assets; it
+is optional but recommended for `todo` assets (the AI generator can
+read it as a brief).
 
 Required fields for `implemented` and `placeholder` assets:
 
@@ -105,11 +93,6 @@ Required fields for `implemented` and `placeholder` assets:
     model (e.g. `ai-generated:midjourney-v6`).
   - `asset-library:<source>` for art imported from a third-party
     library (e.g. `asset-library:opengameart/cave-tileset`).
-- **`vector-source`** — path to the canonical editable vector file,
-  usually the sibling `.svg`. Use `missing` only for legacy or
-  temporary raster references that are waiting to be redrawn.
-- **`runtime-export`** — path to the exported `.png` Godot loads.
-  This is normally the sidecar's sibling PNG.
 - **`license`** — the licence under which the asset is distributed.
   - `CC0` for public domain.
   - `CC-BY-4.0` or `CC-BY-SA-4.0` for Creative Commons with
@@ -144,21 +127,9 @@ The look of Anima Echo is a soft pixel-art top-down view at a single
 display zoom. Every asset must follow these rules so the AI outputs
 stay consistent and drop-in compatible:
 
-- **Renovation direction**: the next static-art and UI pass targets a
-  warm cozy top-down pixel RPG mood: parchment and wood UI surfaces,
-  readable chunky silhouettes, earthy mine colors, restrained mineral
-  glows, and a friendly farming-town feel. Use this as mood guidance,
-  not as permission to copy Stardew Valley's exact assets, UI, map
-  layout, palette, or characters. The detailed backlog is in
-  `docs/specs/visual-renovation-plan.md`.
-
 - **Resolution**: 64×64 px per character and 32×32 px per tile or
   icon by default. UI icons are 48×48 px. Larger source art is fine
   if the import scale is documented in the sidecar `style-notes`.
-- **Vector source**: author assets as SVG/vector shapes with deliberate
-  flat color regions, hard pixel-aligned edges, and no blur-heavy
-  effects. Export PNGs at the exact runtime size or atlas size the
-  scene expects. Keep SVG and PNG visually identical.
 - **Filter**: `TEXTURE_FILTER_NEAREST` is set in code. **Do not**
   add bilinear or trilinear filtering to the source PNG. Keep
   crisp pixel edges.
@@ -175,26 +146,18 @@ stay consistent and drop-in compatible:
 
 ## Generation workflow
 
-The current first-pass static vector batch is generated by
-`scripts/tools/generate_vector_assets.py`. Use that script as the
-manifest for batch-owned placeholder assets; if a generated asset is
-refined, keep the SVG source, PNG export, sidecar, and generator data in
-sync.
-
 1. The dev adds a row to `inventory.md` with:
    - the asset's stable name
    - the category / sub-category
    - a one-line description
    - the status (`todo`, `placeholder`, `implemented`)
    - the target file path it will live at
-2. A vector-art workflow reads `inventory.md` plus this file and
-   draws the missing rows as SVG/vector sources. An image-generation
-   output may be used as a reference, but the committed source asset
-   must still be vector.
-3. The dev drops the new vector source and exported runtime PNG at the
-   target paths **alongside the sidecar metadata file** and flips the
-   row's status to `implemented`. The sidecar must be filled in before
-   the status change is committed.
+2. An external image-generation AI reads `inventory.md` plus this
+   file and draws the missing rows.
+3. The dev drops the new file at the target path **alongside its
+   sidecar metadata file** and flips the row's status to
+   `implemented`. The sidecar must be filled in before the status
+   change is committed.
 4. A reviewer runs the inventory check (see below) and confirms
    every new asset has a sidecar with all required fields.
 5. Any code that should display the asset (warehouse UI, NPC

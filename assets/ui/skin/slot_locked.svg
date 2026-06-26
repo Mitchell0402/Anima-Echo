@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" shape-rendering="crispEdges">
-  <rect x="0.00" y="0.00" width="64.00" height="64.00" fill="#4a2c1d" stroke="#2d1d18" stroke-width="2"/>
-  <rect x="4.00" y="4.00" width="56.00" height="56.00" fill="#d8b878" stroke="#b8793a" stroke-width="1"/>
-  <rect x="17.92" y="26.88" width="28.16" height="21.12" fill="#3f3938" stroke="#2d1d18" stroke-width="2"/>
-  <ellipse cx="32.00" cy="25.60" rx="10.24" ry="11.52" fill="none" stroke="#2d1d18" stroke-width="3"/>
-</svg>
