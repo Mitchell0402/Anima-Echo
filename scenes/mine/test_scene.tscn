@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://cmm5vxys2ey2q" path="res://scripts/town/mine_exit.gd" id="12_mine_exit"]
 [ext_resource type="Texture2D" uid="uid://dsqmmmqhit2ar" path="res://assets/props/minecart_return_to_town.png" id="13_minecart_sprite"]
 [ext_resource type="PackedScene" path="res://scenes/mine/oxygen_pump.tscn" id="14_oxygen_pump"]
+[ext_resource type="Script" path="res://scripts/ui/mine_vignette.gd" id="15_vignette"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pi18e"]
 texture = ExtResource("11_tileset")
@@ -143,3 +144,6 @@ offset_top = -92.0
 offset_right = 64.0
 offset_bottom = -69.0
 text = "E 搭矿车回城"
+
+[node name="Vignette" type="Node" parent="."]
+script = ExtResource("15_vignette")

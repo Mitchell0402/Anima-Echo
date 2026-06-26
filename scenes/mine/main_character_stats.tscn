@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://cx5yqnxku4w6p" path="res://scripts/ui/hotbar_ui.gd" id="8_hotbar"]
 [ext_resource type="Script" uid="uid://bxwk6sqh20na3" path="res://scripts/ui/oxygen_bar.gd" id="9_oxygenbar"]
 [ext_resource type="Script" uid="uid://cpjxlhubu518c" path="res://scripts/ui/weight_bar.gd" id="10_weightbar"]
+[ext_resource type="Script" path="res://scripts/player/trail_effect.gd" id="11_trail"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1paeb"]
 radius = 62.0
@@ -55,6 +56,7 @@ position = Vector2(0, -340)
 script = ExtResource("7_healthbar")
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=421629968]
+layer = 2
 
 [node name="Hotbar" type="Control" parent="HUD" unique_id=1963785497]
 layout_mode = 3
@@ -77,3 +79,6 @@ layout_mode = 3
 anchors_preset = 0
 mouse_filter = 2
 script = ExtResource("10_weightbar")
+
+[node name="TrailEffect" type="Node2D" parent="."]
+script = ExtResource("11_trail")
