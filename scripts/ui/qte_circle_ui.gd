@@ -65,9 +65,12 @@ func stop_qte(success: bool = false) -> void:
 	_is_active = false
 	hide_qte()
 	set_process(false)
-	if _on_done.is_valid():
-		_on_done.call(success)
-		_on_done = Callable()
+	# Save and clear the callback before invoking it, so that a re-entrant
+	# call to stop_qte from within the callback does not recurse infinitely.
+	var cb := _on_done
+	_on_done = Callable()
+	if cb.is_valid():
+		cb.call(success)
 	if success:
 		emit_signal("qte_succeeded")
 	else:

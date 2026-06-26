@@ -489,8 +489,8 @@ func _apply_sell_result(item_id: String, result: Dictionary) -> void:
 func _on_sell_qte_finished(success: bool) -> void:
 	var item_id: String = _qte_pending_item_id
 	_qte_pending_item_id = ""
-	if _qte_circle != null and is_instance_valid(_qte_circle):
-		_qte_circle.stop_qte()
+	# stop_qte already called this callback and has already performed the
+	# teardown.  Avoid re-entrant calls; just release the reference.
 	_qte_circle = null
 	if item_id.is_empty() or _runtime == null:
 		return
