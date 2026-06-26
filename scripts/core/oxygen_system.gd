@@ -5,16 +5,16 @@ extends Node
 ## 消耗率 = base_rate × state_multiplier × weight_multiplier。
 ## 氧气耗尽后渐进扣血，致死回城由 player.die() 处理。
 
-@export var tank_capacity: float = 100.0
-@export var base_rate: float = 1
+@export var tank_capacity: float = 200.0
+@export var base_rate: float = 0.7
 @export var suffocation_dps: float = 8.0
 
 const STATE_MULT := {
 	"idle": 1.0,
 	"walk": 1.0,
-	"run": 2.0,
-	"mining": 3.0,
-	"hidden": 0.5,
+	"run": 1.8,
+	"mining": 2.0,
+	"hidden": 0.4,
 	"hurt": 1.0,
 	"dead": 0.0,
 }

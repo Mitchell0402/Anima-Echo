@@ -4,15 +4,17 @@ const SEGMENT_HP: float = 1.0
 const MIN_SEGMENTS: int = 2
 const MAX_SEGMENTS: int = 4
 
-# ✅ 原石场景路径（编辑器中可拖入 .tscn 文件）
+# 原石场景路径（编辑器中可拖入 .tscn 文件）
 @export var gem_l1_scene: PackedScene
 @export var gem_l2_scene: PackedScene
 @export var gem_l3_scene: PackedScene
+@export var gem_l4_scene: PackedScene
 
-# ✅ 爆率配置（在编辑器中可调，加起来建议等于100）
+# 爆率配置（在编辑器中可调，加起来建议等于100）
 @export var drop_rate_l1: float = 70.0
 @export var drop_rate_l2: float = 20.0
 @export var drop_rate_l3: float = 10.0
+@export var drop_rate_l4: float = 0.0
 
 # ✅ 幸运值：每个段完成后额外爆出一个原石的概率
 @export var luck: float = 0.0  # 0.0~1.0，例如 0.1 = 10% 概率额外爆一个
@@ -65,8 +67,10 @@ func _roll_gem_level() -> int:
 		return 1
 	elif roll < drop_rate_l1 + drop_rate_l2:
 		return 2
-	else:
+	elif roll < drop_rate_l1 + drop_rate_l2 + drop_rate_l3:
 		return 3
+	else:
+		return 4
 
 func _get_gem_scene(level: int) -> PackedScene:
 	match level:
@@ -76,6 +80,8 @@ func _get_gem_scene(level: int) -> PackedScene:
 			return gem_l2_scene
 		3:
 			return gem_l3_scene
+		4:
+			return gem_l4_scene
 		_:
 			return gem_l1_scene
 

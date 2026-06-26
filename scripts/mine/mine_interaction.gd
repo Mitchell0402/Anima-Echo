@@ -4,7 +4,7 @@ extends Node
 ## 新增QTE机制：挖矿中随机弹出圆形指针QTE，按空格命中成功区获得进度加速，
 ## 失败则回退到上一段起点。
 
-@export var mining_speed: float = 0.2
+@export var mining_speed: float = 0.35
 
 # ---- QTE 配置 ----
 @export var qte_min_interval: float = 1.2       # QTE最短间隔（秒）
