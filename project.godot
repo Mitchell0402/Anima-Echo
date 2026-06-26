@@ -23,6 +23,7 @@ WeightSystem="*res://scripts/core/weight_system.gd"
 MCPScreenshot="*res://addons/godot_mcp/mcp_screenshot_service.gd"
 MCPInputService="*res://addons/godot_mcp/mcp_input_service.gd"
 MCPGameInspector="*res://addons/godot_mcp/mcp_game_inspector_service.gd"
+OxygenSystem="*res://scripts/core/oxygen_system.gd"
 
 [display]
 
@@ -32,17 +33,6 @@ window/stretch/scale_mode="integer"
 #Pixel-perfectdisplaymode.Godotkeepstheinternalviewportat#1280x720(worldcoordinates)andletterbox-scalesthewindowtofit.#`viewport`mode+`keep`aspectratio+`integer`scalemodearethe#2D-pixel-gamestandard(StardewValley,Celeste,Undertalepattern).#TheactualzoomischosenbyGameCamera2Dinscripts/camera_2d.gd.window/size/viewport_width=1280
 window/size/minimum_width=900
 window/size/minimum_height=600
-
-[autoload]
-
-NoiseSystem="*res://scripts/core/noise_system.gd"
-ItemDatabase="*res://scripts/items/item_database.gd"
-GameRuntime="*res://scripts/core/game_runtime.gd"
-WeightSystem="*res://scripts/core/weight_system.gd"
-OxygenSystem="*res://scripts/core/oxygen_system.gd"
-MCPScreenshot="*res://addons/godot_mcp/mcp_screenshot_service.gd"
-MCPInputService="*res://addons/godot_mcp/mcp_input_service.gd"
-MCPGameInspector="*res://addons/godot_mcp/mcp_game_inspector_service.gd"
 
 [editor_plugins]
 
@@ -97,4 +87,5 @@ pointing_emulation="off"
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 environment/defaults/default_clear_color=Color(0.337255, 0.337255, 0.337255, 1)

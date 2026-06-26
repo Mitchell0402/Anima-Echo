@@ -9,6 +9,7 @@ extends Node
 @onready var animated_sprite: AnimatedSprite2D = $"../AnimatedSprite2D"
 @onready var _noise: Node = get_node_or_null("/root/NoiseSystem")
 @onready var _weight: Node = get_node_or_null("/root/WeightSystem")
+@onready var _trail: Node = $"../TrailEffect"
 
 const WALK_SPEED_MULTIPLIER: float = 0.5  # 按住 walk 时速度倍率
 const HURT_DECEL: float = 1200.0          # 击退速度衰减
@@ -29,17 +30,20 @@ func _physics_process(delta: float) -> void:
 		body.move_and_slide()
 		_play_hurt_animation(body.hurt_velocity())
 		body.tick_hurt(delta, HURT_DECEL)
+		_stop_trail()
 		return
 
 	# 死亡：停止移动、不覆盖动画（保留 death 动画播放）
 	if body.has_method("is_dead") and body.is_dead():
 		body.velocity = Vector2.ZERO
+		_stop_trail()
 		return
 
 	# 被锁定（挖矿/躲藏）时停止移动，但仍保持脚本运行
 	if body.has_method("can_move") and not body.can_move():
 		body.velocity = Vector2.ZERO
 		handle_animation(Vector2.ZERO, false)
+		_stop_trail()
 		return
 
 	var input_dir := _to_cardinal_direction(Input.get_vector("left", "right", "up", "down"))
@@ -57,6 +61,12 @@ func _physics_process(delta: float) -> void:
 
 	body.move_and_slide()
 	handle_animation(input_dir, is_walking)
+
+	# 拖尾特效：移动时发射粒子，静止时停止
+	if input_dir != Vector2.ZERO:
+		_start_trail()
+	else:
+		_stop_trail()
 
 	# 慢走 2.5 / 跑步 15；躲藏或挖矿时不发声（can_move 已在上方 return）
 	if input_dir != Vector2.ZERO and _noise:
@@ -126,3 +136,13 @@ func update_animation() -> void:
 			animated_sprite.play(animation_name)
 	else:
 		print("动画不存在: ", animation_name)
+
+## 启动拖尾粒子发射
+func _start_trail() -> void:
+	if _trail and _trail.has_method("start_trail"):
+		_trail.start_trail()
+
+## 停止拖尾粒子发射
+func _stop_trail() -> void:
+	if _trail and _trail.has_method("stop_trail"):
+		_trail.stop_trail()
