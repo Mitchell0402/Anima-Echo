@@ -1,4 +1,4 @@
-[gd_scene format=4 uid="uid://cq8hfusdbalf6"]
+[gd_scene format=3 uid="uid://cq8hfusdbalf6"]
 
 [ext_resource type="PackedScene" uid="uid://b3e2t41ye5xky" path="res://scenes/mine/main_character_stats.tscn" id="1_38glm"]
 [ext_resource type="PackedScene" uid="uid://cbv3gcy6d6fg" path="res://scenes/mine/small_mine.tscn" id="2_cpwdd"]
@@ -7,12 +7,14 @@
 [ext_resource type="Texture2D" uid="uid://onck05b88au1" path="res://assets/mine/environment/decor_19.png" id="7_cy2ab"]
 [ext_resource type="Texture2D" uid="uid://cs11vim72xoab" path="res://assets/mine/environment/wall_1.png" id="8_r624d"]
 [ext_resource type="Texture2D" uid="uid://caxbcn853q86b" path="res://assets/mine/environment/wall_2.png" id="9_iobcs"]
-[ext_resource type="PackedScene" path="res://scenes/mine/cover.tscn" id="10_cy2ab"]
+[ext_resource type="PackedScene" uid="uid://d3gx76jdynysk" path="res://scenes/mine/cover.tscn" id="10_cy2ab"]
 [ext_resource type="Texture2D" uid="uid://cp1iehu7h26yi" path="res://assets/mine/environment/2D_Top_Down_Cave_Tileset.png" id="11_tileset"]
 [ext_resource type="Script" uid="uid://cmm5vxys2ey2q" path="res://scripts/town/mine_exit.gd" id="12_mine_exit"]
 [ext_resource type="Texture2D" uid="uid://dsqmmmqhit2ar" path="res://assets/props/minecart_return_to_town.png" id="13_minecart_sprite"]
-[ext_resource type="PackedScene" path="res://scenes/mine/oxygen_pump.tscn" id="14_oxygen_pump"]
-[ext_resource type="Script" path="res://scripts/ui/mine_vignette.gd" id="15_vignette"]
+[ext_resource type="PackedScene" uid="uid://dxy0xgenpump1" path="res://scenes/mine/oxygen_pump.tscn" id="14_oxygen_pump"]
+[ext_resource type="Script" uid="uid://qkyhy3318yet" path="res://scripts/ui/mine_vignette.gd" id="15_vignette"]
+[ext_resource type="PackedScene" uid="uid://civec3if5irdw" path="res://scenes/mine/enemy.tscn" id="16_enemy"]
+[ext_resource type="PackedScene" uid="uid://bs110h3uueaea" path="res://scenes/mine/deep_mine.tscn" id="17_deep"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pi18e"]
 texture = ExtResource("11_tileset")
@@ -30,6 +32,7 @@ texture = ExtResource("5_nk2wp")
 0:0/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_lhj0b"]
+tile_size = Vector2i(32, 32)
 physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_pi18e")
 sources/1 = SubResource("TileSetAtlasSource_yg8v8")
@@ -51,99 +54,143 @@ texture = ExtResource("9_iobcs")
 0:0/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_d28b6"]
+tile_size = Vector2i(32, 32)
 sources/0 = SubResource("TileSetAtlasSource_aq55q")
 sources/1 = SubResource("TileSetAtlasSource_ardav")
 sources/2 = SubResource("TileSetAtlasSource_y6erf")
 
-[sub_resource type="Curve2D" id="Curve2D_hm2ck"]
+[sub_resource type="Curve2D" id="Curve2D_g3cfb"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 92, 317, 0, 0, 0, 0, 450.67786, 329, 0, 0, 0, 0, 456.2802, 774, 0, 0, 0, 0, 120.4505, 777, 0, 0, 0, 0, 119.51678, 315, 0, 0, 0, 0, 92, 317)
-}
-point_count = 6
-
-[sub_resource type="Curve2D" id="Curve2D_cy2ab"]
-_data = {
-"points": PackedVector2Array(0, 0, 0, 0, 1552, 493, 0, 0, 0, 0, 2411, 502, 0, 0, 0, 0, 2409, 959, 0, 0, 0, 0, 1591, 943, 0, 0, 0, 0, 1552, 493)
+"points": PackedVector2Array(0, 0, 0, 0, -1540, -647, 0, 0, 0, 0, -227, -659, 0, 0, 0, 0, 105, 240, 0, 0, 0, 0, -1240, 225, 0, 0, 0, 0, -1540, -647)
 }
 point_count = 5
 
-[sub_resource type="Curve2D" id="Curve2D_r624d"]
+[sub_resource type="Curve2D" id="Curve2D_7rwuu"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 2845, 509, 0, 0, 0, 0, 3472, 518, 0, 0, 0, 0, 3459, 899, 0, 0, 0, 0, 2868, 874, 0, 0, 0, 0, 2845, 509)
+"points": PackedVector2Array(0, 0, 0, 0, 142, 546, 0, 0, 0, 0, 1265, 575, 0, 0, 0, 0, 1512, -192, 0, 0, 0, 0, 227, -186, 0, 0, 0, 0, 142, 546)
+}
+point_count = 5
+
+[sub_resource type="Curve2D" id="Curve2D_crpsc"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 1127, -15, 0, 0, 0, 0, 906, 653, 0, 0, 0, 0, -209, 661, 0, 0, 0, 0, 43, -113, 0, 0, 0, 0, 1127, -15)
 }
 point_count = 5
 
 [node name="testScene" type="Node2D" unique_id=676748231]
 
 [node name="MainCharacter" parent="." unique_id=1349554660 instance=ExtResource("1_38glm")]
-position = Vector2(951, 756)
+position = Vector2(160, 440)
 
-[node name="SmallMine" parent="." unique_id=1749931594 instance=ExtResource("2_cpwdd")]
-position = Vector2(3272, 682)
-
-[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1193815702 groups=["ground"]]
+[node name="GroundLayer" type="TileMapLayer" parent="." unique_id=381721748 groups=["ground"]]
 z_index = -2
 y_sort_enabled = true
 position = Vector2(-96, 59)
 scale = Vector2(0.5, 0.5)
-tile_map_data = PackedByteArray("AAAUACUAAQAAAAAAAAAkACUAAQAAAAAAAAA0ACUAAQAAAAAAAABEACUAAQAAAAAAAABUACUAAQAAAAAAAABkACUAAQAAAAAAAAB0ACUAAQAAAAAAAACEACUAAQAAAAAAAACUACUAAQAAAAAAAACkACUAAQAAAAAAAAC0ACUAAQAAAAAAAADEACUAAQAAAAAAAADUACUAAQAAAAAAAADjACUAAQAAAAAAAAAUADUAAQAAAAAAAAAkADUAAQAAAAAAAAA0ADUAAQAAAAAAAABEADUAAQAAAAAAAABUADUAAQAAAAAAAABkADUAAQAAAAAAAAB0ADUAAQAAAAAAAACEADUAAQAAAAAAAACUADUAAQAAAAAAAACkADUAAQAAAAAAAAC0ADUAAQAAAAAAAADEADUAAQAAAAAAAADUADUAAQAAAAAAAADjADUAAQAAAAAAAAAUAEUAAQAAAAAAAAAUAFUAAQAAAAAAAAAkAEUAAQAAAAAAAAAkAFUAAQAAAAAAAAA0AEUAAQAAAAAAAAA0AFUAAQAAAAAAAABEAEUAAQAAAAAAAABEAFUAAQAAAAAAAABUAEUAAQAAAAAAAABUAFUAAQAAAAAAAABkAEUAAQAAAAAAAABkAFUAAQAAAAAAAAB0AEUAAQAAAAAAAAB0AFUAAQAAAAAAAACEAEUAAQAAAAAAAACEAFUAAQAAAAAAAACUAEUAAQAAAAAAAACUAFUAAQAAAAAAAACkAEUAAQAAAAAAAACkAFUAAQAAAAAAAAC0AEUAAQAAAAAAAAC0AFUAAQAAAAAAAADEAEUAAQAAAAAAAADEAFUAAQAAAAAAAADUAEUAAQAAAAAAAADUAFUAAQAAAAAAAADjAEUAAQAAAAAAAADjAFUAAQAAAAAAAAAUAGUAAQAAAAAAAAAUAHUAAQAAAAAAAAAkAGUAAQAAAAAAAAAkAHUAAQAAAAAAAAA0AGUAAQAAAAAAAAA0AHUAAQAAAAAAAABEAGUAAQAAAAAAAABEAHUAAQAAAAAAAABUAGUAAQAAAAAAAABUAHUAAQAAAAAAAABkAGUAAQAAAAAAAABkAHUAAQAAAAAAAAB0AGUAAQAAAAAAAAB0AHUAAQAAAAAAAACEAGUAAQAAAAAAAACEAHUAAQAAAAAAAACUAGUAAQAAAAAAAACUAHUAAQAAAAAAAACkAGUAAQAAAAAAAACkAHUAAQAAAAAAAAC0AGUAAQAAAAAAAAC0AHUAAQAAAAAAAADEAGUAAQAAAAAAAADEAHUAAQAAAAAAAADUAGUAAQAAAAAAAADUAHUAAQAAAAAAAADjAGUAAQAAAAAAAADjAHUAAQAAAAAAAADzACUAAQAAAAAAAADzADUAAQAAAAAAAAADASUAAQAAAAAAAAADATUAAQAAAAAAAAATASUAAQAAAAAAAAATATUAAQAAAAAAAAAjASUAAQAAAAAAAAAjATUAAQAAAAAAAAAzASUAAQAAAAAAAAAzATUAAQAAAAAAAABDASUAAQAAAAAAAABDATUAAQAAAAAAAABTASUAAQAAAAAAAABTATUAAQAAAAAAAABjASUAAQAAAAAAAABjATUAAQAAAAAAAABzASUAAQAAAAAAAABzATUAAQAAAAAAAACDASUAAQAAAAAAAACDATUAAQAAAAAAAACTASUAAQAAAAAAAACTATUAAQAAAAAAAACjASUAAQAAAAAAAACjATUAAQAAAAAAAACzASUAAQAAAAAAAACzATUAAQAAAAAAAADCASUAAQAAAAAAAADCATUAAQAAAAAAAADzAEUAAQAAAAAAAADzAFUAAQAAAAAAAAADAUUAAQAAAAAAAAADAVUAAQAAAAAAAAATAUUAAQAAAAAAAAATAVUAAQAAAAAAAAAjAUUAAQAAAAAAAAAjAVUAAQAAAAAAAAAzAUUAAQAAAAAAAAAzAVUAAQAAAAAAAABDAUUAAQAAAAAAAABDAVUAAQAAAAAAAABTAUUAAQAAAAAAAABTAVUAAQAAAAAAAABjAUUAAQAAAAAAAABjAVUAAQAAAAAAAABzAUUAAQAAAAAAAABzAVUAAQAAAAAAAACDAUUAAQAAAAAAAACDAVUAAQAAAAAAAACTAUUAAQAAAAAAAACTAVUAAQAAAAAAAACjAUUAAQAAAAAAAACjAVUAAQAAAAAAAACzAUUAAQAAAAAAAACzAVUAAQAAAAAAAADCAUUAAQAAAAAAAADCAVUAAQAAAAAAAADzAGUAAQAAAAAAAADzAHUAAQAAAAAAAAADAWUAAQAAAAAAAAADAXUAAQAAAAAAAAATAWUAAQAAAAAAAAATAXUAAQAAAAAAAAAjAWUAAQAAAAAAAAAjAXUAAQAAAAAAAAAzAWUAAQAAAAAAAAAzAXUAAQAAAAAAAABDAWUAAQAAAAAAAABDAXUAAQAAAAAAAABTAWUAAQAAAAAAAABTAXUAAQAAAAAAAABjAWUAAQAAAAAAAABjAXUAAQAAAAAAAABzAWUAAQAAAAAAAABzAXUAAQAAAAAAAACDAWUAAQAAAAAAAACDAXUAAQAAAAAAAACTAWUAAQAAAAAAAACTAXUAAQAAAAAAAACjAWUAAQAAAAAAAACjAXUAAQAAAAAAAACzAWUAAQAAAAAAAACzAXUAAQAAAAAAAADCAWUAAQAAAAAAAADCAXUAAQAAAAAAAACpACkAAgAAAAAAAAA=")
 tile_set = SubResource("TileSet_lhj0b")
 
-[node name="SmallMine2" parent="." unique_id=1890660003 instance=ExtResource("2_cpwdd")]
-position = Vector2(419, 690)
-
-[node name="SmallMine3" parent="." unique_id=1750828254 instance=ExtResource("2_cpwdd")]
-position = Vector2(1887, 938)
-
-[node name="TileMapLayer2" type="TileMapLayer" parent="." unique_id=727266873]
-tile_map_data = PackedByteArray("AACNAA4AAQAAAAAAAACdAA4AAQAAAAAAAACtAA4AAQAAAAAAAAC9AA4AAQAAAAAAAADNAA4AAQAAAAAAAAAIAA4AAQAAAAAAAAAYAA4AAQAAAAAAAAAoAA4AAQAAAAAAAAA4AA4AAQAAAAAAAABIAA4AAQAAAAAAAABYAA4AAQAAAAAAAABoAA4AAQAAAAAAAAB4AA4AAQAAAAAAAACCAA4AAgAAAAAAAACDAA4AAgAAAAAAAADc/ywAAAAAAAAAAAA=")
+[node name="WallLayer" type="TileMapLayer" parent="." unique_id=961635752]
+z_index = -1
+y_sort_enabled = true
+position = Vector2(-96, 59)
+scale = Vector2(0.5, 0.5)
 tile_set = SubResource("TileSet_d28b6")
 
-[node name="Cover" parent="." unique_id=1642789011 instance=ExtResource("10_cy2ab")]
-position = Vector2(2123, 618)
+[node name="OxygenPump" parent="." unique_id=1343531764 instance=ExtResource("14_oxygen_pump")]
+position = Vector2(920, 696)
 
-[node name="Cover2" parent="." unique_id=1962773055 instance=ExtResource("10_cy2ab")]
-position = Vector2(906, 609)
+[node name="CoverCollection" type="Node" parent="." unique_id=15072162]
 
-[node name="PatrolRoute" type="Node" parent="." unique_id=823913055]
+[node name="Cover" parent="CoverCollection" unique_id=1402855499 instance=ExtResource("10_cy2ab")]
+position = Vector2(1671, 483)
 
-[node name="PatrolA" type="Path2D" parent="PatrolRoute" unique_id=477948252]
-position = Vector2(-266, 142)
-scale = Vector2(3.212938, 1)
-curve = SubResource("Curve2D_hm2ck")
+[node name="Cover2" parent="CoverCollection" unique_id=931574415 instance=ExtResource("10_cy2ab")]
+position = Vector2(30, 491)
 
-[node name="PatrolB" type="Path2D" parent="PatrolRoute" unique_id=1743314280]
-curve = SubResource("Curve2D_cy2ab")
+[node name="Cover3" parent="CoverCollection" unique_id=1767816573 instance=ExtResource("10_cy2ab")]
+position = Vector2(2544, 267)
 
-[node name="PatrolC" type="Path2D" parent="PatrolRoute" unique_id=2020637694]
-curve = SubResource("Curve2D_r624d")
+[node name="PatrolRoute" type="Node" parent="." unique_id=29703222]
 
-[node name="EnemyCollection" type="Node" parent="." unique_id=357820355]
+[node name="PatrolA" type="Path2D" parent="PatrolRoute" unique_id=720254144]
+position = Vector2(1025, 681)
+curve = SubResource("Curve2D_g3cfb")
 
-[node name="SmallMine4" parent="." unique_id=1651285154 instance=ExtResource("2_cpwdd")]
-position = Vector2(1764, 650)
+[node name="PatrolB" type="Path2D" parent="PatrolRoute" unique_id=1385294130]
+position = Vector2(880, 310)
+curve = SubResource("Curve2D_7rwuu")
 
-[node name="SmallMine5" parent="." unique_id=579606295 instance=ExtResource("2_cpwdd")]
-position = Vector2(2467, 662)
+[node name="PatrolC" type="Path2D" parent="PatrolRoute" unique_id=1391319078]
+position = Vector2(2347, 230)
+curve = SubResource("Curve2D_crpsc")
 
-[node name="OxygenPump" parent="." unique_id=1928374651 instance=ExtResource("14_oxygen_pump")]
-position = Vector2(1900, 800)
+[node name="PatrolD" type="Path2D" parent="PatrolRoute" unique_id=1959092776]
+position = Vector2(2050, 250)
 
-[node name="MinecartExit" type="Node2D" parent="." unique_id=2117143751]
-position = Vector2(816, 756)
+[node name="EnemyCollection" type="Node" parent="." unique_id=746376261]
+
+[node name="Enemy" parent="EnemyCollection" unique_id=1872819340 node_paths=PackedStringArray("path") instance=ExtResource("16_enemy")]
+position = Vector2(526, 31)
+chase_speed = 530.0
+path = NodePath("../../PatrolRoute/PatrolA")
+
+[node name="Enemy2" parent="EnemyCollection" unique_id=1380752770 node_paths=PackedStringArray("path") instance=ExtResource("16_enemy")]
+position = Vector2(1054, 569)
+chase_speed = 530.0
+path = NodePath("../../PatrolRoute/PatrolB")
+
+[node name="Enemy3" parent="EnemyCollection" unique_id=510624152 node_paths=PackedStringArray("path") instance=ExtResource("16_enemy")]
+position = Vector2(3055, 172)
+patrol_speed = 160.0
+chase_speed = 600.0
+exposure_range = 420.0
+search_duration = 2.5
+patrol_detection_cooldown_time = 3.0
+noise_origin_cooldown = 3.0
+attack_damage = 35.0
+path = NodePath("../../PatrolRoute/PatrolC")
+
+[node name="MinecartExit" type="Node2D" parent="." unique_id=709162381]
+position = Vector2(-495, 1011)
 script = ExtResource("12_mine_exit")
 
-[node name="Sprite2D" type="Sprite2D" parent="MinecartExit" unique_id=1315293760]
+[node name="Sprite2D" type="Sprite2D" parent="MinecartExit" unique_id=1480543072]
 texture_filter = 1
 scale = Vector2(2, 2)
 texture = ExtResource("13_minecart_sprite")
 
-[node name="Label" type="Label" parent="MinecartExit" unique_id=344511472]
+[node name="Label" type="Label" parent="MinecartExit" unique_id=1806198056]
 offset_left = -44.0
 offset_top = -92.0
 offset_right = 64.0
 offset_bottom = -69.0
 text = "E 搭矿车回城"
 
-[node name="Vignette" type="Node" parent="."]
+[node name="Vignette" type="Node" parent="." unique_id=362013908]
 script = ExtResource("15_vignette")
+
+[node name="Mine" type="Node" parent="." unique_id=707636422]
+
+[node name="SmallMine" parent="Mine" unique_id=813339993 instance=ExtResource("17_deep")]
+position = Vector2(-494, 806)
+
+[node name="SmallMine2" parent="Mine" unique_id=704328314 instance=ExtResource("2_cpwdd")]
+position = Vector2(261, 397)
+
+[node name="SmallMine3" parent="Mine" unique_id=1934391637 instance=ExtResource("17_deep")]
+position = Vector2(1904, 651)
+
+[node name="SmallMine4" parent="Mine" unique_id=1067212663 instance=ExtResource("17_deep")]
+position = Vector2(1376, 347)
+
+[node name="SmallMine5" parent="Mine" unique_id=541497463 instance=ExtResource("17_deep")]
+position = Vector2(2704, 539)
+
+[node name="SmallMine6" parent="Mine" unique_id=1749931594 instance=ExtResource("2_cpwdd")]
+position = Vector2(-492, 605)
+
+[node name="SmallMine7" parent="Mine" unique_id=1949609581 instance=ExtResource("2_cpwdd")]
+position = Vector2(-1273, 792)
+
+[node name="SmallMine8" parent="Mine" unique_id=2040243352 instance=ExtResource("2_cpwdd")]
+position = Vector2(-1280, 597)

@@ -13,17 +13,17 @@ extends CharacterBody2D
 enum State { PATROL, INVESTIGATE, CHASE, SEARCH, RETURN, ATTACK }
 
 # --- 速度 ---
-@export var patrol_speed: float = 125.0
-@export var investigate_speed: float = 200.0
+@export var patrol_speed: float = 200.0
+@export var investigate_speed: float = 250.0
 @export var chase_speed: float = 550.0
 @export var search_move_speed: float = 125.0
 @export var return_speed: float = 150.0
 
 # --- 范围 ---
-@export var exposure_range: float = 350.0
-@export var detection_range: float = 750.0
-@export var suspect_range: float = 450.0
-@export var chase_lose_distance: float = 700.0
+@export var exposure_range: float = 200.0
+@export var detection_range: float = 500.0
+@export var suspect_range: float = 250.0
+@export var chase_lose_distance: float = 500.0
 
 # --- 噪音阈值 ---
 @export var min_noise_threshold: float = 1.0
@@ -59,6 +59,9 @@ enum State { PATROL, INVESTIGATE, CHASE, SEARCH, RETURN, ATTACK }
 @export var attack_hit_radius: float = 110.0  # 出手帧判定命中半径
 @export var knockback_force: float = 600.0    # 对玩家的击退力度
 @export var attack_damage: float = 25.0        # 每次命中扣血（四次致死）
+
+# --- 调试 ---
+@export var show_debug_ranges: bool = true
 
 # --- 巡逻路径 ---
 @export var path: Path2D
@@ -419,6 +422,23 @@ func _dir_suffix(v: Vector2) -> String:
 	if abs(v.x) > abs(v.y):
 		return "r" if v.x > 0 else "l"
 	return "f" if v.y > 0 else "b"
+
+# ============ 调试绘制 ============
+
+func _process(_delta: float) -> void:
+	if show_debug_ranges:
+		queue_redraw()
+
+func _draw() -> void:
+	if not show_debug_ranges:
+		return
+
+	# 听觉检测范围 — 黄色虚线大圈
+	draw_arc(Vector2.ZERO, detection_range, 0, TAU, 64, Color(1.0, 0.9, 0.0, 0.3), 1.5)
+
+	# 暴露检测范围 — 红色半透明小圈（视线/贴身暴露）
+	draw_circle(Vector2.ZERO, exposure_range, Color(0.9, 0.15, 0.1, 0.12))
+	draw_arc(Vector2.ZERO, exposure_range, 0, TAU, 32, Color(0.9, 0.15, 0.1, 0.5), 1.5)
 
 # ============ 动画 ============
 func _update_animation() -> void:

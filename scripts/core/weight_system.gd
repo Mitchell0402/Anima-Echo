@@ -8,13 +8,13 @@ const MINE_SCENE_NAME: String = "testScene"
 
 enum Tier { LIGHT, HEAVY, OVERLOAD }
 
-const LIGHT_MAX: float = 65.0
+const LIGHT_MAX: float = 60.0
 const HEAVY_MAX: float = 100.0
-const OVERLOAD_MAX: float = 180.0
+const OVERLOAD_MAX: float = 200.0
 
 const SPEED_MULT: Dictionary = { Tier.LIGHT: 1.0, Tier.HEAVY: 0.8, Tier.OVERLOAD: 0.6 }
 const NOISE_MULT: Dictionary = { Tier.LIGHT: 1.0, Tier.HEAVY: 1.3, Tier.OVERLOAD: 1.8 }
-const OXYGEN_MULT: Dictionary = { Tier.LIGHT: 1.0, Tier.HEAVY: 1.3, Tier.OVERLOAD: 1.7 }
+const OXYGEN_MULT: Dictionary = { Tier.LIGHT: 1.0, Tier.HEAVY: 1.2, Tier.OVERLOAD: 1.5 }
 
 signal weight_changed(current: float, maximum: float)
 signal tier_changed(new_tier: Tier)

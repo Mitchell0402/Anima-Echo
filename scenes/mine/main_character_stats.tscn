@@ -9,11 +9,11 @@
 [ext_resource type="Script" uid="uid://cx5yqnxku4w6p" path="res://scripts/ui/hotbar_ui.gd" id="8_hotbar"]
 [ext_resource type="Script" uid="uid://bxwk6sqh20na3" path="res://scripts/ui/oxygen_bar.gd" id="9_oxygenbar"]
 [ext_resource type="Script" uid="uid://cpjxlhubu518c" path="res://scripts/ui/weight_bar.gd" id="10_weightbar"]
-[ext_resource type="Script" path="res://scripts/player/trail_effect.gd" id="11_trail"]
+[ext_resource type="Script" uid="uid://d1s8gucatpiqe" path="res://scripts/player/trail_effect.gd" id="11_trail"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1paeb"]
-radius = 62.0
-height = 244.0
+radius = 50.0
+height = 204.0
 
 [node name="MainCharacter" type="CharacterBody2D" unique_id=1349554660 groups=["player"]]
 z_index = 2
@@ -22,7 +22,7 @@ collision_mask = 0
 script = ExtResource("6_player")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=692970453]
-position = Vector2(0, -110)
+position = Vector2(0, -90)
 shape = SubResource("CapsuleShape2D_1paeb")
 
 [node name="Stats" type="Node" parent="." unique_id=1346716875]
@@ -37,7 +37,7 @@ script = ExtResource("4_gl7sw")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=38135608]
 position = Vector2(-4, 22)
-zoom = Vector2(0.8, 0.8)
+zoom = Vector2(0.6, 0.6)
 drag_horizontal_enabled = true
 drag_vertical_enabled = true
 drag_left_margin = 0.1
@@ -46,8 +46,8 @@ drag_right_margin = 0.1
 drag_bottom_margin = 0.1
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=677501370]
-position = Vector2(-4, -118)
-scale = Vector2(10, 10)
+position = Vector2(-4, -92)
+scale = Vector2(8, 8)
 sprite_frames = ExtResource("5_myn43")
 animation = &"death_r"
 
@@ -80,5 +80,5 @@ anchors_preset = 0
 mouse_filter = 2
 script = ExtResource("10_weightbar")
 
-[node name="TrailEffect" type="Node2D" parent="."]
+[node name="TrailEffect" type="Node2D" parent="." unique_id=2117173799]
 script = ExtResource("11_trail")
