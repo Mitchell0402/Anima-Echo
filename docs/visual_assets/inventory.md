@@ -9,6 +9,10 @@ without first reading its sidecar.
 The naming, status, and style contracts are in
 [`docs/visual_assets.md`](../visual_assets.md).
 
+Default generation source: `imagegen` raster PNG. SVG/vector art and
+manual geometric drawings are not accepted as committed game visuals
+unless a task explicitly requests that exception.
+
 ## Status legend
 
 - `implemented` — file exists, is loaded by the game, the visual
@@ -138,6 +142,9 @@ generator should fulfil.
 
 This section is the AI's work order. Every row here corresponds to
 a row in the future `Placeholders` section once the asset is drawn.
+
+The current full batch-generation plan lives in
+[`docs/specs/visual_asset_audit_generation_plan.md`](../specs/visual_asset_audit_generation_plan.md).
 
 | Name | Category | Sub-category | Description | Target path | Style notes | Priority |
 |------|----------|--------------|-------------|-------------|--------------|----------|

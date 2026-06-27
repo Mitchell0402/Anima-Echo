@@ -81,7 +81,8 @@ All NPC portrait images live under `res://assets/props/`:
 ### Visual Assets
 
 - New asset: `assets/props/task_board.png` (48×48 pixel-art wooden bulletin board). Sidecar at `assets/props/task_board.png.meta.md`.
-- Old `assets/town/npcs/*.png` files deleted (replaced by `assets/props/` equivalents).
+- Old `assets/town/npcs/*.png` files still exist on disk but appear replaced in current scene/data references by `assets/props/` equivalents; audit them as likely obsolete before deletion.
+- Full audit and batch-generation plan lives in [`docs/specs/visual_asset_audit_generation_plan.md`](specs/visual_asset_audit_generation_plan.md). It records 128 current PNGs, 1 current sidecar, the `imagegen` raster-only default, UI/dialogue/warehouse/shop coverage, and the town TileMap replacement requirement.
 
 ---
 
@@ -123,6 +124,7 @@ The full narrative/worldbuilding design lives in [`docs/specs/narrative_design.m
 - TODO: Audit every existing `assets/**/*.png` and add `<name>.png.meta.md` sidecar.
 - TODO: Populate `docs/visual_assets/inventory.md` with the full asset list.
 - TODO: Generate missing UI icons using external image-generation AI.
+- TODO: Generate the full visual batch listed in `docs/specs/visual_asset_audit_generation_plan.md`, including UI panels, dialogue assets, warehouse/shop/task/refine skins, item/equipment icons, NPC portraits, and TileMap-ready town terrain/building/tree/decor sprites.
 - TODO: Apply the three-layer display model to the mine scene.
 - TODO: Add buyer remaining budget indicator to buyer NPC popup.
 - TODO: Add 7 per-concern warehouse regression tests.

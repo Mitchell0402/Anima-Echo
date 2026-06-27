@@ -16,6 +16,12 @@ That file is the **single source of truth** for "what is implemented
 today" and "what still needs to be drawn". Update it whenever a new
 asset is added, removed, or re-graded.
 
+Unless a task explicitly says otherwise, new and replacement visual
+assets are generated as high-quality raster PNGs with `imagegen`.
+Do not use SVG/vector drawings, hand-drawn geometric placeholder art,
+or code-drawn shapes as committed game visuals. Temporary code
+placeholders may exist only until the generated raster asset lands.
+
 ## Hard rules
 
 These rules apply to every visual asset in the repository. They are
@@ -152,8 +158,9 @@ stay consistent and drop-in compatible:
    - a one-line description
    - the status (`todo`, `placeholder`, `implemented`)
    - the target file path it will live at
-2. An external image-generation AI reads `inventory.md` plus this
-   file and draws the missing rows.
+2. `imagegen` reads `inventory.md` plus this file and draws the
+   missing rows as raster PNG assets. Do not generate vector art
+   unless the user explicitly requests an exception.
 3. The dev drops the new file at the target path **alongside its
    sidecar metadata file** and flips the row's status to
    `implemented`. The sidecar must be filled in before the status

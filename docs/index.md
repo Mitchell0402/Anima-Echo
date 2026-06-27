@@ -13,6 +13,7 @@ Anima Echo is a Godot 4.x 2D mining prototype being cleaned up into a baseline f
 - [specs/development_plan.md](specs/development_plan.md): 6-day phased development plan (Day 1 complete, Day 2-6 planned).
 - [specs/weight_system.md](specs/weight_system.md): tiered encumbrance (Light/Heavy/Overload) with speed and noise penalties.
 - [visual_assets.md](visual_assets.md) and [visual_assets/inventory.md](visual_assets/inventory.md): the contract and the work order for the visual assets an external image-generation AI will produce.
+- [specs/visual_asset_audit_generation_plan.md](specs/visual_asset_audit_generation_plan.md): full visual asset audit facts, imagegen-only generation rule, UI coverage, and town TileMap generation plan.
 - [decisions/0001-fix-doc-scene-drift.md](decisions/0001-fix-doc-scene-drift.md): why the main scene, town scene script reference, and `CustomerShopService.list_customers()` were fixed together.
 - [decisions/0002-inventory-consistency.md](decisions/0002-inventory-consistency.md): why `InventoryManager.is_full()` and `ItemDatabase.get_stack_limit` now proxy through to the unified runtime.
 - [decisions/0003-warehouse-system.md](decisions/0003-warehouse-system.md): why the inventory split into a 12-slot hotbar and a 48-slot warehouse, and how mine entry / exit / death flow through the runtime.
