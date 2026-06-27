@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://cgemstar00001"]
+
+[ext_resource type="PackedScene" uid="uid://fe60hkkiiu80" path="res://scenes/mine/gems/gem_abstract.tscn" id="1_abstract"]
+[ext_resource type="Texture2D" uid="uid://bv4cxw636vdg" path="res://assets/props/raw_anomalous_geode_alpha.png" id="2_ru6xd"]
+
+[node name="gem" unique_id=563308230 instance=ExtResource("1_abstract")]
+gem_level = 4
+gem_tint = Color(1, 0.85, 0.3, 1)
+pickup_speed = 900.0
+collect_distance = 24.0
+pickup_delay = 0.35
+
+[node name="Sprite2D" parent="." index="0" unique_id=701452490]
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("2_ru6xd")

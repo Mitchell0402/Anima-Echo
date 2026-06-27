@@ -197,6 +197,32 @@ func _is_task_complete_for_source(task_id: String, task: Dictionary) -> bool:
 	return true
 
 
+func refresh_daily_tasks() -> Dictionary:
+	# Wipe old active tasks, draw 3 new ones from the random pool.
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	# Cancel all active tasks
+	for task_id in _states.keys():
+		var s: Dictionary = _states[task_id]
+		if s.get("state", "") == "active":
+			_states.erase(task_id)
+	# Draw from "daily_task" pool
+	var pool: Array = catalog.get_tasks_for_pool("daily_pool")
+	if pool.is_empty():
+		return {"ok": true, "drawn": 0}
+	var drawn: Array = []
+	for _i in range(3):
+		if pool.is_empty():
+			break
+		var idx: int = rng.randi() % pool.size()
+		var task: Dictionary = pool[idx]
+		var tid: String = str(task.get("id", ""))
+		accept_task(tid)
+		drawn.append(tid)
+		pool.remove_at(idx)
+	return {"ok": true, "drawn": drawn}
+
+
 func _source_name() -> String:
 	return source_name
 

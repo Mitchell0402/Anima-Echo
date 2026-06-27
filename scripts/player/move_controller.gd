@@ -11,7 +11,7 @@ extends Node
 @onready var _weight: Node = get_node_or_null("/root/WeightSystem")
 @onready var _trail: Node = $"../TrailEffect"
 
-const WALK_SPEED_MULTIPLIER: float = 0.5  # 按住 walk 时速度倍率
+const WALK_SPEED_FACTOR: float = 0.5  # 默认步行速度相对于全速的比例
 const HURT_DECEL: float = 1200.0          # 击退速度衰减
 
 var current_direction: String = "f"  # f, b, l, r
@@ -48,10 +48,10 @@ func _physics_process(delta: float) -> void:
 
 	var input_dir := _to_cardinal_direction(Input.get_vector("left", "right", "up", "down"))
 
-	var is_walking := Input.is_action_pressed("walk")
+	var is_running := Input.is_action_pressed("walk")  # walk action = Shift, now means run
 	var effective_speed: float = stats.get_effective_speed()
-	if is_walking:
-		effective_speed *= WALK_SPEED_MULTIPLIER
+	if not is_running:
+		effective_speed *= WALK_SPEED_FACTOR
 
 	body.velocity.x = input_dir.x * effective_speed
 	body.velocity.y = input_dir.y * effective_speed * stats.z_axis_factor
@@ -60,7 +60,7 @@ func _physics_process(delta: float) -> void:
 		body.velocity = body.velocity.move_toward(Vector2.ZERO, effective_speed * 10.0 * delta)
 
 	body.move_and_slide()
-	handle_animation(input_dir, is_walking)
+	handle_animation(input_dir, is_running)
 
 	# 拖尾特效：移动时发射粒子，静止时停止
 	if input_dir != Vector2.ZERO:
@@ -70,12 +70,19 @@ func _physics_process(delta: float) -> void:
 
 	# 慢走 2.5 / 跑步 15；躲藏或挖矿时不发声（can_move 已在上方 return）
 	if input_dir != Vector2.ZERO and _noise:
-		var loudness: float = _noise.WALK * 0.5 if is_walking else _noise.RUN
+		var loudness: float = _noise.WALK * 0.5 if not is_running else _noise.RUN
 		if _weight:
 			loudness *= _weight.get_noise_multiplier()
+		var eq: Object = get_node_or_null("/root/GameRuntime")
+		if eq:
+			var esys: Object = eq.get("equipment_system")
+			if esys:
+				loudness *= (1.0 - float(esys.get_innate_noise_reduction()))
+				if not is_running:
+					loudness *= (1.0 - float(esys.get_walk_noise_reduction()))
 		_noise.emit_noise(body.global_position, loudness, body)
 
-func handle_animation(input_dir: Vector2, is_walking: bool) -> void:
+func handle_animation(input_dir: Vector2, is_running: bool) -> void:
 	if not animated_sprite:
 		return
 
@@ -86,7 +93,7 @@ func handle_animation(input_dir: Vector2, is_walking: bool) -> void:
 			update_animation()
 		return
 
-	var new_state := "walk" if is_walking else "run"
+	var new_state := "run" if is_running else "walk"
 	var new_direction := get_direction(input_dir)
 	var changed := false
 

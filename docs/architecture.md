@@ -2,12 +2,14 @@
 
 ## Engine And Entry Points
 
-Anima Echo is a Godot 4.x project. `project.godot` names the project `Mine Platform V2`, sets `res://scenes/town/mining_town.tscn` as the main scene, and enables Jolt Physics.
+Anima Echo is a Godot 4.x project. `project.godot` sets `res://scenes/ui/title_menu.tscn` as the entry scene, which flows through `res://scenes/ui/intro.tscn` (opening narration) into `res://scenes/town/mining_town.tscn`.
 
 Important scenes:
 
-- `res://scenes/town/mining_town.tscn`: current town entry scene.
-- `res://scenes/mine/test_scene.tscn`: current mine route scene.
+- `res://scenes/ui/title_menu.tscn`: title screen (Start/Continue/Setting/Exit).
+- `res://scenes/ui/intro.tscn`: black-screen opening narration before town.
+- `res://scenes/town/mining_town.tscn`: town gameplay scene.
+- `res://scenes/mine/test_scene.tscn`: mine route scene.
 - `res://scenes/mine/main_character_stats.tscn`: mine player scene.
 - `res://scenes/mine/small_mine.tscn`: mineable node scene.
 - `res://scenes/mine/cover.tscn`, `enemy.tscn`, and `gems/*.tscn`: reusable mine interaction pieces.
@@ -28,7 +30,21 @@ The display system is a strict three-layer model. See [decisions/0004-display-sy
 - `OxygenSystem`: carry-on oxygen tank consumed in mine scenes. Consumption rate is base_rate × state_multiplier × weight_multiplier. Depletion triggers HP drain; mine death clears inventory and returns to town.
 - `WeightSystem`: tiered encumbrance system (Light/Heavy/Overload) that updates only while the current scene is the mine (`testScene`). In town the bar is dormant; the warehouse does not contribute to weight.
 - `ItemDatabase`: compatibility item icon, stack limit, display-name, description, and stack-key helper for the hotbar/inventory UI. Stack limits and descriptions are read from `GameRuntime.catalog` (not held locally).
+- `StabilitySystem`: town stability 0–100. Selling star crystal → -15, gifting → +15, gifting normal → +2. Daily decay 3. Affects enemy spawn/detection range and town visual tint.
+- `DayNightCycle`: day counter + night flag. Mine→town return triggers night. 3 free mine entries per day. Daily task refresh at night end.
 - `MCPScreenshot`, `MCPInputService`, `MCPGameInspector`: Godot MCP helper autoloads from `addons/godot_mcp`.
+
+### Runtime Narrative Systems (RefCounted, owned by GameRuntime)
+
+- **TaskService** (`scripts/economy/task_service.gd`): `event_count`/`event_sum`/`deliver_item` objectives, progress via `GameEventBus`. Auto-accepts `task_talk_to_townspeople` and `task_first_identification` on new game. Right-side task panel in town HUD.
+- **NpcAffection** (`scripts/narrative/npc_affection.gd`): 0–100 per NPC, +1/+3/+5 by rarity, 1 gift/day/NPC.
+- **MoralityTracker** (`scripts/core/morality_tracker.gd`): star crystals sold vs gifted.
+- **EquipmentSystem** (`scripts/player/equipment_system.gd`): 4 slots, good/evil exclusive, basic upgrades. Data at `data/equipment/equipment.json`.
+
+### Narrative Data
+
+- `data/narrative/dialogues.json`: 4 NPCs × 4 stages, multiple dialogue variants per stage.
+- `docs/specs/narrative_design.md`: **must-read** for all agents before editing gameplay/NPC/town files.
 
 ## Runtime Data Flow
 
@@ -48,11 +64,13 @@ All inventory, warehouse, wallet, and budget changes should go through `GameTran
 
 ## Scene Flow
 
-1. The game starts in the town.
-2. The miner NPC calls `GameRuntime.begin_mine_run()` (which clears the hotbar) and opens `res://scenes/mine/test_scene.tscn`.
-3. Mine interactions collect raw geodes into the hotbar.
-4. `MinecartExit` calls `GameRuntime.end_mine_run()` (which dumps the hotbar into the warehouse) and returns the player to town.
-5. Town NPC actions (identifier, buyer, task clerk) read the warehouse directly through a symmetric warehouse picker. Task rewards land in the warehouse.
+1. The game starts at the **title screen** (`res://scenes/ui/title_menu.tscn`).
+2. Clicking **START** opens the **intro narration** (`res://scenes/ui/intro.tscn`): 14 lines of black-screen text, left-click to advance. The last line auto-transitions to town. A **TEST** button on the title screen skips intro and goes directly to town.
+3. The town (`res://scenes/town/mining_town.tscn`) is the central hub. Players move freely, talk to NPCs (E key), check the task board, access the warehouse (I key), and use the refine station.
+4. The blacksmith NPC (after 5+ shallow mine runs) sells deep mine tickets. Entering the mine calls `GameRuntime.begin_mine_run()` (clears hotbar) and opens `res://scenes/mine/test_scene.tscn`.
+5. Mine interactions collect raw geodes into the hotbar.
+6. `MinecartExit` calls `GameRuntime.end_mine_run()` (dumps hotbar into warehouse) and returns the player to town.
+7. Town NPC actions (identifier, buyer, task clerk) read the warehouse directly. Task rewards land in the warehouse.
 
 Because `GameRuntime` is an autoload, hotbar state, warehouse state, wallet balance, event history, task progress, identified items, and customer budgets all persist across town/mine scene changes during the current session. The hotbar is reset to empty when a mine run starts and when the player dies in the mine; the warehouse is never touched by mine-scoped events.
 
@@ -63,14 +81,23 @@ Because `GameRuntime` is an autoload, hotbar state, warehouse state, wallet bala
 - `scripts/items`: item database, gem pickup behavior, and hotbar compatibility.
 - `scripts/player`: mine player state, stats, movement, and death handling.
 - `scripts/mine`: mineable nodes, covers, mine stats, and oxygen pump interactable.
-- `scripts/town`: generated town scene logic, town movement, NPC interaction, mine return route, and warehouse UI host.
+- `scripts/town`: town scene logic, town player controller, town movement, NPC interaction, mine return route, refine station, and warehouse UI host.
+- `scripts/narrative`: dialogue UI, NPC affection, morality tracker.
 - `scripts/enemies`: enemy AI.
-- `scripts/ui`: health bar, hotbar, warehouse UI, NPC warehouse popups, weight bar, oxygen bar, and progress UI.
+- `scripts/ui`: title menu, intro narration, health bar, hotbar, warehouse UI, NPC warehouse popups, dialogue UI, weight bar, oxygen bar, QTE circle, and progress UI.
 - `assets/mine`, `assets/town`, `assets/props`: current authored art assets.
 
 ## Input Map
 
-`project.godot` defines a `toggle_warehouse` action bound to the `I` key. The warehouse UI listens to this action; `Esc` is the secondary close key. The action is a no-op in the mine scene (the player is told "no warehouse in the mine" by getting no response).
+`project.godot` defines these actions:
+- `left` / `right` / `up` / `down`: WASD + arrow keys for movement.
+- `interact`: E key (talk to NPCs, mine, use cover, etc.).
+- `walk`: Shift key. Hold to **run** in both town and mine (the action name is legacy; behavior is now "run while held").
+- `qte_action`: Space (QTE during mining/negotiation).
+- `toggle_warehouse`: I key (open/close warehouse UI in town).
+- `ui_cancel`: Esc (close popups, exit dialogue).
+
+**Movement convention** (both scenes): default = WALK (0.5× speed in mine, 145 in town). Hold Shift = RUN (full speed in mine, 290 in town). Oxygen drain rate: walk = 1.0×, run = 2.0×. Noise: walk = low, run = high.
 
 ## Known Architecture TODOs
 

@@ -221,7 +221,9 @@ func _from_runtime_item_id(item_id: String, metadata: Dictionary = {}) -> Dictio
 			return {"type": "gem", "data": {"level": 1, "value": int(metadata.get("value", 1))}}
 		"raw_fine_geode":
 			return {"type": "gem", "data": {"level": 2, "value": int(metadata.get("value", 2))}}
-		"raw_rare_geode", "raw_anomalous_geode":
+		"raw_rare_geode":
 			return {"type": "gem", "data": {"level": 3, "value": int(metadata.get("value", 3))}}
+		"raw_star_geode":
+			return {"type": "gem", "data": {"level": 4, "value": int(metadata.get("value", 4))}}
 		_:
 			return {"type": item_id, "data": metadata.duplicate(true)}

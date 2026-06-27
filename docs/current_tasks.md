@@ -1,21 +1,112 @@
 # Current Tasks
 
-Last updated: 2026-06-24
+Last updated: 2026-06-27
 
 ## Current Baseline
 
-- The repository is a single-root Godot project for a 2D mining prototype.
-- The current main scene is `res://scenes/town/mining_town.tscn` (uid `uid://dxjbgwnb1j7cw`).
-- The current mine route is `res://scenes/mine/test_scene.tscn`.
-- The current automated test entrypoint is `res://tests/project/run_all.gd`.
-- The project has a normalized layout under `assets/`, `data/`, `docs/`, `scenes/`, `scripts/`, and `tests/`.
-- The runtime economy core is already present under `scripts/core` and `scripts/economy`.
-- **Weight System**: 3-tier encumbrance (Light/Heavy/Overload) based on raw geode weight, with speed and noise penalties. The system is gated to the mine scene; the warehouse does not contribute to weight. [Spec](specs/weight_system.md)
-- **Oxygen System**: Carry-on oxygen tank consumed in mine scenes. 3.0× drain while mining, 2.0× while running, 0.5× while hidden. Weight multiplier 1.3/1.7 from WeightSystem. Depletion → HP drain → mine death → inventory clear + return to town. OxygenPump interactable placed in test scene. [Spec](specs/oxygen_system.md)
-- **Doc/Scene/Service Drift**: Three silent inconsistencies (main scene, town scene script reference, `CustomerShopService.list_customers()`) are fixed and locked down with regression tests. [Decision](../decisions/0001-fix-doc-scene-drift.md)
-- **Inventory Consistency**: `InventoryManager.is_full()` and `ItemDatabase.get_stack_limit` / `get_description` now proxy through to `GameRuntime.hotbar` / `catalog` instead of holding a local 8-slot fiction or a parallel constant table. [Decision](../decisions/0002-inventory-consistency.md)
-- **Warehouse System**: The 18-slot single inventory is split into a 12-slot in-mine hotbar and a 48-slot, 999-item-soft-cap in-town warehouse. Hotbar resets on mine entry, dumps to warehouse on town return, and clears on mine death. Town NPC sell/identify/deliver actions read the warehouse directly through a symmetric warehouse popup. Customer `budget` is decremented on every sale. [Spec](specs/warehouse-system.md) / [Decision](../decisions/0003-warehouse-system.md). **Implementation: complete; 4 regression tests added in this PR; 7 more are follow-up.**
-- **Display System**: The town uses a three-layer world/camera/UI model. World is fixed at 1152x648. GameCamera (`scripts/camera_2d.gd`) follows the player with smooth lerp, clamps inside the world bounds, and picks an integer zoom that fits the world inside the viewport. UI uses anchor presets on its own CanvasLayer. `project.godot` declares `window/stretch/mode="viewport"`, `aspect="keep"`, and `scale_mode="integer"` so pixel art stays sharp at any window size. [Decision](../decisions/0004-display-system.md). **Implementation: complete for town; mine scene still uses the old pattern (see follow-up).**
+- The repository is a single-root Godot project for a 2D mining prototype ("别按那个键" / Anima Echo).
+- **Entry scene**: `res://scenes/ui/title_menu.tscn` → `res://scenes/ui/intro.tscn` (narration) → `res://scenes/town/mining_town.tscn`.
+  - Title screen: START (new game), CONTINUE (disabled, no save yet), SETTING (stub), EXIT, TEST (skip intro → town directly).
+  - Intro: 14-line black-screen narrative, left-click to advance, auto-transitions to town.
+- **Town gameplay scene**: `res://scenes/town/mining_town.tscn`.
+- **Mine route**: `res://scenes/mine/test_scene.tscn`.
+- **Test entrypoint**: `res://tests/project/run_all.gd`.
+- **Project layout**: `assets/`, `data/`, `docs/`, `scenes/`, `scripts/`, `tests/`.
+- Runtime economy core at `scripts/core` and `scripts/economy`.
+
+### Player Movement
+
+Both town and mine use the same convention: **default WALK, hold Shift to RUN**.
+
+| Scene | Script | Walk speed | Run speed | Animation |
+|-------|--------|------------|-----------|-----------|
+| Town | `scripts/town/town_player_controller.gd` | `@export var speed := 145.0` | `@export var run_speed := 290.0` | `walk_fblr` / `run_fblr` |
+| Mine | `scripts/player/move_controller.gd` | `stats.get_effective_speed() * 0.5` | `stats.get_effective_speed()` | `walk_fblr` / `run_fblr` |
+
+`project.godot` defines `walk` action bound to Shift (physical_keycode 4194325). Oxygen system drain rate flips: walk=1.0×, run=2.0×.
+
+### NPC & Portrait Assets
+
+All NPC portrait images live under `res://assets/props/`:
+
+| NPC | Portrait path | Scene path |
+|-----|---------------|------------|
+| 守夜老人 (elder) | `res://assets/props/npc_task_clerk_sprites_alpha.png` | `scenes/town/npc_elder.tscn` |
+| 铁匠青年 (blacksmith) | `res://assets/props/npc_miner_alpha.png` | `scenes/town/npc_blacksmith.tscn` |
+| 花店少女 (florist) | `res://assets/props/npc_identifier_sprites_alpha.png` | `scenes/town/npc_florist.tscn` |
+| 商人 (buyer) | `res://assets/props/npc_buyer_sprites_alpha.png` | `scenes/town/npc_buyer.tscn` |
+
+`data/narrative/dialogues.json` references these portrait paths in each NPC's `"portrait"` field.
+
+### Task System
+
+`scripts/economy/task_service.gd` manages tasks with three objective types: `event_count`, `event_sum`, `deliver_item`. Progress tracked via `GameEventBus`.
+
+**Auto-accepted on new game** (in `GameRuntime.initialize_for_new_game()`):
+
+| Task ID | Name | Objectives | Reward |
+|---------|------|------------|--------|
+| `task_talk_to_townspeople` | 小镇初识 | Talk to all 4 NPCs (event: `npc_talked_<id>`) | 2× raw_common_geode + 30 coins |
+| `task_first_identification` | First Reveal | Identify any geode (event: `item_identified`) | 1× raw_fine_geode + 20 coins |
+
+**Task UI**: Right-side panel in town HUD (`◆ 当前任务`) shows all active tasks with per-objective progress (○ 0/1 → ✓).
+
+**Event emission**: `mining_town_scene._on_dialogue_close()` emits `npc_talked_<npc_id>` via `event_bus.game_event.emit()`.
+
+### Town HUD Layout
+
+| Position | Content |
+|----------|---------|
+| Top bar | Prompt label (left) + status/coins (right) |
+| Left-middle | Stability bar + value + morality tracker |
+| Right-middle | Active task panel (任務名 + ○/✓ progress) |
+| Bottom-left | Warehouse summary |
+| Center | NPC popup / task board picker / refine picker |
+| Center-top | Task board interaction hint |
+
+### Title Menu
+
+`scripts/ui/title_menu.gd` — CanvasLayer, layer 11. Dark purple background, centered gold title "别按那个键", 5 buttons:
+
+- **START** → `intro.tscn` (new game)
+- **CONTINUE** — disabled (no save system yet)
+- **SETTING** — stub AcceptDialog
+- **EXIT** → `get_tree().quit()`
+- **TEST** — small, dim yellow, skips intro, goes directly to `mining_town.tscn`
+
+### Intro Narration
+
+`scripts/ui/intro.gd` — CanvasLayer, layer 12. Pure black background, centered white text, fade-in per line, left-click to advance. 14 lines total. Last line auto-transitions to town.
+
+### Visual Assets
+
+- New asset: `assets/props/task_board.png` (48×48 pixel-art wooden bulletin board). Sidecar at `assets/props/task_board.png.meta.md`.
+- Old `assets/town/npcs/*.png` files deleted (replaced by `assets/props/` equivalents).
+
+---
+
+## Narrative Design
+
+The full narrative/worldbuilding design lives in [`docs/specs/narrative_design.md`](specs/narrative_design.md). Every agent must read it before editing gameplay, NPC, or town-scene files.
+
+**Current content status**:
+- Title → Intro → Town entry flow: implemented
+- 4 NPCs with stage 0–3 dialogues: implemented in `data/narrative/dialogues.json`
+- Stage transitions gated by behavior milestones (first star crystal touch, first sell/gift, multiple choices): not yet wired
+- Opening task "talk to all NPCs": implemented (guidance for first-time players)
+
+## Existing Systems (from previous baseline)
+
+- **Weight System**: 3-tier encumbrance (Light/Heavy/Overload) based on raw geode weight, with speed and noise penalties. Gated to mine scene. [Spec](specs/weight_system.md)
+- **Oxygen System**: Carry-on oxygen tank consumed in mine scenes. 3.0× drain while mining, 2.0× while running, 0.5× while hidden. Depletion → HP drain → mine death → inventory clear + return to town. [Spec](specs/oxygen_system.md)
+- **Warehouse System**: 12-slot in-mine hotbar + 48-slot in-town warehouse (999-item soft cap). Hotbar resets on mine entry, dumps to warehouse on town return, clears on mine death. [Spec](specs/warehouse-system.md)
+- **Display System**: Three-layer world/camera/UI model. World 1152x648, integer zoom, anchor-based UI. [Decision](../decisions/0004-display-system.md)
+- **Economy**: `GameRuntime` autoload owns catalog, event bus, hotbar, warehouse, wallet, RNG, transaction service, identification, negotiation, shop, and task services.
+- **Stability System**: `StabilitySystem` autoload (0–100). Selling star crystal = -15, gifting = +15, gifting normal = +2. Daily decay 3. Affects enemy spawn/detection. Town tint changes with stability.
+- **Day/Night Cycle**: `DayNightCycle` autoload. Mine→town return triggers night. Night ends → new day. 3 free mine entries per day.
+- **NPC Affection**: `scripts/narrative/npc_affection.gd`. 0–100, gift +1/+3/+5. 1 gift per NPC per day.
+- **Morality Tracker**: `scripts/core/morality_tracker.gd`. Tracks star crystals sold vs gifted.
+- **Equipment System**: `scripts/player/equipment_system.gd`. 4 slots, good/evil exclusive items, basic upgrades (pickaxe, backpack, talisman).
 
 ## Known Risks And TODOs
 
@@ -25,22 +116,30 @@ Last updated: 2026-06-24
 - TODO: Record asset source and license metadata for generated or third-party art.
 - TODO: Define the next gameplay cleanup in a focused spec before implementation.
 - TODO: Complete end-to-end testing of the weight system (speed/noise/UI) in Godot editor.
-- TODO: Migrate `_test_project_scene_routes` to compare the main scene uid (`uid://dxjbgwnb1j7cw`) instead of the `res://` path string, so the test passes under Godot 4.6. Pre-existing on `origin/main`; the drift-fix PR adds a new uid-aware test instead.
-- TODO: Re-evaluate autoload order in `project.godot`. `ItemDatabase` now reads from `GameRuntime.catalog` and so depends on `GameRuntime` being initialized. Current order (`NoiseSystem` → `ItemDatabase` → `GameRuntime` → `WeightSystem`) is safe today because `get_stack_limit` / `get_description` are only called after the player enters a scene, but the dependency should be made explicit (move `ItemDatabase` after `GameRuntime`) or eliminated (pass the catalog in via a setter) to keep the contract clear. See [decisions/0002](../decisions/0002-inventory-consistency.md).
-- TODO: Wire every catalog item to a texture resource so the warehouse UI can show real icons. The catalog has item names and descriptions but no per-item icon mapping today; the warehouse UI shows a placeholder.
-- TODO: **Direct-sell price is not what the tooltip shows.** When the player clicks "直接卖" on a mineral in the buyer popup, the price the customer pays is `base_price * customer.price_multiplier * preferred_bonus * timing * variance`. The buyer's `price_multiplier` (1.10 to 1.25) and the buyer's `preferred_tags` (a +8% bonus on tag match) are applied silently. The tooltip displays `base_price` only, so the player sees e.g. "Copper Nugget x1 底价 10" and the toast then reads "已出售 copper_nugget +12 铜板" for what they thought was a flat-price sell. Known example: buyer_blacksmith sells a Copper Nugget (`base_price=10`, `tags=[metal, ...]`, matches `preferred=[metal, blacksmith]`) for `10 * 1.10 * 1.08 * 1.00 * 1.04 ≈ 12.4`, rounded to 12. The previous fix (commit `17e130b`) only changed `timing` from `good` (1.08x) to `normal` (1.0x), which removed one source of inflation but left `price_multiplier` and `preferred_bonus` still active. The spec (`docs/specs/warehouse-system.md`) currently says the direct-sell price is `base_price * variance`, which is what the player expects. Pick one of: (a) make the direct-sell path pass flags that disable the buyer-specific multiplier and preferred bonus and clamp variance to 1.0, so the toast matches the tooltip exactly; (b) extend the spec so the tooltip shows the actual range (base × multiplier × preferred_bonus × [0.96, 1.04]) and the player can plan around it. Option (a) matches the player's mental model; option (b) is more honest. Defer the call until the team has a preference.
-- TODO: Audit every existing `assets/**/*.png` and add a `<name>.png.meta.md` sidecar next to each. The sidecar carries the full metadata schema from `docs/visual_assets/inventory.md` (id, category, sub-category, source, license, status, width/height, palette, description, style-notes, created-by, last-reviewed-by, last-reviewed-on, plus `audit-on` for implemented/obsolete and `replacement` for placeholder/obsolete). Grade each asset as `implemented` (keep), `placeholder` (downgrade with a `replacement` note and a matching `todo` row in the inventory), or `obsolete` (retire). Anything that no longer matches the style guide becomes `placeholder` until the AI produces a replacement. This is a one-time audit; future assets are graded at commit time.
-- TODO: Populate `docs/visual_assets/inventory.md` with the full asset list once the audit above has produced sidecars. Each row links to its sidecar path; the `Todo` section is the AI's work order and is the input to the generation step.
-- TODO: Generate the missing UI icons (warehouse slot icons for every catalog item plus HUD icons) using an external image-generation AI. The AI reads `docs/visual_assets.md` and the `Todo` section of `docs/visual_assets/inventory.md`, drops the PNG at the target path, and writes the matching sidecar. Status flips to `placeholder` when the file lands and to `implemented` after a human reviews the sidecar against the style guide.
-- TODO: Apply the three-layer display model to the mine scene. The mine currently has a hard-coded TileMap size and a Camera2D attached to the player; bring it into the world/camera/UI model so mine world bounds are explicit and the camera clamps cleanly.
-- TODO: Add a "buyer remaining budget" indicator to the buyer NPC popup so the player can see how much each customer is willing to spend before clicking. Today the budget is enforced silently — the grid greys out only when budget is exhausted.
-- TODO: Add the seven per-concern warehouse regression tests spelled out in the [warehouse spec](specs/warehouse-system.md) (warehouse 48-slot cap, 999-item cap, hotbar reset on mine entry, hotbar dump on town return, warehouse intact on mine death, weight system gating, customer budget consumption and exhaustion, deliverable-task filtering). The first cut landed the data model and rewrote `_test_core_economy_loop` to cover the end-to-end flow; the per-concern tests are still pending.
-- TODO: Resolve `[node name="InventoryManager"]` in `scenes/mine/main_character_stats.tscn` referencing the renamed / `class_name` of the InventoryManager script. The script does not have a `class_name` declared, which means the scene file's path-based reference works but the editor is harder to use.
+- TODO: Migrate `_test_project_scene_routes` to compare the main scene uid instead of `res://` path.
+- TODO: Re-evaluate autoload order in `project.godot`. `ItemDatabase` depends on `GameRuntime`.
+- TODO: Wire every catalog item to a texture resource so the warehouse UI can show real icons.
+- TODO: **Direct-sell price mismatch**: tooltip shows `base_price` but actual price includes `price_multiplier` and `preferred_bonus`. Pick: (a) fix sell path to match tooltip, or (b) extend tooltip to show range.
+- TODO: Audit every existing `assets/**/*.png` and add `<name>.png.meta.md` sidecar.
+- TODO: Populate `docs/visual_assets/inventory.md` with the full asset list.
+- TODO: Generate missing UI icons using external image-generation AI.
+- TODO: Apply the three-layer display model to the mine scene.
+- TODO: Add buyer remaining budget indicator to buyer NPC popup.
+- TODO: Add 7 per-concern warehouse regression tests.
+- TODO: Resolve `InventoryManager` node name in mine player scene.
+
+## Next Steps (Day 5: Endings + Boss)
+
+See [`docs/specs/development_plan.md`](specs/development_plan.md) for the full plan. Day 5 includes:
+- 5.1 Evil ending (stability=0 → town collapse)
+- 5.2 Good ending (stability=100 → boss fight)
+- 5.3 Boss fight mechanics
+- 5.4 Neutral ending (30+ days, never touched star crystal)
+- 5.5 End-game statistics panel
 
 ## Next Cleanup Candidates
 
 - Add a small CI check around `tests/project/run_all.gd`.
 - Create a focused spec for the next gameplay or UX cleanup.
-- Replace hardcoded town NPC placement with a scene-authored or data-authored source if town layout expands.
-- Split generated town UI from scene orchestration if town interactions grow.
 - Save / load the warehouse across processes (currently session-local).
+- Wire stage transition triggers (first star crystal, first sell/gift) to NPC dialogue stages.

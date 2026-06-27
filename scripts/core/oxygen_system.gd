@@ -92,8 +92,8 @@ func _resolve_state_multiplier() -> float:
 	if _player.velocity.length() < 0.1:
 		return STATE_MULT["idle"]
 	if Input.is_action_pressed("walk"):
-		return STATE_MULT["walk"]
-	return STATE_MULT["run"]
+		return STATE_MULT["run"]  # walk action = Shift, now means run
+	return STATE_MULT["walk"]
 
 
 func _check_scene_transition() -> void:

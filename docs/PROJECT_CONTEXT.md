@@ -2,10 +2,12 @@
 
 > Purpose: current AI-readable context for the clean Godot development base.
 > Engine: Godot 4.6.3.
-> Main scene: `res://scenes/town/mining_town.tscn`.
+> 标题界面：`res://scenes/ui/title_menu.tscn`
+> Main scene (town): `res://scenes/town/mining_town.tscn`.
 > Mine scene: `res://scenes/mine/test_scene.tscn`.
 > Test entry: `res://tests/project/run_all.gd`.
-> 主场景：`res://scenes/town/mining_town.tscn`
+> 标题界面：`res://scenes/ui/title_menu.tscn`
+> 主场景（城镇）：`res://scenes/town/mining_town.tscn`
 > 矿洞场景：`res://scenes/mine/test_scene.tscn`
 > 测试入口：`res://tests/project/run_all.gd`
 
@@ -92,11 +94,11 @@ The game uses a strict three-layer model. See [decisions/0004-display-system.md]
 ## Town Systems
 
 - Town map asset: `res://assets/town/map/town_map.png`.
-- NPC sprite assets:
-  - `npc_miner_sprites.png`
-  - `npc_buyer_sprites.png`
-  - `npc_identifier_sprites.png`
-  - `npc_task_clerk_sprites.png`
+- NPC sprite assets (under `res://assets/props/`):
+  - `npc_miner_alpha.png`
+  - `npc_buyer_sprites_alpha.png`
+  - `npc_identifier_sprites_alpha.png`
+  - `npc_task_clerk_sprites_alpha.png`
 - Active town helper scripts:
   - `town_walkable_map.gd`
   - `town_npc_interactor.gd`

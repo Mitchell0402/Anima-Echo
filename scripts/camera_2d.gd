@@ -42,14 +42,15 @@ var _target: Node2D = null
 
 
 func _ready() -> void:
-	# We do our own lerp; turn off the built-in smoothing so the camera
-	# does not double-smooth.
 	position_smoothing_enabled = false
 	make_current()
-	# Defer the integer zoom computation until the camera is in the
-	# tree and the viewport is reachable. fit_world_to_viewport_integer
-	# calls get_viewport_rect(), which fails if the node has not been
-	# added to the tree yet.
+	# Auto-detect the target: when the camera is a child of a Node2D
+	# (e.g. the player), use the parent as the follow target unless
+	# set_target() was called explicitly.
+	if _target == null:
+		var parent := get_parent()
+		if parent is Node2D:
+			_target = parent as Node2D
 	call_deferred("_apply_initial_zoom")
 
 
@@ -67,26 +68,23 @@ func set_target(node: Node2D) -> void:
 func _process(delta: float) -> void:
 	if _target == null or not is_instance_valid(_target):
 		return
-	# Aim position is the target plus a look-ahead in the direction
-	# the target is moving (if it has a `facing` string attribute, e.g.
-	# "up" / "down" / "left" / "right"). NPCs do not expose `facing`,
-	# so we only apply look-ahead when the target has the attribute.
-	var aim := _target.global_position
-	if "facing" in _target and look_ahead_distance > 0.0:
+	# Look-ahead: smooth local offset in the facing direction.
+	# When the camera is a child of the target, the parent-child
+	# relationship already handles position following. We only
+	# need to add a local offset for look-ahead, then clamp the
+	# resulting global position to the world bounds.
+	var desired_offset := Vector2.ZERO
+	if look_ahead_distance > 0.0 and "facing" in _target:
 		match _target.facing:
 			"up":
-				aim.y -= look_ahead_distance
+				desired_offset.y = -look_ahead_distance
 			"down":
-				aim.y += look_ahead_distance
+				desired_offset.y = look_ahead_distance
 			"left":
-				aim.x -= look_ahead_distance
+				desired_offset.x = -look_ahead_distance
 			"right":
-				aim.x += look_ahead_distance
-	# Smooth lerp toward the aim. clampf keeps the factor in [0, 1].
-	position = position.lerp(aim, clampf(delta * smooth_speed, 0.0, 1.0))
-	# Clamp so the camera stays inside the world. The view rectangle is
-	# viewport / zoom, so we keep the centre at least half a view away
-	# from each world edge.
+				desired_offset.x = look_ahead_distance
+	position = position.lerp(desired_offset, clampf(delta * smooth_speed, 0.0, 1.0))
 	_clamp_to_world()
 
 
@@ -106,18 +104,16 @@ func _clamp_to_world() -> void:
 	var half_view := view_size * 0.5
 	var world_min := world_bounds.position
 	var world_max := world_bounds.position + world_bounds.size
-	# X axis
 	if view_size.x >= world_bounds.size.x:
-		position.x = world_min.x + world_bounds.size.x * 0.5
+		global_position.x = world_min.x + world_bounds.size.x * 0.5
 	else:
-		position.x = clampf(position.x,
+		global_position.x = clampf(global_position.x,
 			world_min.x + half_view.x,
 			world_max.x - half_view.x)
-	# Y axis
 	if view_size.y >= world_bounds.size.y:
-		position.y = world_min.y + world_bounds.size.y * 0.5
+		global_position.y = world_min.y + world_bounds.size.y * 0.5
 	else:
-		position.y = clampf(position.y,
+		global_position.y = clampf(global_position.y,
 			world_min.y + half_view.y,
 			world_max.y - half_view.y)
 

@@ -9,6 +9,8 @@ Anima Echo is a Godot 4.x 2D mining prototype being cleaned up into a baseline f
 - [current_tasks.md](current_tasks.md): current cleanup state, risks, and next practical tasks.
 - [testing.md](testing.md): how to run the existing project checks and manual smoke tests.
 - [glossary.md](glossary.md): project-specific terms.
+- [specs/narrative_design.md](specs/narrative_design.md): complete narrative/worldbuilding design — characters, secrets, progression, endings. **Mandatory reading for all agents.**
+- [specs/development_plan.md](specs/development_plan.md): 6-day phased development plan (Day 1 complete, Day 2-6 planned).
 - [specs/weight_system.md](specs/weight_system.md): tiered encumbrance (Light/Heavy/Overload) with speed and noise penalties.
 - [visual_assets.md](visual_assets.md) and [visual_assets/inventory.md](visual_assets/inventory.md): the contract and the work order for the visual assets an external image-generation AI will produce.
 - [decisions/0001-fix-doc-scene-drift.md](decisions/0001-fix-doc-scene-drift.md): why the main scene, town scene script reference, and `CustomerShopService.list_customers()` were fixed together.

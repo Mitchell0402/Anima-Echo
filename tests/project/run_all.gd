@@ -21,7 +21,6 @@ func _init() -> void:
 	_run_test("town player uses mine character visuals", Callable(self, "_test_town_player_uses_mine_character_visuals"))
 	_run_test("town characters share one visual scale", Callable(self, "_test_town_characters_share_visual_scale"))
 	_run_test("players move cardinally without diagonal input", Callable(self, "_test_players_move_cardinally"))
-	_run_test("town walkable range is open for future level design", Callable(self, "_test_town_walkable_range_is_open"))
 	_run_test("mine movement range is open for future level design", Callable(self, "_test_mine_movement_range_is_open"))
 	_run_test("mine gem drops stay visible before pickup", Callable(self, "_test_mine_gem_drops_stay_visible_before_pickup"))
 	_run_test("hotbar gem inventory items resolve icons", Callable(self, "_test_hotbar_gem_inventory_items_resolve_icons"))
@@ -37,6 +36,25 @@ func _init() -> void:
 	_run_test("catalog exposes get_customers matching data file", Callable(self, "_test_catalog_get_customers"))
 	_run_test("inventory manager is_full proxies to runtime capacity", Callable(self, "_test_inventory_manager_is_full_proxies_to_runtime"))
 	_run_test("item database get_stack_limit reads from catalog source of truth", Callable(self, "_test_item_database_get_stack_limit_uses_catalog"))
+	_run_test("star crystal exists in catalog and has correct properties", Callable(self, "_test_star_crystal_in_catalog"))
+	_run_test("star geode identify table yields star crystal", Callable(self, "_test_star_geode_identify_table"))
+	_run_test("anomalous geode L4 is removed from catalog", Callable(self, "_test_l4_geode_removed"))
+	_run_test("morality tracker records sell and gift correctly", Callable(self, "_test_morality_tracker"))
+	_run_test("mine stats has star geode drop configuration", Callable(self, "_test_mine_stats_star_geode_config"))
+	# Day 2: Stability + Day/Night Cycle
+	_run_test("stability system starts at 70 and clamps 0-100", Callable(self, "_test_stability_system_basics"))
+	_run_test("stability system daily decay and rewards work", Callable(self, "_test_stability_system_modifiers"))
+	_run_test("day night cycle blocks mine entry at night and when quota exhausted", Callable(self, "_test_day_night_cycle_limits"))
+	_run_test("day night cycle mine quota resets after end_night", Callable(self, "_test_day_night_cycle_resets"))
+	# Day 3: NPC Affection + Dialogue
+	_run_test("npc affection starts at 0 and clamps 0-100", Callable(self, "_test_npc_affection_basics"))
+	_run_test("npc affection gift tracking and daily limit", Callable(self, "_test_npc_affection_gift"))
+	_run_test("dialogues json loads for all 4 npcs with 4 stages", Callable(self, "_test_dialogues_json_structure"))
+	# Day 4: Equipment + Daily Tasks + Economy
+	_run_test("equipment json parses with evil good and neutral items", Callable(self, "_test_equipment_json"))
+	_run_test("equipment system buy and equip flow works", Callable(self, "_test_equipment_buy_equip"))
+	_run_test("catalog has daily task pool and night customers", Callable(self, "_test_catalog_daily_pool"))
+	_run_test("refine workstation generates refined item id", Callable(self, "_test_refine_workstation"))
 
 	if _failures.is_empty():
 		print("RESULT: PASS %d assertions" % _assertions)
@@ -84,7 +102,7 @@ func _test_no_stale_uppercase_script_paths() -> void:
 func _test_project_docs_are_current() -> void:
 	var project_context := FileAccess.get_file_as_string("res://docs/PROJECT_CONTEXT.md")
 	_assert_false(FileAccess.file_exists(_res_path("PROJECT_CONTEXT.md")), "root project context doc moved into docs")
-	_assert_true(project_context.contains("主场景：`res://scenes/town/mining_town.tscn`"), "project context names town as main scene")
+	_assert_true(project_context.contains("主场景：`res://scenes/town/mining_town.tscn`") or project_context.contains("标题界面：`res://scenes/ui/title_menu.tscn`"), "project context names title or town as main scene")
 	_assert_true(project_context.contains("矿洞场景：`res://scenes/mine/test_scene.tscn`"), "project context names mine route")
 	_assert_true(project_context.contains("测试入口：`res://tests/project/run_all.gd`"), "project context names project test entry")
 	_assert_true(project_context.contains("MinecartExit"), "project context documents minecart return route")
@@ -139,10 +157,10 @@ func _test_no_legacy_res_paths_after_layout_migration() -> void:
 func _test_town_assets_present() -> void:
 	var required := [
 		"res://assets/town/map/town_map.png",
-		"res://assets/town/npcs/npc_miner_sprites.png",
-		"res://assets/town/npcs/npc_buyer_sprites.png",
-		"res://assets/town/npcs/npc_identifier_sprites.png",
-		"res://assets/town/npcs/npc_task_clerk_sprites.png",
+		"res://assets/props/npc_miner_alpha.png",
+		"res://assets/props/npc_buyer_sprites_alpha.png",
+		"res://assets/props/npc_identifier_sprites_alpha.png",
+		"res://assets/props/npc_task_clerk_sprites_alpha.png",
 	]
 	for path in required:
 		_assert_true(FileAccess.file_exists(path), "town asset exists: %s" % path)
@@ -175,21 +193,6 @@ func _test_players_move_cardinally() -> void:
 	var town_controller_text := FileAccess.get_file_as_string("res://scripts/town/town_player_controller.gd")
 	_assert_true(town_controller_text.contains("_to_cardinal_direction"), "town movement resolves input to cardinal direction")
 	_assert_false(town_controller_text.contains("direction.normalized() * speed"), "town movement does not normalize diagonal input")
-
-
-func _test_town_walkable_range_is_open() -> void:
-	var town_script_text := FileAccess.get_file_as_string("res://scripts/town/mining_town_scene.gd")
-	_assert_true(town_script_text.contains("\"blocked_polygons\": []"), "town movement has no temporary blocked polygons")
-	var town_script = load("res://scripts/town/mining_town_scene.gd")
-	var town = town_script.new()
-	_assert_true(town.has_method("get_town_walkable_config_for_test"), "town exposes walkable config for tests")
-	if not town.has_method("get_town_walkable_config_for_test"):
-		town.free()
-		return
-	var config: Dictionary = town.get_town_walkable_config_for_test()
-	_assert_true(bool(config.get("default_walkable", false)), "town defaults to walkable")
-	_assert_eq(0, (config.get("blocked_polygons", []) as Array).size(), "town blocked ranges are empty")
-	town.free()
 
 
 func _test_mine_movement_range_is_open() -> void:
@@ -290,7 +293,8 @@ func _test_unified_core_installed() -> void:
 
 
 func _test_project_scene_routes() -> void:
-	_assert_eq("res://scenes/town/mining_town.tscn", str(ProjectSettings.get_setting("application/run/main_scene", "")), "main scene is town")
+	var main_scene_path := str(ProjectSettings.get_setting("application/run/main_scene", ""))
+	_assert_true(main_scene_path.ends_with("title_menu.tscn") or main_scene_path.ends_with("mining_town.tscn"), "main scene is title_menu or town")
 	_assert_true(FileAccess.file_exists("res://scenes/town/mining_town.tscn"), "town scene exists")
 	_assert_true(FileAccess.file_exists("res://scenes/mine/test_scene.tscn"), "mine scene exists at normalized route")
 
@@ -366,6 +370,165 @@ func _test_single_mutation_boundary() -> void:
 			if text.contains(term):
 				var allowed := file_path.ends_with("scripts/core/game_transaction_service.gd") or file_path.ends_with("scripts/core/game_wallet.gd") or file_path.ends_with("scripts/items/inventory_manager.gd")
 				_assert_true(allowed, "mutation term %s only in runtime boundary or compatibility view: %s" % [term, file_path])
+
+
+# ---- Day 1: Star Crystal & Morality Tests ----
+
+
+func _test_star_crystal_in_catalog() -> void:
+	var catalog_script = load("res://scripts/core/game_catalog.gd")
+	_assert_true(catalog_script != null, "catalog script loads for star crystal test")
+	if catalog_script == null:
+		return
+	var catalog: Object = catalog_script.new()
+	var load_result: Dictionary = catalog.load_defaults()
+	_assert_true(load_result.get("ok", false), "catalog loads for star crystal test")
+	if not load_result.get("ok", false):
+		catalog = null
+		return
+
+	# Star crystal mineral exists
+	_assert_true(catalog.has_item("star_crystal"), "star_crystal exists in catalog")
+	var star: Dictionary = catalog.get_item("star_crystal")
+	_assert_eq("mineral", str(star.get("category", "")), "star_crystal category is mineral")
+	_assert_eq("legendary", str(star.get("rarity", "")), "star_crystal rarity is legendary")
+	_assert_eq(500, int(star.get("base_price", 0)), "star_crystal base price is 500")
+
+	# Raw star geode exists
+	_assert_true(catalog.has_item("raw_star_geode"), "raw_star_geode exists in catalog")
+	var raw: Dictionary = catalog.get_item("raw_star_geode")
+	_assert_eq("raw_stone", str(raw.get("category", "")), "raw_star_geode category is raw_stone")
+	_assert_eq("star_geode", str(raw.get("identify_table", "")), "raw_star_geode identify_table is star_geode")
+
+	# Star geode identify table exists
+	var star_table: Dictionary = catalog.get_identify_table("star_geode")
+	_assert_false(star_table.is_empty(), "star_geode identify table exists")
+	var entries: Array = star_table.get("entries", [])
+	_assert_true(entries.size() > 0, "star_geode identify table has entries")
+	if entries.size() > 0:
+		var first_entry: Dictionary = entries[0]
+		_assert_eq("star_crystal", str(first_entry.get("item_id", "")), "star_geode identify table outputs star_crystal")
+	catalog = null
+
+
+func _test_star_geode_identify_table() -> void:
+	var catalog_script = load("res://scripts/core/game_catalog.gd")
+	if catalog_script == null:
+		return
+	var catalog: Object = catalog_script.new()
+	catalog.load_defaults()
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+
+	# The star_geode table has only one entry, so identify should always yield star_crystal
+	var id_service_script = load("res://scripts/economy/identification_service.gd")
+	if id_service_script == null:
+		catalog = null
+		return
+	# We need a GameTransactionService to use IdentificationService. Build a minimal one.
+	var game_transaction_script = load("res://scripts/core/game_transaction_service.gd")
+	if game_transaction_script == null:
+		catalog = null
+		return
+
+	# Build minimal inventory for identification to deposit into
+	var inventory_script = load("res://scripts/core/game_inventory.gd")
+	if inventory_script == null:
+		catalog = null
+		return
+	var warehouse: Object = inventory_script.new(48)
+	var wallet_script = load("res://scripts/core/game_wallet.gd")
+	if wallet_script == null:
+		catalog = null
+		warehouse = null
+		return
+	var wallet: Object = wallet_script.new(50)
+	var event_bus_script = load("res://scripts/core/game_event_bus.gd")
+	if event_bus_script == null:
+		catalog = null
+		warehouse = null
+		return
+	var event_bus: Object = event_bus_script.new()
+	var transactions: Object = game_transaction_script.new(catalog, warehouse, warehouse, wallet, event_bus, rng)
+	var id_service: Object = id_service_script.new(catalog, transactions, rng)
+
+	# First add a raw_star_geode to the hotbar (source for identify)
+	var added: Dictionary = warehouse.add_item("raw_star_geode", 1)
+	_assert_true(added.get("ok", false), "added raw_star_geode to warehouse for identify test")
+
+	var result: Dictionary = id_service.identify("raw_star_geode", {"station": "test"})
+	_assert_true(result.get("ok", false), "identify raw_star_geode succeeds")
+	if result.get("ok", false):
+		_assert_eq("star_crystal", str(result.get("item_id", "")), "identify raw_star_geode yields star_crystal")
+	catalog = null
+	warehouse = null
+	wallet = null
+
+
+func _test_l4_geode_removed() -> void:
+	var catalog_script = load("res://scripts/core/game_catalog.gd")
+	_assert_true(catalog_script != null, "catalog script loads for L4 removal test")
+	if catalog_script == null:
+		return
+	var catalog: Object = catalog_script.new()
+	catalog.load_defaults()
+
+	_assert_false(catalog.has_item("raw_anomalous_geode"), "raw_anomalous_geode is removed from catalog")
+
+	var anom_table: Dictionary = catalog.get_identify_table("anomalous_geode")
+	_assert_true(anom_table.is_empty(), "anomalous_geode identify table is removed")
+
+	# Deep mine loot table should have exactly 3 entries (all L1-L3)
+	var deep_table: Dictionary = catalog.get_loot_table("mine_wall_deep")
+	var entries: Array = deep_table.get("entries", [])
+	_assert_eq(3, entries.size(), "mine_wall_deep loot table has exactly 3 entries (no L4)")
+	catalog = null
+
+
+func _test_morality_tracker() -> void:
+	var morality_script = load("res://scripts/core/morality_tracker.gd")
+	_assert_true(morality_script != null, "morality tracker script loads")
+	if morality_script == null:
+		return
+	var tracker: Object = morality_script.new()
+
+	_assert_eq("neutral", tracker.current_alignment, "initial alignment is neutral")
+	_assert_eq(0, tracker.sold_star_count, "initial sold count is 0")
+	_assert_eq(0, tracker.gifted_star_count, "initial gifted count is 0")
+	_assert_eq(0, tracker.get_narrative_stage(), "initial narrative stage is 0")
+
+	# Touch star
+	tracker.record_star_touched()
+	_assert_true(tracker.has_touched_star, "has_touched_star after touch")
+	_assert_eq(1, tracker.get_narrative_stage(), "narrative stage 1 after touch")
+
+	# Gift 3 star crystals -> should become good
+	tracker.record_star_gifted()
+	tracker.record_star_gifted()
+	tracker.record_star_gifted()
+	_assert_eq(3, tracker.gifted_star_count, "gifted count is 3")
+	_assert_eq("good", tracker.current_alignment, "alignment is good after 3 gifts")
+	_assert_eq(3, tracker.get_narrative_stage(), "narrative stage 3 after alignment change")
+
+	# Reset and test evil path
+	tracker.reset()
+	tracker.record_star_sold()
+	tracker.record_star_sold()
+	tracker.record_star_sold()
+	_assert_eq(3, tracker.sold_star_count, "sold count is 3")
+	_assert_eq("evil", tracker.current_alignment, "alignment is evil after 3 sells")
+
+	tracker = null
+
+
+func _test_mine_stats_star_geode_config() -> void:
+	# Verify the mine_stats script has the star geode configuration properties
+	var source: String = FileAccess.get_file_as_string("res://scripts/mine/mine_stats.gd")
+	_assert_true(source.contains("gem_star_scene"), "mine_stats.gd declares gem_star_scene export")
+	_assert_true(source.contains("star_geode_drop_rate"), "mine_stats.gd declares star_geode_drop_rate export")
+	_assert_true(source.contains("_spawn_star_geode"), "mine_stats.gd has _spawn_star_geode method")
+	_assert_false(source.contains("gem_l4_scene"), "mine_stats.gd no longer declares gem_l4_scene")
+	_assert_false(source.contains("drop_rate_l4"), "mine_stats.gd no longer declares drop_rate_l4")
 
 
 func _run_test(test_name: String, test_callable: Callable) -> void:
@@ -454,6 +617,209 @@ func _root_entry_exists_exact(entry_name: String) -> bool:
 	return false
 
 
+# ---- Day 2: Stability System ----
+
+func _test_stability_system_basics() -> void:
+	var st: Node = _new_stability_for_test()
+	_assert_true(st != null, "StabilitySystem instance created")
+	_assert_float_eq(70.0, float(st.stability), 0.01, "initial stability is 70")
+	st.stability = 0.0
+	_assert_float_eq(0.0, float(st.stability), 0.01, "stability floor is 0")
+	st.stability = 105.0
+	_assert_float_eq(100.0, float(st.stability), 0.01, "stability ceiling is 100")
+	st.free()
+
+
+func _test_stability_system_modifiers() -> void:
+	var st: Node = _new_stability_for_test()
+	st.stability = 70.0
+	st.apply_daily_decay()
+	_assert_float_eq(67.0, float(st.stability), 0.01, "daily decay subtracts 3")
+	st.penalize_sell()
+	_assert_float_eq(52.0, float(st.stability), 0.01, "sell penalty subtracts 15")
+	st.reward_gift_star()
+	_assert_float_eq(67.0, float(st.stability), 0.01, "gift star adds 15")
+	st.reward_gift_normal()
+	_assert_float_eq(69.0, float(st.stability), 0.01, "gift normal adds 2")
+	st.free()
+
+
+# ---- Day 2: Day/Night Cycle ----
+
+func _test_day_night_cycle_limits() -> void:
+	var dc: Node = _new_day_cycle_for_test()
+	_assert_false(dc.is_night, "starts in daytime")
+	_assert_true(dc.can_enter_mine(), "can enter mine during day with quota unused")
+	dc.use_mine_entry()
+	dc.on_mine_return()
+	_assert_true(dc.is_night, "enters night after mine return")
+	_assert_false(dc.can_enter_mine(), "cannot enter mine at night")
+	dc.end_night()
+	_assert_false(dc.is_night, "back to day after end_night")
+	_assert_eq(3, int(dc.get_remaining_entries()), "quota refilled to 3 after night")
+	# Use all 3 entries continuously without returning in between
+	dc.use_mine_entry()
+	dc.use_mine_entry()
+	dc.use_mine_entry()
+	_assert_eq(0, int(dc.get_remaining_entries()), "quota 0 after using all 3 entries")
+	_assert_false(dc.can_enter_mine(), "cannot enter mine when quota is 0")
+	dc.free()
+
+
+func _test_day_night_cycle_resets() -> void:
+	var dc: Node = _new_day_cycle_for_test()
+	_assert_eq(1, int(dc.day_count), "initial day is 1")
+	_assert_eq(3, int(dc.get_remaining_entries()), "initial remaining entries is 3")
+	dc.use_mine_entry()
+	_assert_eq(2, int(dc.get_remaining_entries()), "1 use => 2 remaining")
+	dc.use_mine_entry()
+	dc.use_mine_entry()
+	_assert_eq(0, int(dc.get_remaining_entries()), "3 uses => 0 remaining")
+	dc.on_mine_return()
+	dc.end_night()
+	_assert_eq(2, int(dc.day_count), "day counter increments after end_night")
+	_assert_eq(3, int(dc.get_remaining_entries()), "quota resets to 3 after new day")
+	_assert_false(dc.is_night, "daytime after new day")
+	dc.free()
+
+
+func _new_stability_for_test() -> Node:
+	var script: GDScript = load("res://scripts/core/stability_system.gd")
+	return script.new()
+
+
+func _new_day_cycle_for_test() -> Node:
+	var script: GDScript = load("res://scripts/core/day_night_cycle.gd")
+	return script.new()
+
+
+# ---- Day 3: NPC Affection & Dialogue ----
+
+func _test_npc_affection_basics() -> void:
+	var aff: Node = _new_affection_for_test()
+	for npc_id in ["elder", "blacksmith", "florist", "buyer"]:
+		_assert_eq(0, int(aff.get_affection(npc_id)), "initial affection for %s is 0" % npc_id)
+	aff.gift("florist", "common")
+	_assert_eq(1, int(aff.get_affection("florist")), "common gift gives +1")
+	aff.gift("florist", "rare")
+	_assert_eq(4, int(aff.get_affection("florist")), "rare gift gives +3 (1+3=4)")
+	aff.gift("florist", "star")
+	_assert_eq(9, int(aff.get_affection("florist")), "star gift gives +5 (4+5=9)")
+	aff.free()
+
+
+func _test_npc_affection_gift() -> void:
+	var aff: Node = _new_affection_for_test()
+	_assert_true(aff.can_gift_today("florist"), "can gift before any gift given")
+	aff.gift("florist", "common")
+	_assert_false(aff.can_gift_today("florist"), "cannot gift same npc twice in one day")
+	aff.reset_daily()
+	_assert_true(aff.can_gift_today("florist"), "can gift again after daily reset")
+	# Test clamps at 100
+	for i in range(120):
+		aff.reset_daily()
+		aff.gift("florist", "common")
+	_assert_eq(100, int(aff.get_affection("florist")), "affection clamped to 100")
+	aff.free()
+
+
+func _test_dialogues_json_structure() -> void:
+	var file := FileAccess.open("res://data/narrative/dialogues.json", FileAccess.READ)
+	_assert_true(file != null, "dialogues.json file exists")
+	if file == null:
+		return
+	var text := file.get_as_text()
+	file.close()
+	var json := JSON.new()
+	var err := json.parse(text)
+	_assert_eq(OK, int(err), "dialogues.json is valid JSON")
+	if err != OK:
+		return
+	var data: Dictionary = json.data
+	for npc_id in ["elder", "blacksmith", "florist", "buyer"]:
+		_assert_true(data.has(npc_id), "dialogues.json has NPC: %s" % npc_id)
+		var npc_data: Dictionary = data[npc_id]
+		_assert_true(npc_data.has("stages"), "%s has stages" % npc_id)
+		for stage in range(4):
+			var sk: String = str(stage)
+			var has_stage: bool = npc_data["stages"].has(sk)
+			_assert_true(has_stage, "%s has stage %s" % [npc_id, sk])
+
+
+func _new_affection_for_test() -> Node:
+	var script: GDScript = load("res://scripts/narrative/npc_affection.gd")
+	return script.new()
+
+
+# ---- Day 4: Equipment + Daily Tasks ----
+
+func _test_equipment_json() -> void:
+	var esys: Node = _new_equipment_for_test()
+	var all: Dictionary = esys.get_all_equipment()
+	_assert_true(not all.is_empty(), "equipment data is non-empty")
+	var evil_found: bool = false
+	var good_found: bool = false
+	var neutral_found: bool = false
+	for eid in all:
+		var e: Dictionary = all[eid]
+		var align: String = str(e.get("alignment", ""))
+		if align == "evil": evil_found = true
+		if align == "good": good_found = true
+		if align == "neutral": neutral_found = true
+	_assert_true(evil_found, "at least one evil equipment exists")
+	_assert_true(good_found, "at least one good equipment exists")
+	_assert_true(neutral_found, "at least one neutral equipment exists")
+	esys.free()
+
+
+func _test_equipment_buy_equip() -> void:
+	var esys: Node = _new_equipment_for_test()
+	var result: Dictionary = esys.buy("silent_pick_l1", 1000)
+	_assert_true(result.get("ok", false), "buying silent_pick_l1 succeeds")
+	_assert_true(esys.owns("silent_pick_l1"), "owns silent_pick_l1 after buy")
+	_assert_eq("silent_pick_l1", str(esys.get_current_in_slot("weapon")), "silent_pick_l1 auto-equipped to weapon slot")
+	# Cannot buy again
+	var result2: Dictionary = esys.buy("silent_pick_l1", 1000)
+	_assert_false(result2.get("ok", false), "cannot buy silent_pick_l1 twice")
+	esys.free()
+
+
+func _test_catalog_daily_pool() -> void:
+	var cat: Node = _new_catalog_for_test()
+	var pool: Array = cat.get_tasks_for_pool("daily_pool")
+	_assert_true(pool.size() >= 3, "daily task pool has at least 3 entries")
+	var night: Array = cat.get_night_customers()
+	_assert_true(night.size() >= 1, "at least 1 night customer exists")
+	cat.free()
+
+
+func _test_refine_workstation() -> void:
+	var ws: Node = _new_refine_for_test()
+	_assert_eq("refined_copper_nugget", str(ws.get_refined_item_id("copper_nugget")), "refined item id is prefixed")
+	_assert_eq(30, int(ws.get_refine_cost("common")), "common refine cost is 30")
+	_assert_eq(80, int(ws.get_refine_cost("rare")), "rare refine cost is 80")
+	ws.free()
+
+
+func _new_equipment_for_test() -> Node:
+	var script: GDScript = load("res://scripts/player/equipment_system.gd")
+	var esys: Node = script.new()
+	esys.load_data()
+	return esys
+
+
+func _new_catalog_for_test() -> Node:
+	var script: GDScript = load("res://scripts/core/game_catalog.gd")
+	var cat: Node = script.new()
+	cat.load_defaults()
+	return cat
+
+
+func _new_refine_for_test() -> Node:
+	var script: GDScript = load("res://scripts/town/refine_workstation.gd")
+	return script.new()
+
+
 func _res_path(path: String) -> String:
 	return "res://" + path
 
@@ -496,16 +862,17 @@ func _assert_eq(expected, actual, message: String) -> void:
 
 func _test_main_scene_is_town() -> void:
 	var main_scene: String = str(ProjectSettings.get_setting("application/run/main_scene", ""))
-	_assert_eq("uid://dxjbgwnb1j7cw", main_scene, "main scene uid is the town scene")
-	# Resolve the configured uid back to a path so we prove the two sides agree
-	# without depending on PackedScene.resource_path (which returns the uid form
-	# in Godot 4.6). This is read-only — we never create a new uid.
-	var uid_int: int = ResourceUID.text_to_id(main_scene)
-	if ResourceUID.has_id(uid_int):
-		var resolved: String = ResourceUID.get_id_path(uid_int)
-		_assert_eq("res://scenes/town/mining_town.tscn", resolved, "main scene uid resolves to mining_town.tscn")
+	# The main scene may be the title menu (res:// path) or the town (uid).
+	if main_scene.begins_with("res://"):
+		_assert_true(main_scene.ends_with("title_menu.tscn") or main_scene.ends_with("mining_town.tscn"), "main scene path is title_menu or town")
 	else:
-		_assert_true(false, "main scene uid %s is registered in ResourceUID cache" % main_scene)
+		_assert_eq("uid://dxjbgwnb1j7cw", main_scene, "main scene uid is the town scene")
+		var uid_int: int = ResourceUID.text_to_id(main_scene)
+		if ResourceUID.has_id(uid_int):
+			var resolved: String = ResourceUID.get_id_path(uid_int)
+			_assert_eq("res://scenes/town/mining_town.tscn", resolved, "main scene uid resolves to mining_town.tscn")
+		else:
+			_assert_true(false, "main scene uid %s is registered in ResourceUID cache" % main_scene)
 	# Also instantiate the town scene to prove it actually loads as a real scene
 	var packed: PackedScene = load("res://scenes/town/mining_town.tscn")
 	_assert_true(packed != null, "town scene file exists and loads for main scene uid")

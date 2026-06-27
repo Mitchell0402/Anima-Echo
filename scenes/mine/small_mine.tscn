@@ -6,9 +6,9 @@
 [ext_resource type="PackedScene" uid="uid://8l1j1tm1ee6u" path="res://scenes/mine/gems/gem_l2.tscn" id="3_7mspx"]
 [ext_resource type="Script" uid="uid://bq67qfjk550xb" path="res://scripts/ui/progress_ui.gd" id="3_tmet0"]
 [ext_resource type="PackedScene" uid="uid://cyfi7qy3l1lyx" path="res://scenes/mine/gems/gem_l3.tscn" id="4_glmyf"]
-[ext_resource type="PackedScene" path="res://scenes/mine/gems/gem_l4.tscn" id="5_geml4"]
-[ext_resource type="Texture2D" uid="uid://ttg3fl22ajvx" path="res://assets/gj/environment/stones_1.png" id="6_03nme"]
-[ext_resource type="Script" path="res://scripts/ui/qte_circle_ui.gd" id="8_d280x"]
+[ext_resource type="PackedScene" uid="uid://cgemstar00001" path="res://scenes/mine/gems/gem_star.tscn" id="5_star"]
+[ext_resource type="Texture2D" uid="uid://ttg3fl22ajvx" path="res://assets/mine/environment/stones_1.png" id="6_03nme"]
+[ext_resource type="Script" uid="uid://duuyrjfhh35cr" path="res://scripts/ui/qte_circle_ui.gd" id="8_d280x"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kjxxc"]
 size = Vector2(263, 196)
@@ -24,7 +24,7 @@ script = ExtResource("1_rl66i")
 gem_l1_scene = ExtResource("2_03nme")
 gem_l2_scene = ExtResource("3_7mspx")
 gem_l3_scene = ExtResource("4_glmyf")
-gem_l4_scene = ExtResource("5_geml4")
+gem_star_scene = ExtResource("5_star")
 drop_rate_l2 = 25.0
 drop_rate_l3 = 5.0
 luck = 0.3
@@ -60,4 +60,6 @@ offset_left = -75.0
 offset_top = -250.0
 offset_right = 75.0
 offset_bottom = -100.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("8_d280x")

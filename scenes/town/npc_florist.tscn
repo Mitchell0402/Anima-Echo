@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://dpq2mu2tqdg06"]
+
+[ext_resource type="Script" uid="uid://cr2fd2px8hnlw" path="res://scripts/town/npc_base.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://tl44eita8pxa" path="res://assets/props/npc_identifier_sprites_alpha.png" id="2_wbv2r"]
+
+[node name="NPC_Florist" type="Node2D" unique_id=1558701450]
+script = ExtResource("1_script")
+npc_id = "florist"
+npc_display_name = "花店少女"
+
+[node name="NameLabel" type="Label" parent="." unique_id=523761018]
+offset_left = -32.0
+offset_top = -83.0
+offset_right = 32.0
+offset_bottom = -60.0
+text = "花店少女"
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1513537604]
+position = Vector2(0, -26)
+scale = Vector2(0.07, 0.07)
+texture = ExtResource("2_wbv2r")

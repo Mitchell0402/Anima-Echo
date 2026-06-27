@@ -65,7 +65,7 @@ Examples (existing):
 
 - `assets/mine/characters/player/Sword_Walk_with_shadow.png`
 - `assets/mine/enemies/gnoll/Gnoll1_Attack_with_shadow.png`
-- `assets/town/npcs/npc_miner_sprites.png`
+- `assets/props/npc_miner_alpha.png`
 
 Examples (planned, not yet drawn):
 

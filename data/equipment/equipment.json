@@ -1,0 +1,205 @@
+{
+  "equipment": [
+    {
+      "id": "greedy_pickaxe",
+      "name": "贪欲镐",
+      "description": "冰冷而沉重的镐子，每一次挥下都像是偷走大地的呼吸。",
+      "alignment": "evil",
+      "slot": "weapon",
+      "cost": 800,
+      "unlock": "sold_star_ge_2",
+      "effects": {
+        "noise_reduction": 0.20,
+        "rare_drop_bonus": 0.15
+      },
+      "obtain": "buy"
+    },
+    {
+      "id": "flesh_talisman",
+      "name": "血肉护符",
+      "description": "将星辰矿碎片嵌入兽骨制成的护身符。它在胸口搏动——像一颗不属于你的心脏。",
+      "alignment": "evil",
+      "slot": "charm",
+      "cost": 600,
+      "unlock": "sold_star_ge_2",
+      "effects": {
+        "damage_reduction": 0.25
+      },
+      "obtain": "buy"
+    },
+    {
+      "id": "burden_pouch",
+      "name": "负重囊",
+      "description": "用旧矿袋改制的腰包。重了，但不再那么重了。",
+      "alignment": "evil",
+      "slot": "accessory",
+      "cost": 400,
+      "unlock": "sold_star_ge_2",
+      "effects": {
+        "weight_penalty_reduction": 0.50
+      },
+      "obtain": "buy"
+    },
+    {
+      "id": "calm_stone",
+      "name": "静心石",
+      "description": "花店少女回赠的一块小小石头。靠近掩体时，怪物会困惑地扭头走开。",
+      "alignment": "good",
+      "slot": "accessory",
+      "cost": 0,
+      "unlock": "gifted_star_ge_2_affection_50",
+      "effects": {
+        "cover_deaggro_after": 2.0
+      },
+      "obtain": "gift",
+      "gifted_by": "florist"
+    },
+    {
+      "id": "recall_shard",
+      "name": "回溯碎片",
+      "description": "一块包在碎布中的暖黄色晶片。上面刻了一行小字：「还给你，还给我。」",
+      "alignment": "good",
+      "slot": "accessory",
+      "cost": 0,
+      "unlock": "gifted_star_ge_2_affection_50",
+      "effects": {
+        "death_keep_backpack": true,
+        "one_shot": true
+      },
+      "obtain": "gift",
+      "gifted_by": "florist"
+    },
+    {
+      "id": "empathy_aura",
+      "name": "共情光环",
+      "description": "一种说不出缘由的平静围绕着你。怪物似乎没那么容易被你惊扰了。",
+      "alignment": "good",
+      "slot": "charm",
+      "cost": 0,
+      "unlock": "gifted_star_ge_2_affection_50",
+      "effects": {
+        "innate_noise_reduction": 0.10,
+        "walk_noise_reduction": 0.50
+      },
+      "obtain": "gift",
+      "gifted_by": "florist"
+    },
+    {
+      "id": "silent_pick_l1",
+      "name": "降噪镐 L1",
+      "description": "普通镐头裹了一层布。稍微安静了一点。",
+      "alignment": "neutral",
+      "slot": "weapon",
+      "cost": 50,
+      "upgrade_to": "silent_pick_l2",
+      "effects": {
+        "noise_reduction": 0.15
+      },
+      "obtain": "buy"
+    },
+    {
+      "id": "silent_pick_l2",
+      "name": "降噪镐 L2",
+      "description": "加装了橡胶握柄和减震绑带。挥击声压制到了最低。",
+      "alignment": "neutral",
+      "slot": "weapon",
+      "cost": 150,
+      "upgrade_to": "silent_pick_l3",
+      "effects": {
+        "noise_reduction": 0.30
+      },
+      "obtain": "buy"
+    },
+    {
+      "id": "silent_pick_l3",
+      "name": "降噪镐 L3",
+      "description": "大师级消音镐。击打矿石时，只留下一声闷响。",
+      "alignment": "neutral",
+      "slot": "weapon",
+      "cost": 400,
+      "upgrade_to": null,
+      "effects": {
+        "noise_reduction": 0.50
+      },
+      "obtain": "buy"
+    },
+    {
+      "id": "expanded_bag_l1",
+      "name": "扩容背包 L1",
+      "description": "加了几层口袋的帆布背包。还能再装一点。",
+      "alignment": "neutral",
+      "slot": "bag",
+      "cost": 50,
+      "upgrade_to": "expanded_bag_l2",
+      "effects": {
+        "hotbar_slots": 4
+      },
+      "obtain": "buy"
+    },
+    {
+      "id": "expanded_bag_l2",
+      "name": "扩容背包 L2",
+      "description": "翻毛皮矿工背包，带金属搭扣。很能装。",
+      "alignment": "neutral",
+      "slot": "bag",
+      "cost": 150,
+      "upgrade_to": "expanded_bag_l3",
+      "effects": {
+        "hotbar_slots": 8
+      },
+      "obtain": "buy"
+    },
+    {
+      "id": "expanded_bag_l3",
+      "name": "扩容背包 L3",
+      "description": "坚固的钢架外骨骼背包。你可以在矿洞里待一整天了。",
+      "alignment": "neutral",
+      "slot": "bag",
+      "cost": 400,
+      "upgrade_to": null,
+      "effects": {
+        "hotbar_slots": 12
+      },
+      "obtain": "buy"
+    },
+    {
+      "id": "precision_charm_l1",
+      "name": "精准护符 L1",
+      "description": "一枚锈铜护身符，拇指轻轻摩挲就能集中注意力。",
+      "alignment": "neutral",
+      "slot": "charm",
+      "cost": 50,
+      "upgrade_to": "precision_charm_l2",
+      "effects": {
+        "qte_zone_bonus": 8
+      },
+      "obtain": "buy"
+    },
+    {
+      "id": "precision_charm_l2",
+      "name": "精准护符 L2",
+      "description": "银制护符，刻了细密的同心圆。预判变得像本能一样。",
+      "alignment": "neutral",
+      "slot": "charm",
+      "cost": 150,
+      "upgrade_to": "precision_charm_l3",
+      "effects": {
+        "qte_zone_bonus": 16
+      },
+      "obtain": "buy"
+    },
+    {
+      "id": "precision_charm_l3",
+      "name": "精准护符 L3",
+      "description": "秘银护符，两侧各嵌一颗星尘残渣。指针再也不抖了。",
+      "alignment": "neutral",
+      "slot": "charm",
+      "cost": 400,
+      "upgrade_to": null,
+      "effects": {
+        "qte_zone_bonus": 25
+      },
+      "obtain": "buy"
+    }
+  ]
+}

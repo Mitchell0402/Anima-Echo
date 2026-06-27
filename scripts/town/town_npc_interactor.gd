@@ -1,12 +1,12 @@
 extends Node2D
 
-const NPC_IDS: Array[String] = ["miner", "identifier", "buyer", "task_clerk"]
+const NPC_IDS: Array[String] = ["blacksmith", "florist", "buyer", "elder"]
 
 var _npc_positions := {
-	"miner": Vector2(250, 220),
+	"blacksmith": Vector2(250, 220),
 	"buyer": Vector2(900, 220),
-	"task_clerk": Vector2(560, 430),
-	"identifier": Vector2(910, 575)
+	"elder": Vector2(560, 430),
+	"florist": Vector2(910, 575)
 }
 
 

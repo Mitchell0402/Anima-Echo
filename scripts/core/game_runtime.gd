@@ -9,6 +9,9 @@ const CustomerShopServiceScript = preload("res://scripts/economy/customer_shop_s
 const IdentificationServiceScript = preload("res://scripts/economy/identification_service.gd")
 const NegotiationServiceScript = preload("res://scripts/economy/negotiation_service.gd")
 const TaskServiceScript = preload("res://scripts/economy/task_service.gd")
+const MoralityTrackerScript = preload("res://scripts/core/morality_tracker.gd")
+const NpcAffectionScript = preload("res://scripts/narrative/npc_affection.gd")
+const EquipmentSystemScript = preload("res://scripts/player/equipment_system.gd")
 
 const HOTBAR_CAPACITY: int = 12
 const HOTBAR_DEFAULT_MAX_ITEMS: int = 0  # 0 = no cap; the hotbar is bounded only by slot capacity.
@@ -27,6 +30,9 @@ var identification_service: Object
 var negotiation_service: Object
 var shop_service: Object
 var task_service: Object
+var morality_tracker: Object
+var npc_affection: Object
+var equipment_system: Object
 var customer_remaining_budget: Dictionary = {}  # customer_id -> int
 
 signal mine_run_started
@@ -60,7 +66,12 @@ func initialize_for_new_game() -> Dictionary:
 	shop_service = CustomerShopServiceScript.new(catalog, transactions, negotiation_service)
 	task_service = TaskServiceScript.new(catalog, transactions, event_bus)
 	task_service.set_source_collection(warehouse, "warehouse")
+	task_service.accept_task("task_talk_to_townspeople")
 	task_service.accept_task("task_first_identification")
+	morality_tracker = MoralityTrackerScript.new()
+	npc_affection = NpcAffectionScript.new()
+	equipment_system = EquipmentSystemScript.new()
+	equipment_system.load_data()
 	return {"ok": true}
 
 
@@ -147,6 +158,9 @@ func shutdown() -> void:
 	if task_service != null and task_service.has_method("dispose"):
 		task_service.dispose()
 	task_service = null
+	morality_tracker = null
+	npc_affection = null
+	equipment_system = null
 	shop_service = null
 	negotiation_service = null
 	identification_service = null

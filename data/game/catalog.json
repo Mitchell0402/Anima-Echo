@@ -40,17 +40,17 @@
 	  "tags": ["raw", "geode", "mine"]
 	},
 	{
-	  "id": "raw_anomalous_geode",
-	  "name": "Anomalous Geode",
-	  "description": "The miner who found this one refuses to go back to the same wall. It is cold in the hand and warm nowhere else.",
+	  "id": "raw_star_geode",
+	  "name": "Warm Geode",
+	  "description": "A palm-sized stone that feels warm to the touch, as if something alive is breathing inside. Its surface carries faint ripple marks, waiting to be cracked open.",
 	  "category": "raw_stone",
 	  "rarity": "legendary",
-	  "rarity_weight": 3,
+	  "rarity_weight": 2,
 	  "stack_size": 99,
-	  "base_price": 90,
-	  "weight": 10,
-	  "identify_table": "anomalous_geode",
-	  "tags": ["raw", "geode", "mine", "volatile"]
+	  "base_price": 120,
+	  "weight": 12,
+	  "identify_table": "star_geode",
+	  "tags": ["raw", "geode", "mine", "sensitive", "star"]
 	},
 	{
 	  "id": "copper_nugget",
@@ -139,6 +139,17 @@
 	  "stack_size": 99,
 	  "base_price": 340,
 	  "tags": ["ancient", "sensitive"]
+	},
+	{
+	  "id": "star_crystal",
+	  "name": "Star Crystal",
+	  "description": "A crystal born from human essence, warm and pulsing with a faint heartbeat. These are the stolen emotions, memories, and futures of the townspeople — crystallized by the slumbering entity beneath the mine. Every shard carries a life not yet lived.",
+	  "category": "mineral",
+	  "rarity": "legendary",
+	  "rarity_weight": 1,
+	  "stack_size": 99,
+	  "base_price": 500,
+	  "tags": ["cosmic", "sensitive", "star"]
 	}
   ],
   "loot_tables": [
@@ -153,10 +164,9 @@
 	{
 	  "id": "mine_wall_deep",
 	  "entries": [
-		{"item_id": "raw_common_geode", "quantity": 1, "weight": 35},
+		{"item_id": "raw_common_geode", "quantity": 1, "weight": 30},
 		{"item_id": "raw_fine_geode", "quantity": 1, "weight": 40},
-		{"item_id": "raw_rare_geode", "quantity": 1, "weight": 20},
-		{"item_id": "raw_anomalous_geode", "quantity": 1, "weight": 5}
+		{"item_id": "raw_rare_geode", "quantity": 1, "weight": 30}
 	  ]
 	}
   ],
@@ -164,38 +174,39 @@
 	{
 	  "id": "common_geode",
 	  "entries": [
-		{"item_id": "copper_nugget", "quantity": 1, "weight": 50},
+		{"item_id": "copper_nugget", "quantity": 1, "weight": 49},
 		{"item_id": "iron_shard", "quantity": 1, "weight": 35},
 		{"item_id": "silver_vein", "quantity": 1, "weight": 12},
-		{"item_id": "crystal_bloom", "quantity": 1, "weight": 3}
+		{"item_id": "crystal_bloom", "quantity": 1, "weight": 3},
+		{"item_id": "star_crystal", "quantity": 1, "weight": 1}
 	  ]
 	},
 	{
 	  "id": "fine_geode",
 	  "entries": [
-		{"item_id": "iron_shard", "quantity": 1, "weight": 34},
+		{"item_id": "iron_shard", "quantity": 1, "weight": 33},
 		{"item_id": "silver_vein", "quantity": 1, "weight": 30},
 		{"item_id": "crystal_bloom", "quantity": 1, "weight": 24},
 		{"item_id": "gold_vein", "quantity": 1, "weight": 10},
-		{"item_id": "moonlit_crystal", "quantity": 1, "weight": 2}
+		{"item_id": "moonlit_crystal", "quantity": 1, "weight": 2},
+		{"item_id": "star_crystal", "quantity": 1, "weight": 1}
 	  ]
 	},
 	{
 	  "id": "rare_geode",
 	  "entries": [
-		{"item_id": "silver_vein", "quantity": 1, "weight": 30},
+		{"item_id": "silver_vein", "quantity": 1, "weight": 29},
 		{"item_id": "gold_vein", "quantity": 1, "weight": 25},
-		{"item_id": "crystal_bloom", "quantity": 1, "weight": 25},
+		{"item_id": "crystal_bloom", "quantity": 1, "weight": 24},
 		{"item_id": "moonlit_crystal", "quantity": 1, "weight": 15},
-		{"item_id": "star_fragment", "quantity": 1, "weight": 5}
+		{"item_id": "star_fragment", "quantity": 1, "weight": 5},
+		{"item_id": "star_crystal", "quantity": 1, "weight": 2}
 	  ]
 	},
 	{
-	  "id": "anomalous_geode",
+	  "id": "star_geode",
 	  "entries": [
-		{"item_id": "moonlit_crystal", "quantity": 1, "weight": 45},
-		{"item_id": "star_fragment", "quantity": 1, "weight": 35},
-		{"item_id": "memory_core", "quantity": 1, "weight": 20}
+		{"item_id": "star_crystal", "quantity": 1, "weight": 100}
 	  ]
 	}
   ],
@@ -226,6 +237,21 @@
 	}
   ],
   "tasks": [
+	{
+	  "id": "task_talk_to_townspeople",
+	  "name": "小镇初识",
+	  "description": "与四位小镇居民聊聊天，了解这个地方。",
+	  "objectives": [
+		{"id": "elder", "type": "event_count", "event": "npc_talked_elder", "count": 1},
+		{"id": "blacksmith", "type": "event_count", "event": "npc_talked_blacksmith", "count": 1},
+		{"id": "florist", "type": "event_count", "event": "npc_talked_florist", "count": 1},
+		{"id": "buyer", "type": "event_count", "event": "npc_talked_buyer", "count": 1}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_common_geode", "quantity": 2}
+	  ],
+	  "currency_reward": 30
+	},
 	{
 	  "id": "task_first_identification",
 	  "name": "First Reveal",
@@ -261,6 +287,65 @@
 		{"item_id": "raw_fine_geode", "quantity": 2}
 	  ],
 	  "currency_reward": 30
+	},
+	{
+	  "id": "daily_copper_run",
+	  "name": "铜矿订单",
+	  "description": "交付铜块 x5",
+	  "objectives": [
+		{"id": "deliver_copper5", "type": "deliver_item", "item_id": "copper_nugget", "count": 5}
+	  ],
+	  "rewards": [{"item_id": "raw_common_geode", "quantity": 1}],
+	  "currency_reward": 80,
+	  "daily_pool": [true]
+	},
+	{
+	  "id": "daily_iron_forge",
+	  "name": "铁匠的急单",
+	  "description": "交付铁片 x3",
+	  "objectives": [
+		{"id": "deliver_iron3", "type": "deliver_item", "item_id": "iron_shard", "count": 3}
+	  ],
+	  "rewards": [{"item_id": "raw_fine_geode", "quantity": 1}],
+	  "currency_reward": 120,
+	  "daily_pool": [true]
+	},
+	{
+	  "id": "daily_silver_chain",
+	  "name": "珠宝匠的银链",
+	  "description": "交付银脉 x2",
+	  "objectives": [
+		{"id": "deliver_silver2", "type": "deliver_item", "item_id": "silver_vein", "count": 2}
+	  ],
+	  "rewards": [{"item_id": "raw_rare_geode", "quantity": 1}],
+	  "currency_reward": 150,
+	  "daily_pool": [true]
 	}
+  ],
+  "night_customers": [
+    {
+      "id": "night_traveler_lux",
+      "name": "Lux the Traveler",
+      "price_multiplier": 1.40,
+      "preferred_tags": ["crystal", "cosmic"],
+      "rejected_tags": ["metal"],
+      "budget": 400
+    },
+    {
+      "id": "night_smuggler_ven",
+      "name": "Ven the Smuggler",
+      "price_multiplier": 1.35,
+      "preferred_tags": ["metal", "ancient"],
+      "rejected_tags": ["safe"],
+      "budget": 500
+    },
+    {
+      "id": "night_collector_iria",
+      "name": "Iria the Oddity Collector",
+      "price_multiplier": 1.55,
+      "preferred_tags": ["jeweler", "star"],
+      "rejected_tags": [],
+      "budget": 600
+    }
   ]
 }

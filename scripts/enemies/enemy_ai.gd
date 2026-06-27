@@ -101,6 +101,7 @@ const NOISE_POLL_INTERVAL: float = 0.1
 
 @onready var sprite: AnimatedSprite2D = _resolve_sprite()
 @onready var _noise: Node = get_node_or_null("/root/NoiseSystem")
+@onready var _stability: Node = get_node_or_null("/root/StabilitySystem")
 
 func _resolve_sprite() -> AnimatedSprite2D:
 	if has_node("AnimatedSprite2D"):
@@ -171,7 +172,7 @@ func _update_exposure(delta: float) -> bool:
 		return false
 
 	var dist: float = global_position.distance_to(player.global_position)
-	if dist <= exposure_range:
+	if dist <= _effective_exposure_range():
 		_exposure_timer += delta
 		if _exposure_timer >= exposure_confirm_time:
 			print("[Enemy] ⚡ 暴露确认，开始猎杀")
@@ -197,7 +198,7 @@ func _update_patrol_auditory(delta: float) -> void:
 		return
 	_noise_poll = 0.0
 
-	var noise: Dictionary = _noise.get_audible_noise(global_position, detection_range)
+	var noise: Dictionary = _noise.get_audible_noise(global_position, _effective_detection_range())
 	if noise.is_empty():
 		return
 
@@ -205,7 +206,7 @@ func _update_patrol_auditory(delta: float) -> void:
 	if _noise_origin_block_timer > 0.0 and origin.distance_to(_blocked_noise_origin) < 30.0:
 		return
 
-	var threshold: float = _patrol_noise_threshold(noise["distance"])
+	var threshold: float = _effective_noise_threshold(noise["distance"])
 	if noise["loudness"] < threshold:
 		return
 
@@ -222,7 +223,7 @@ func _update_suspect(delta: float) -> void:
 		return
 
 	var dist: float = global_position.distance_to(player.global_position)
-	if dist > suspect_range:
+	if dist > _effective_suspect_range():
 		_suspect_timer = 0.0
 		return
 
@@ -230,7 +231,7 @@ func _update_suspect(delta: float) -> void:
 		return
 
 	# 玩家跑步声（来自玩家本体）
-	var loudness: float = _noise.get_loudest_from_source(global_position, player, suspect_range)
+	var loudness: float = _noise.get_loudest_from_source(global_position, player, _effective_suspect_range())
 	# 挖矿是高噪音的暴露行为：调查/搜索阶段范围内挖矿直接视作可疑信号
 	if player.has_method("is_mining") and player.is_mining():
 		loudness = max(loudness, _noise.MINE)
@@ -248,6 +249,26 @@ func _patrol_noise_threshold(distance: float) -> float:
 		return max_noise_threshold
 	var t: float = clamp(distance / detection_range, 0.0, 1.0)
 	return min_noise_threshold + (max_noise_threshold - min_noise_threshold) * t
+
+func _effective_exposure_range() -> float:
+	if _stability and _stability.has_method("get_detection_range_multiplier"):
+		return exposure_range * _stability.get_detection_range_multiplier()
+	return exposure_range
+
+func _effective_detection_range() -> float:
+	if _stability and _stability.has_method("get_detection_range_multiplier"):
+		return detection_range * _stability.get_detection_range_multiplier()
+	return detection_range
+
+func _effective_suspect_range() -> float:
+	if _stability and _stability.has_method("get_detection_range_multiplier"):
+		return suspect_range * _stability.get_detection_range_multiplier()
+	return suspect_range
+
+func _effective_noise_threshold(distance: float) -> float:
+	if _stability and _stability.has_method("get_noise_threshold_multiplier"):
+		return _patrol_noise_threshold(distance) * _stability.get_noise_threshold_multiplier()
+	return _patrol_noise_threshold(distance)
 
 # ============ 状态行为 ============
 
@@ -362,7 +383,13 @@ func _resolve_attack_hit() -> void:
 	if player.has_method("take_hit"):
 		player.take_hit(global_position, knockback_force)
 	if player.has_method("take_damage"):
-		player.take_damage(attack_damage)
+		var dmg: float = attack_damage
+		var rt: Node = get_node_or_null("/root/GameRuntime")
+		if rt:
+			var esys: Object = rt.get("equipment_system")
+			if esys:
+				dmg *= (1.0 - float(esys.get_damage_reduction()))
+		player.take_damage(maxf(1.0, dmg))
 	print("[Enemy] 🗡️ 命中玩家")
 
 func _search(delta: float) -> void:

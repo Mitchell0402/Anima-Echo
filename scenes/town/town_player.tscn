@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://c3ypvuc2p0k1h"]
+
+[ext_resource type="Script" uid="uid://c7dcwuej8oayq" path="res://scripts/town/town_player_controller.gd" id="1_script"]
+[ext_resource type="SpriteFrames" uid="uid://0paq516vlwv3" path="res://assets/mine/characters/player/main_char_sprite_frames.tres" id="2_frames"]
+
+[node name="TownPlayer" type="Node2D" unique_id=1569191181]
+script = ExtResource("1_script")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=450142431]
+texture_filter = 1
+position = Vector2(0, -20)
+scale = Vector2(1.75, 1.75)
+sprite_frames = ExtResource("2_frames")
+animation = &"death_b"
+
+[node name="GameCamera" type="Camera2D" parent="." unique_id=601582084]
+limit_left = 0
+limit_top = 0
+limit_right = 1675
+limit_bottom = 941

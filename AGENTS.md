@@ -26,6 +26,7 @@ At the start of every new task, fresh conversation, or worktree session:
    * `docs/architecture.md`
    * `docs/current_tasks.md`
    * `docs/testing.md`
+   * `docs/specs/narrative_design.md` — **mandatory**: the complete narrative/worldbuilding design that every agent must understand before editing any gameplay, NPC, or town-scene files.
    * `.codex/session-start.md`
 
 4. Summarize before editing:

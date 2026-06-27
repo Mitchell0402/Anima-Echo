@@ -154,7 +154,7 @@ func _runtime_item_id_for_level(level: int) -> String:
 		3:
 			return "raw_rare_geode"
 		4:
-			return "raw_anomalous_geode"
+			return "raw_star_geode"
 		_:
 			return "raw_common_geode"
 

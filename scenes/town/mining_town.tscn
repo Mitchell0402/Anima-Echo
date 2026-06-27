@@ -1,6 +1,63 @@
 [gd_scene format=3 uid="uid://dxjbgwnb1j7cw"]
 
 [ext_resource type="Script" uid="uid://dieycncl74k6o" path="res://scripts/town/mining_town_scene.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://dpicxginqstur" path="res://assets/town/map/town_map.png" id="2"]
+[ext_resource type="PackedScene" uid="uid://bbpld72w603ty" path="res://scenes/town/npc_blacksmith.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://dpq2mu2tqdg06" path="res://scenes/town/npc_florist.tscn" id="4"]
+[ext_resource type="PackedScene" uid="uid://dd5h0o286tldl" path="res://scenes/town/npc_buyer.tscn" id="5"]
+[ext_resource type="PackedScene" uid="uid://cv5cbiaiy8cca" path="res://scenes/town/npc_elder.tscn" id="6"]
+[ext_resource type="Script" uid="uid://2fyxd5uysg2f" path="res://scripts/town/refine_workstation.gd" id="7"]
+[ext_resource type="Texture2D" uid="uid://3aflkmnn0am6" path="res://assets/props/task_board.png" id="7_v0k1h"]
+[ext_resource type="PackedScene" uid="uid://c3ypvuc2p0k1h" path="res://scenes/town/town_player.tscn" id="9"]
 
 [node name="MiningTown" type="Node2D" unique_id=1470820021]
 script = ExtResource("1")
+
+[node name="TownMap" type="TextureRect" parent="." unique_id=215971514]
+offset_left = 3.0
+offset_right = 1675.0
+offset_bottom = 941.0
+texture = ExtResource("2")
+expand_mode = 1
+
+[node name="NPC_Blacksmith" parent="." unique_id=757074099 instance=ExtResource("3")]
+position = Vector2(485, 292)
+
+[node name="NPC_Florist" parent="." unique_id=1681267081 instance=ExtResource("4")]
+position = Vector2(769, 656)
+
+[node name="NPC_Buyer" parent="." unique_id=207225653 instance=ExtResource("5")]
+position = Vector2(1246, 386)
+
+[node name="NPC_Elder" parent="." unique_id=166516499 instance=ExtResource("6")]
+position = Vector2(890, 305)
+
+[node name="TaskBoard" type="Node2D" parent="." unique_id=776540351]
+position = Vector2(610, 372)
+
+[node name="Sprite2D" type="Sprite2D" parent="TaskBoard" unique_id=2057502560]
+texture = ExtResource("7_v0k1h")
+
+[node name="Label" type="Label" parent="TaskBoard" unique_id=2134829215]
+offset_left = -24.0
+offset_top = -51.0
+offset_right = 24.0
+offset_bottom = -28.0
+text = "公告板"
+
+[node name="RefineStation" type="Node2D" parent="." unique_id=1010317600]
+position = Vector2(900, 500)
+script = ExtResource("7")
+
+[node name="Sprite2D" type="Sprite2D" parent="RefineStation" unique_id=777131898]
+scale = Vector2(0.8, 0.8)
+
+[node name="Label" type="Label" parent="RefineStation" unique_id=1399688840]
+offset_left = -20.0
+offset_top = -40.0
+offset_right = -20.0
+offset_bottom = -40.0
+text = "精炼台"
+
+[node name="TownPlayer" parent="." unique_id=165085066 instance=ExtResource("9")]
+position = Vector2(814, 379)

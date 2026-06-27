@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://cv5cbiaiy8cca"]
+
+[ext_resource type="Script" uid="uid://cr2fd2px8hnlw" path="res://scripts/town/npc_base.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://bqt1otagbnhq8" path="res://assets/props/npc_task_clerk_sprites_alpha.png" id="2_wacey"]
+
+[node name="NPC_Elder" type="Node2D" unique_id=423169192]
+script = ExtResource("1_script")
+npc_id = "elder"
+npc_display_name = "守夜老人"
+
+[node name="NameLabel" type="Label" parent="." unique_id=861596575]
+offset_left = -24.0
+offset_top = -85.0
+offset_right = 24.0
+offset_bottom = -62.0
+text = "守夜人"
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=455190772]
+position = Vector2(0, -28)
+scale = Vector2(0.07, 0.07)
+texture = ExtResource("2_wacey")

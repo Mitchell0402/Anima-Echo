@@ -29,6 +29,7 @@ func load_from_path(path: String) -> Dictionary:
 	_index_entries(parsed.get("loot_tables", []), _loot_tables)
 	_index_entries(parsed.get("identify_tables", []), _identify_tables)
 	_index_by_id(parsed.get("customers", []), _customers)
+	_index_by_id(parsed.get("night_customers", []), _customers)
 	_index_by_id(parsed.get("tasks", []), _tasks)
 	if _items.is_empty():
 		return _fail("catalog_items_empty", "Catalog must define at least one item.")
@@ -58,6 +59,13 @@ func get_customer(customer_id: String) -> Dictionary:
 func get_customers() -> Array:
 	return _customers.values().duplicate(true)
 
+func get_night_customers() -> Array:
+	var result: Array = []
+	for c in _customers.values():
+		if str(c.get("id", "")).begins_with("night_"):
+			result.append(c.duplicate(true))
+	return result
+
 
 func get_task(task_id: String) -> Dictionary:
 	return _tasks.get(task_id, {}).duplicate(true)
@@ -65,6 +73,14 @@ func get_task(task_id: String) -> Dictionary:
 
 func get_tasks() -> Array:
 	return _tasks.values().duplicate(true)
+
+func get_tasks_for_pool(pool_key: String) -> Array:
+	var result: Array = []
+	for task in _tasks.values():
+		var pools: Array = task.get(pool_key, [])
+		if not pools.is_empty():
+			result.append(task.duplicate(true))
+	return result
 
 
 func has_item(item_id: String) -> bool:

@@ -8,16 +8,20 @@ const MAX_SEGMENTS: int = 4
 @export var gem_l1_scene: PackedScene
 @export var gem_l2_scene: PackedScene
 @export var gem_l3_scene: PackedScene
-@export var gem_l4_scene: PackedScene
 
-# 爆率配置（在编辑器中可调，加起来建议等于100）
+# 星辰矿原石场景（独立掉落，3% 概率）
+@export var gem_star_scene: PackedScene
+
+# 爆率配置（加起来建议等于100）
 @export var drop_rate_l1: float = 70.0
 @export var drop_rate_l2: float = 20.0
 @export var drop_rate_l3: float = 10.0
-@export var drop_rate_l4: float = 0.0
 
-# ✅ 幸运值：每个段完成后额外爆出一个原石的概率
-@export var luck: float = 0.0  # 0.0~1.0，例如 0.1 = 10% 概率额外爆一个
+# 星辰矿原石独立爆率（每次分段完成时额外判定）
+@export var star_geode_drop_rate: float = 0.03
+
+# 幸运值：每个段完成后额外爆出一个原石的概率
+@export var luck: float = 0.0
 
 var total_segments: int = 0
 var current_progress: float = 0.0
@@ -67,10 +71,8 @@ func _roll_gem_level() -> int:
 		return 1
 	elif roll < drop_rate_l1 + drop_rate_l2:
 		return 2
-	elif roll < drop_rate_l1 + drop_rate_l2 + drop_rate_l3:
-		return 3
 	else:
-		return 4
+		return 3
 
 func _get_gem_scene(level: int) -> PackedScene:
 	match level:
@@ -80,8 +82,6 @@ func _get_gem_scene(level: int) -> PackedScene:
 			return gem_l2_scene
 		3:
 			return gem_l3_scene
-		4:
-			return gem_l4_scene
 		_:
 			return gem_l1_scene
 
@@ -98,6 +98,10 @@ func _spawn_gems_for_segment(segment_index: int) -> void:
 	
 	for j in range(gem_count):
 		_spawn_single_gem(segment_index, j + 1)
+
+	# 星辰矿原石独立判定：每次分段完成时额外 3% 概率爆出
+	if gem_star_scene and randf() < star_geode_drop_rate:
+		_spawn_star_geode()
 
 func _spawn_single_gem(segment_index: int, gem_index: int) -> void:
 	var gem_level = _roll_gem_level()
@@ -126,5 +130,27 @@ func _spawn_single_gem(segment_index: int, gem_index: int) -> void:
 	if gem_instance.has_method("launch"):
 		var horizontal_vel = randf_range(-80, 80)
 		var vertical_vel = randf_range(-50, -20)
+		var velocity = Vector2(horizontal_vel, vertical_vel)
+		gem_instance.launch(velocity)
+
+func _spawn_star_geode() -> void:
+	var gem_instance = gem_star_scene.instantiate()
+	var mine_node = get_parent()
+	var world = mine_node.get_parent()
+	if world == null:
+		world = get_tree().current_scene
+
+	world.add_child(gem_instance)
+
+	var spawn_pos = mine_node.global_position
+	spawn_pos.x += randf_range(-15, 15)
+	spawn_pos.y += randf_range(-10, 5)
+
+	gem_instance.global_position = spawn_pos
+	print("[Mine Debug] ✨ 星辰矿原石掉落！位置: %s" % spawn_pos)
+
+	if gem_instance.has_method("launch"):
+		var horizontal_vel = randf_range(-60, 60)
+		var vertical_vel = randf_range(-40, -15)
 		var velocity = Vector2(horizontal_vel, vertical_vel)
 		gem_instance.launch(velocity)

@@ -3,6 +3,7 @@ extends Node2D
 signal moved(position: Vector2)
 
 @export var speed := 145.0
+@export var run_speed := 290.0
 @export var animation_frame_time := 0.12
 
 var walkable_map: RefCounted
@@ -79,7 +80,7 @@ func get_animation_frame() -> int:
 	return _animation_frame
 
 
-func preview_move(direction: Vector2, delta: float) -> bool:
+func preview_move(direction: Vector2, delta: float, is_running: bool = false) -> bool:
 	if movement_paused:
 		return false
 	direction = _to_cardinal_direction(direction)
@@ -87,8 +88,9 @@ func preview_move(direction: Vector2, delta: float) -> bool:
 		_set_idle_frame()
 		return false
 	facing = _direction_to_facing(direction)
-	_advance_walk_animation(delta)
-	var target := position + direction * speed * delta
+	_advance_move_animation(delta, is_running)
+	var current_speed: float = run_speed if is_running else speed
+	var target := position + direction * current_speed * delta
 	if walkable_map != null and not walkable_map.is_walkable(target):
 		return false
 	position = target
@@ -97,13 +99,11 @@ func preview_move(direction: Vector2, delta: float) -> bool:
 
 
 func _process(delta: float) -> void:
-	# movement_paused is set by the town scene when an overlay (popup or
-	# warehouse) is open. The town scene has a single source of truth for
-	# "should the player be able to move" and we just honour it.
 	if movement_paused:
 		_set_idle_frame()
 		return
-	preview_move(_read_direction(), delta)
+	var is_running: bool = Input.is_key_pressed(KEY_SHIFT)
+	preview_move(_read_direction(), delta, is_running)
 
 
 func _read_direction() -> Vector2:
@@ -135,9 +135,9 @@ func _to_cardinal_direction(direction: Vector2) -> Vector2:
 	return Vector2(0.0, signf(direction.y))
 
 
-func _advance_walk_animation(delta: float) -> void:
+func _advance_move_animation(delta: float, is_running: bool) -> void:
 	if _animated_sprite != null:
-		_play_animated_state("walk")
+		_play_animated_state("run" if is_running else "walk")
 		return
 	if _sprite_layout == "grid":
 		_animation_elapsed += delta

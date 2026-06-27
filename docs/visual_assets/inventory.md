@@ -98,8 +98,7 @@ The file paths follow the `docs/visual_assets.md#naming-convention`:
 - `mine/enemies/` — enemy sprite frames
 - `mine/environment/` — tiles, decor, drop-in mineable nodes
 - `town/map/` — the town background
-- `town/npcs/` — NPC portrait / sprite sheets
-- `props/` — interactive props (minecart, signs, ...)
+- `props/` — interactive props and NPC sprites (task board, minecart, signs, NPC portraits)
 - `ui/icons/` — warehouse slot icons and HUD icons
 
 ## Palettes
@@ -118,12 +117,11 @@ palette.
 
 This section is filled in by the audit workflow (see the appendix
 at the bottom). A future pass lists every file currently on disk in
-`assets/` and either keeps it, downgrades it, or retires it. The
-section is empty in this PR.
+`assets/` and either keeps it, downgrades it, or retires it.
 
 | Path | Sidecar | Palette | Status | Used by | Last reviewed |
 |------|----------|---------|--------|---------|---------------|
-| _example row_ | `Sword_Walk_with_shadow.png.meta.md` | `mine/default` | `implemented` | `scripts/town/mining_town_scene.gd:188` (player sprite frames) | TBD |
+| `assets/props/task_board.png` | `task_board.png.meta.md` | `props-palette` | `implemented` | `scenes/town/mining_town.tscn` (TaskBoard/Sprite2D texture) | 2026-06-27 |
 
 ## Placeholder
 

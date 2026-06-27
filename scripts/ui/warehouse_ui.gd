@@ -1,5 +1,5 @@
 extends CanvasLayer
-## Standalone warehouse UI. Opened by the I key in town. Shows a 6x8 grid
+## Standalone warehouse UI. Opened by the I key in town. Shows a 3x4 grid
 ## of slots backed by GameRuntime.warehouse. Empty slots render as grey.
 ## Occupied slots show the item icon (best effort) and the stack quantity
 ## in the bottom-right corner. Hovering a slot shows a tooltip with the
@@ -22,9 +22,6 @@ const MIN_SLOT_SIZE: float = 32.0
 const MAX_SLOT_SIZE: float = 80.0
 const MIN_PANEL_W: float = 360.0
 const MIN_PANEL_H: float = 280.0
-# The panel aims for 80% of the shorter screen dimension so the UI is
-# readable at any resolution. The clamp is what makes the minimum-size
-# guarantee work: even at 800x450 the panel will still be at least 360x280.
 const PANEL_SCALE: float = 0.8
 
 var _panel: PanelContainer
@@ -49,13 +46,19 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_on_viewport_resized)
 
 
+func _center_panel() -> void:
+	if _panel == null:
+		return
+	var panel_size: Vector2 = _compute_panel_size()
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	_panel.position = (vp - panel_size) / 2.0
+	_panel.custom_minimum_size = panel_size
+	_panel.size = panel_size
+
+
 func _compute_slot_size() -> float:
-	# The slot is sized to make 6 columns fit in 80% of the shorter
-	# viewport dimension. This keeps the panel centered and readable
-	# on a wide range of resolutions.
 	var vp: Vector2 = get_viewport().get_visible_rect().size
 	var panel_w_target: float = maxf(vp.x * PANEL_SCALE, MIN_PANEL_W)
-	# Solve: panel_w = COLS * slot + (COLS - 1) * SLOT_GAP + 2 * PANEL_PADDING
 	var inner_w: float = panel_w_target - 2.0 * PANEL_PADDING - float(COLS - 1) * SLOT_GAP
 	var raw: float = inner_w / float(COLS)
 	return clampf(raw, MIN_SLOT_SIZE, MAX_SLOT_SIZE)
@@ -72,12 +75,9 @@ func _compute_panel_size() -> Vector2:
 
 
 func _on_viewport_resized() -> void:
-	# Re-layout even if not currently visible so the next open is fresh.
 	_slot_size = _compute_slot_size()
 	if _panel != null:
-		var panel_size: Vector2 = _compute_panel_size()
-		_panel.custom_minimum_size = panel_size
-		_panel.size = panel_size
+		_center_panel()
 		_rebuild_slot_sizes()
 
 
@@ -106,13 +106,11 @@ func _build() -> void:
 	add_child(_overlay)
 	# Compute the slot size for the current viewport before laying out.
 	_slot_size = _compute_slot_size()
-	# Panel
+	# Panel — manually centered (PRESET_CENTER anchor offsets don't auto-update
+	# when size changes, leading to misalignment).
 	_panel = PanelContainer.new()
-	_panel.set_anchors_preset(Control.PRESET_CENTER)
-	var panel_size: Vector2 = _compute_panel_size()
-	_panel.custom_minimum_size = panel_size
-	_panel.size = panel_size
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_center_panel()
 	add_child(_panel)
 	# Title + grid + footer layout.
 	var root: VBoxContainer = VBoxContainer.new()
@@ -129,7 +127,7 @@ func _build() -> void:
 	_grid.add_theme_constant_override("v_separation", int(SLOT_GAP))
 	# Force the grid to its expected minimum width so the panel does not
 	# collapse to a narrower size when the GridContainer auto-fits.
-	_grid.custom_minimum_size = Vector2(panel_size.x - 2.0 * PANEL_PADDING,
+	_grid.custom_minimum_size = Vector2(_compute_panel_size().x - 2.0 * PANEL_PADDING,
 		TITLE_HEIGHT + float(ROWS) * _slot_size + float(ROWS - 1) * SLOT_GAP + FOOTER_HEIGHT)
 	root.add_child(_grid)
 	for i in range(COLS * ROWS):
@@ -182,15 +180,13 @@ func _build_slot() -> Panel:
 func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_pressed():
 		return
-	# Open / close via I or Esc.
+	# Open / close via I key only. Esc is reserved for the settings menu.
 	var is_toggle: bool = event.is_action_pressed("toggle_warehouse")
-	var is_cancel: bool = event.is_action_pressed("ui_cancel")
-	if not is_toggle and not is_cancel:
+	if not is_toggle:
 		return
 	if _is_open:
 		hide_warehouse()
 	else:
-		# Open only in town (or any non-mine scene).
 		var runtime: Node = get_node_or_null("/root/GameRuntime")
 		if runtime != null and runtime.has_method("is_in_mine_scene") and runtime.is_in_mine_scene():
 			return
@@ -203,13 +199,9 @@ func is_open() -> bool:
 
 
 func show_warehouse() -> void:
-	# Re-layout on every open in case the viewport has changed since the
-	# last open. _compute_slot_size is cheap (one division + clamp).
 	_slot_size = _compute_slot_size()
 	if _panel != null:
-		var panel_size: Vector2 = _compute_panel_size()
-		_panel.custom_minimum_size = panel_size
-		_panel.size = panel_size
+		_center_panel()
 		_rebuild_slot_sizes()
 	_refresh_slots()
 	visible = true
@@ -239,6 +231,7 @@ func _refresh_slots() -> void:
 				var qty: int = int(warehouse.count_item(item_id))
 				ordered.append({"item_id": item_id, "quantity": qty})
 	# Fill slots.
+	var db: Node = get_node_or_null("/root/ItemDatabase")
 	for i in range(_grid.get_child_count()):
 		var slot: Panel = _grid.get_child(i)
 		var icon: TextureRect = slot.get_node("Icon")
@@ -246,26 +239,28 @@ func _refresh_slots() -> void:
 		var data: Dictionary = ordered[i] if i < ordered.size() else {}
 		var item_id: String = str(data.get("item_id", ""))
 		var quantity: int = int(data.get("quantity", 0))
+		# Clear out any leftover placeholder from previous refreshes.
+		for c in icon.get_children():
+			c.queue_free()
 		if item_id.is_empty():
 			icon.texture = null
 			count.text = ""
 			slot.modulate = Color(0.85, 0.85, 0.85, 1.0)
 		else:
-			# No per-item texture yet (catalog has no icon mapping); show a
-			# visible placeholder so the player can tell the slot is occupied.
-			# White background with a small color bar at the bottom hinting
-			# at the item's category. This makes the warehouse read as
-			# "stuff is here" even before icon assets exist.
-			var placeholder := ColorRect.new()
-			placeholder.color = Color(0.95, 0.85, 0.45, 1.0)  # warm gold
-			placeholder.set_anchors_preset(Control.PRESET_FULL_RECT)
-			placeholder.size = Vector2(0, 0)
-			icon.add_child(placeholder)
+			var tex: Texture2D = db.get_icon_by_item_id(item_id) if db != null and db.has_method("get_icon_by_item_id") else null
+			if tex != null:
+				icon.texture = tex
+				slot.modulate = Color.WHITE
+			else:
+				# Fallback placeholder for items without icons yet.
+				var placeholder := ColorRect.new()
+				placeholder.color = Color(0.95, 0.85, 0.45, 1.0)
+				placeholder.set_anchors_preset(Control.PRESET_FULL_RECT)
+				placeholder.size = Vector2(0, 0)
+				icon.add_child(placeholder)
+				icon.texture = null
+				slot.modulate = Color.WHITE
 			count.text = str(quantity) if quantity > 1 else ""
-			slot.modulate = Color.WHITE
-			# Stash on the slot for later refreshes so we don't pile up
-			# placeholder children.
-			slot.set_meta("placeholder", placeholder)
 		# Bind the item id onto the slot for hover lookup.
 		slot.set_meta("item_id", item_id)
 
