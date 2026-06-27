@@ -1,177 +1,183 @@
 # Visual Asset Inventory
 
-This file is the **single source of truth** for visual assets in
-Anima Echo. Every PNG in the repository is listed here. Every row
-in this file points at a sidecar `<name>.png.meta.md` next to the
-asset on disk. A reviewer should never load an asset into the game
-without first reading its sidecar.
-
-The naming, status, and style contracts are in
+This file is the single source of truth for visual asset status in Anima
+Echo. The naming, metadata, and review rules are defined in
 [`docs/visual_assets.md`](../visual_assets.md).
 
-## Status legend
+## Status Legend
 
-- `implemented` — file exists, is loaded by the game, the visual
-  is final, and the sidecar is complete.
-- `placeholder` — file exists and is loaded, but is a temporary
-  stand-in that should be replaced. The sidecar records what is
-  wrong.
-- `todo` — file does not exist yet. The row is the AI's work order.
-  A sidecar is recommended for non-trivial assets so the AI
-  generator has the brief up front.
-- `obsolete` — file is no longer used by the game but is kept in
-  the repository for reference. The sidecar records the retirement
-  rationale.
+- `implemented` - exists, is loaded by runtime, and has complete sidecar
+  metadata.
+- `development` - exists under `assets/development/`, has SVG/PNG/meta, and
+  is ready for art review or future integration, but is not loaded by runtime.
+- `placeholder` - exists and is loaded, but is a temporary stand-in.
+- `todo` - does not exist yet; the row is a work order.
+- `obsolete` - no longer used, retained for reference.
 
-## Metadata sidecar schema
+## Metadata Sidecar Schema
 
-Every `implemented` and `placeholder` row has a sidecar next to the
-PNG. The required fields are:
+Required fields for every `implemented`, `development`, and `placeholder`
+PNG:
 
 | Field | Required for | Notes |
-|-------|---------------|-------|
-| `id` | all | Stable name. Must match the row. |
-| `category` | all | `mine` / `town` / `props` / `ui`. |
-| `sub-category` | all | e.g. `characters` / `icons` / `npcs`. |
-| `source` | all | `authored-original` / `ai-generated:<model>` / `asset-library:<src>`. |
-| `license` | all | `CC0` / `CC-BY-4.0` / `CC-BY-SA-4.0` / `CC-BY-NC-4.0` / `CC-BY-NC-SA-4.0` / `project-internal` / `TBD`. `TBD` is rejected by reviewers. |
-| `status` | all | Must match this row. |
-| `width`, `height` | all | Pixel dimensions of the source PNG. |
-| `palette` | all | Name of the 16-colour palette (defined per category in this file). |
-| `description` | all | One paragraph: what the asset depicts and where the game uses it. |
-| `style-notes` | all | Anything an AI regenerator needs: line weight, perspective, animation timing, shadow policy, etc. |
-| `created-by` | all | Author name or AI prompt slug. |
-| `last-reviewed-by` | all | Dev who last verified the sidecar matches the file. |
-| `last-reviewed-on` | all | ISO date of that review. |
-| `audit-on` | `implemented`, `obsolete` | Date the asset was last audited against the style guide. |
-| `replacement` | `placeholder`, `obsolete` | Name of the asset (if any) that replaces this one. |
-
-A sidecar missing any required field is incomplete. A reviewer
-should reject the commit and ask the author to fill the field in.
-
-## Sidecar naming
-
-The sidecar lives in the same directory as the asset and uses the
-asset's relative path with `.meta.md` appended:
-
-- `assets/mine/characters/player/Sword_Walk_with_shadow.png`
-- `assets/mine/characters/player/Sword_Walk_with_shadow.png.meta.md`
-
-So the sidecar for the same file is the file name with
-`.png.meta.md` replacing `.png`.
-
-## Review checklist (before loading an asset)
-
-A reviewer — and the author of any change that adds a new
-`load()` / `preload()` for a visual asset — must walk this list
-before the code change merges:
-
-1. **Inventory row exists** for the file path, with the right
-   status.
-2. **Sidecar exists** at `<file>.png.meta.md` next to the asset.
-3. **All required fields** in the sidecar are filled. In
-   particular `license` is not `TBD` and `status` matches the
-   inventory row.
-4. **`palette`** in the sidecar matches the category's palette in
-   this file.
-5. **`source`** indicates where the asset came from. If it is
-   `ai-generated:<model>`, the sidecar records the exact prompt
-   in `style-notes`.
-6. **`last-reviewed-on`** is within the last 90 days. If the asset
-   is older, the reviewer runs the audit workflow below before
-   merging the code change.
-7. **The intended use in the new code** matches `description` and
-   `style-notes`. A button icon is not a world sprite. A
-   placeholder is not a final asset.
-8. **The asset's resolution** matches the import scale the code
-   expects. The warehouse UI assumes 32×32 px icons; a 256×256 px
-   icon will be sampled down. Document the scale in the PR
-   description if it is not 1:1.
-
-Any `No` answer is a blocker.
-
-## Categories
-
-The file paths follow the `docs/visual_assets.md#naming-convention`:
-
-- `mine/characters/` — player sprite frames
-- `mine/enemies/` — enemy sprite frames
-- `mine/environment/` — tiles, decor, drop-in mineable nodes
-- `town/map/` — the town background
-- `town/npcs/` — NPC portrait / sprite sheets
-- `props/` — interactive props (minecart, signs, ...)
-- `ui/icons/` — warehouse slot icons and HUD icons
+|-------|--------------|-------|
+| `id` | all | Stable name. Must match the manifest or inventory row. |
+| `category` | all | Runtime category or `development`. |
+| `sub-category` | all | Directory/use group, such as `ui/icons` or `mine/environment`. |
+| `source` | all | Origin of the asset. |
+| `vector-source` | all static art | Path to the canonical SVG/vector source. |
+| `runtime-export` | all static art | Path to the exported PNG. For `development`, this is a review export, not a loaded runtime path. |
+| `license` | all | Must not be `TBD`. |
+| `status` | all | Must match this inventory. |
+| `width`, `height` | all | PNG dimensions. |
+| `palette` | all | Palette family below. |
+| `description` | all | What the asset depicts. |
+| `intended-use` | all | Where this asset is meant to be used after review. |
+| `style-notes` | all | Style constraints, references, and generation notes. |
+| `created-by` | all | Author or generator. |
+| `last-reviewed-by` | all | Reviewer or generator author who checked the sidecar. |
+| `last-reviewed-on` | all | ISO date. |
+| `audit-on` | `implemented`, `obsolete` | Last runtime style audit date. |
+| `replacement` | `placeholder`, `obsolete` | Replacement id/path when known. |
 
 ## Palettes
 
-Each category uses one 16-colour palette. The palette is named
-here and referenced by the sidecar's `palette` field.
+- `development/mine` - dark stone, moss green, bone, cyan crystal, and warm
+  highlight palette for mine environment and props.
+- `development/town` - warm grass, wood, path, roof, water, and light trim
+  palette for town map/NPC development art.
+- `development/ui` - parchment, wood, brass, muted green, slate, and cream
+  palette for icons and UI skin.
+- `mine/default`, `town/default`, `ui/default` - legacy runtime palettes.
+  These remain to be audited separately.
 
-- `mine/default` — TBD (set when the first mine asset is audited)
-- `town/default` — TBD (set when the first town asset is audited)
-- `ui/default` — TBD (set when the first UI icon is audited)
+## Planned Development Library
 
-A future pass replaces the `TBD` with the actual colour list per
-palette.
+> **All assets in this section are `todo` — they have not been generated
+> yet.** The 127 assets below were previously generated and committed but
+> were lost in a revert. The design, groupings, palettes, and asset names
+> are preserved here as the work order for re-generation. No files exist
+> under `assets/development/` at this time.
+
+When the generation script is (re)created, the expected outputs are:
+
+- SVG vector sources under `assets/development/`.
+- PNG alpha exports.
+- Metadata sidecars (`<name>.png.meta.md`).
+- `assets/development/manifest.json` _(not yet created)_.
+- Contact sheets under `tmp/development_asset_contact_sheets/`.
+
+The planned generation script is
+`scripts/tools/generate_development_assets.py` _(not yet created)_.
+
+### Summary
+
+| Group | Count | Planned Directory | Status | Runtime loaded? |
+|-------|-------|--------------------|--------|-----------------|
+| Mine environment | 85 | `assets/development/mine/environment/` | `todo` | no |
+| Props | 2 | `assets/development/props/` | `todo` | no |
+| Town map | 1 | `assets/development/town/map/` | `todo` | no |
+| Town NPC static art | 4 | `assets/development/town/npcs/` | `todo` | no |
+| UI icons | 17 | `assets/development/ui/icons/` | `todo` | no |
+| UI skin | 18 | `assets/development/ui/skin/` | `todo` | no |
+| **Total** | **127** | `assets/development/` | `todo` | no |
+
+### Development Asset Groups
+
+The following groups define the 127 planned assets. Each asset name below
+is a `todo` work-order row: when generated, it will produce `<name>.svg`,
+`<name>.png`, and `<name>.png.meta.md` with `status: development`.
+
+#### Mine Environment (85 assets)
+
+Includes `2D_Top_Down_Cave_Tileset`, `bone_1` through `bone_10`,
+`crystal_1` through `crystal_10`, `decor_1` through `decor_20`,
+`greenery_1` through `greenery_10`, `lake`, `land`, `rune_1` through
+`rune_7`, `stones_1` through `stones_10`, `wall_1` through `wall_14`, and
+`raw_anomalous_geode_pickup`.
+
+These are planned review-source replacements for cave tiles, cave decor,
+raw pickups, walls, bones, crystals, stones, greenery, and runes. Most are
+intended as vector mosaics derived from the current high-detail runtime
+art; `raw_anomalous_geode_pickup` will use the `tmp/imagegen` alpha
+reference.
+
+#### Props (2 assets)
+
+Includes `minecart_return_to_town` and `oxygen_pump`.
+
+The minecart is planned to be derived from the current high-detail runtime
+minecart art. The oxygen pump will use the `tmp/imagegen` alpha reference.
+Neither asset will be loaded from `assets/development/`.
+
+#### Town Map And NPCs (5 assets)
+
+Includes `town_map`, `npc_miner_sprites`, `npc_buyer_sprites`,
+`npc_identifier_sprites`, and `npc_task_clerk_sprites`.
+
+The town map is planned as a review-size vector mosaic derived from the
+current town background. NPCs will use the `tmp/imagegen` alpha references.
+
+#### UI Icons (17 assets)
+
+Includes all raw geodes, identified minerals, and HUD/menu icons:
+`raw_common_geode`, `raw_fine_geode`, `raw_rare_geode`,
+`raw_anomalous_geode`, `copper_nugget`, `iron_shard`, `silver_vein`,
+`gold_vein`, `crystal_bloom`, `moonlit_crystal`, `star_fragment`,
+`memory_core`, `warehouse`, `coin`, `oxygen`, `weight`, and `health`.
+
+These will use the `tmp/imagegen` alpha references and are intended for
+future warehouse, shop, HUD, and menu review.
+
+#### UI Skin (18 assets)
+
+Includes `panel_parchment_9slice`, `panel_wood_9slice`,
+`button_normal_9slice`, `button_hover_9slice`, `button_pressed_9slice`,
+`button_disabled_9slice`, `slot_empty`, `slot_filled`, `slot_locked`,
+`tooltip_9slice`, `toast_9slice`, `bar_frame_horizontal`,
+`bar_fill_health`, `bar_fill_oxygen`, `bar_fill_progress`,
+`weight_frame_vertical`, `qte_ring`, and `dialog_nameplate`.
+
+These are planned early vector-authored UI surfaces for later warehouse,
+buy/sell, dialog, toast, HUD, and QTE styling. They will need in-engine UI
+review before runtime adoption.
 
 ## Implemented
 
-This section is filled in by the audit workflow (see the appendix
-at the bottom). A future pass lists every file currently on disk in
-`assets/` and either keeps it, downgrades it, or retires it. The
-section is empty in this PR.
-
-| Path | Sidecar | Palette | Status | Used by | Last reviewed |
-|------|----------|---------|--------|---------|---------------|
-| _example row_ | `Sword_Walk_with_shadow.png.meta.md` | `mine/default` | `implemented` | `scripts/town/mining_town_scene.gd:188` (player sprite frames) | TBD |
+The legacy runtime assets still live under `assets/mine/`, `assets/town/`,
+and `assets/props/`. Their implemented/placeholder audit remains a separate
+pass; this change does not re-grade or replace them.
 
 ## Placeholder
 
-This section lists files that exist and are loaded but are
-temporary stand-ins. The sidecar describes what is wrong, and the
-`Todo` section below carries the matching `todo` row that the AI
-generator should fulfil.
+No placeholder assets are tracked at this time.
 
-| Path | Sidecar | Replaces | Used by | Sidecar status |
-|------|----------|----------|---------|----------------|
-| _empty in this PR_ | | | | |
+## Todo
 
-## Todo (planned, not yet drawn)
-
-This section is the AI's work order. Every row here corresponds to
-a row in the future `Placeholders` section once the asset is drawn.
-
-| Name | Category | Sub-category | Description | Target path | Style notes | Priority |
-|------|----------|--------------|-------------|-------------|--------------|----------|
-| _example_ | `ui` | `icons` | 32×32 px gold-brown rounded pebble | `assets/ui/icons/raw_common_geode.png` | transparent background, no shadow, palette `ui/default` | P1 |
+- **Re-create the generation script** `scripts/tools/generate_development_assets.py` and regenerate the 127 planned development assets listed above.
+- Review contact sheets under `tmp/development_asset_contact_sheets/` once assets are regenerated.
+- Decide which development assets should graduate into runtime paths.
+- Add sidecars for legacy player and enemy animation sheets in a separate
+  animation metadata pass.
+- When wiring begins, copy/export approved art out of `assets/development/`
+  into the appropriate runtime root and update the row status.
+- Audit every existing `assets/**/*.png` and add a `<name>.png.meta.md`
+  sidecar next to each (legacy runtime asset audit).
 
 ## Obsolete
 
 | Path | Sidecar | Replaced by | Retirement rationale |
-|------|----------|-------------|---------------------|
+|------|---------|-------------|----------------------|
 | _none yet_ | | | |
 
-## Appendix: keeping the inventory in sync
+## Review Checklist Before Loading An Asset
 
-Until the inventory is auto-generated, the dev updates this file by
-hand. The pattern is:
-
-1. Run `find assets -type f -name "*.png"` to see every committed
-   asset.
-2. Run `find assets -type f -name "*.png.meta.md"` to see every
-   sidecar.
-3. Run `grep -rn "load.*\.png\|preload.*\.png" scripts/ tests/
-   scenes/` to see every load site.
-4. Run the review checklist above for every load site.
-5. Diff the three lists against the tables in this file:
-   - Files in `assets/` but not in any table → audit, grade, add
-     with a sidecar.
-   - Files in `assets/` that have a `placeholder` sidecar that is
-     empty → fill the sidecar in.
-   - Loads with no file → add a `todo` row.
-   - Table rows whose file no longer exists → flip to `obsolete`
-     and move to the obsolete section.
-6. Commit the doc in the same change as any code or asset change.
-
-The script form of this is a follow-up TODO recorded in
-`docs/current_tasks.md`.
+1. Inventory or `assets/development/manifest.json` row exists.
+2. Sidecar exists next to the PNG.
+3. All required fields are filled.
+4. `license` is not `TBD`.
+5. `status` matches the intended use. Runtime-loaded files should not stay
+   `development`.
+6. Intended use matches the new code.
+7. Resolution/import scale matches the runtime target.
+8. `last-reviewed-on` is within 90 days.

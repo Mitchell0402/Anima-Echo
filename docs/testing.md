@@ -42,6 +42,33 @@ Smoke start the mine:
 godot --headless --path . res://scenes/mine/test_scene.tscn --quit-after 3
 ```
 
+## Visual Asset Checks
+
+> **The generation script does not exist yet.** The commands below are the
+> target workflow for when the script and assets are (re)created. All 127
+> planned development assets are currently `todo`.
+
+Regenerate and validate the isolated development art library:
+
+```powershell
+python scripts/tools/generate_development_assets.py
+```
+
+_(Script not yet created.)_ When it exists, this command will write SVG
+sources, PNG alpha exports, sidecar metadata, `assets/development/manifest.json`,
+and contact sheets under `tmp/development_asset_contact_sheets/`.
+
+Before wiring any development art into runtime, confirm no scene or script
+currently loads the isolated source library:
+
+```powershell
+Get-ChildItem -Path scripts,scenes,tests -Recurse -File -Include *.gd,*.tscn,*.tres |
+  Select-String -Pattern "assets/development"
+```
+
+Expected result: no matches (correct today, since `assets/development/` does
+not exist).
+
 ## What The Current Tests Cover
 
 `tests/project/run_all.gd` currently checks:
