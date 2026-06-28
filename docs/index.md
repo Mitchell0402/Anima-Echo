@@ -7,7 +7,7 @@ Anima Echo is a Godot 4.x 2D mining prototype being cleaned up into a baseline f
 - [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md): detailed current project context and prototype notes.
 - [architecture.md](architecture.md): stable module boundaries, scene flow, data flow, and known architecture TODOs.
 - [current_tasks.md](current_tasks.md): current cleanup state, risks, and next practical tasks.
-- [testing.md](testing.md): how to run the existing project checks and manual smoke tests.
+- [testing.md](testing.md): how to run headless project checks, MCP-driven editor/runtime verification, and manual smoke tests.
 - [glossary.md](glossary.md): project-specific terms.
 - [specs/narrative_design.md](specs/narrative_design.md): complete narrative/worldbuilding design — characters, secrets, progression, endings. **Mandatory reading for all agents.**
 - [specs/daily_content_design.md](specs/daily_content_design.md): **player-facing daily content design for Day 1–6**, mapping narrative beats to task flow and system introductions.
