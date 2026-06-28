@@ -24,12 +24,12 @@ var _nearby_npc_id := ""
 var _warehouse_ui = null  # WarehouseUI CanvasLayer. Exposed for freeze checks.
 var _dialogue_ui = null   # DialogueUI CanvasLayer
 var _dialogue_npc_id := ""  # NPC id whose dialogue is currently open
+var _popup_npc_id := ""  # NPC id whose interaction popup is currently open
 var _dialogues_cache: Dictionary = {}
 var _shown_daily_indices: Dictionary = {}  # "npcId_stage" -> int (last index shown)
 var _last_narrative_stage: int = 0
 var _task_board: Node2D
 var _board_prompt: Label
-var _refine_station: Node
 var _mine_entrance: Node
 var _bed: Node
 var _task_panel: PanelContainer
@@ -45,6 +45,7 @@ var _stability_bar: ColorRect
 var _stability_value_label: Label
 var _morality_label: Label
 var _day_info_label: Label
+var _affection_label: Label
 var _night_overlay: ColorRect
 
 
@@ -63,6 +64,7 @@ func _ready() -> void:
 	_refresh_hud("靠近 NPC 后按 E 交谈。按 I 打开仓库。")
 	_check_intro_guidance()
 	_connect_stage_signal()
+	_connect_affection_signal()
 
 
 func _process(_delta: float) -> void:
@@ -84,9 +86,6 @@ func _process(_delta: float) -> void:
 	elif board_nearby:
 		_prompt_label.text = ""
 		_board_prompt.text = "按 E 查看公告板"
-	elif _refine_station and _refine_station.is_nearby(_player.position):
-		_prompt_label.text = "按 E 使用精炼台"
-		_board_prompt.text = ""
 	elif _mine_entrance and _mine_entrance.is_nearby(_player.position):
 		_prompt_label.text = "按 E 进入矿洞"
 		_board_prompt.text = ""
@@ -139,10 +138,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			_open_task_picker_direct()
 			get_viewport().set_input_as_handled()
 			return
-		if _refine_station and _refine_station.is_nearby(_player.position):
-			_open_refine_picker()
-			get_viewport().set_input_as_handled()
-			return
 		if _mine_entrance and _mine_entrance.is_nearby(_player.position):
 			_open_mine_entrance_popup()
 			get_viewport().set_input_as_handled()
@@ -165,9 +160,8 @@ func _setup_scene_refs() -> void:
 					"position": town_npc.position,
 					"node": town_npc,
 				}
-	# Find pre-placed TaskBoard and RefineStation from the scene.
+	# Find pre-placed TaskBoard from the scene.
 	_task_board = get_node_or_null("TaskBoard")
-	_refine_station = get_node_or_null("RefineStation")
 	_mine_entrance = get_node_or_null("MineEntrance")
 	_bed = get_node_or_null("Bed")
 	# Player is pre-placed as a scene instance; wire up the pre-placed
@@ -307,6 +301,29 @@ func _build_ui() -> void:
 	_inventory_label.custom_minimum_size = Vector2(520, 120)
 	layer.add_child(_inventory_label)
 
+	# Bottom-right affection panel
+	var aff_panel := VBoxContainer.new()
+	aff_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	aff_panel.offset_left = -180
+	aff_panel.offset_top = -120
+	aff_panel.offset_right = -12
+	aff_panel.offset_bottom = -12
+	aff_panel.add_theme_constant_override("separation", 2)
+	layer.add_child(aff_panel)
+
+	var aff_header := Label.new()
+	aff_header.text = "◆ 好感度"
+	aff_header.add_theme_font_size_override("font_size", 13)
+	aff_header.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	aff_panel.add_child(aff_header)
+
+	_affection_label = Label.new()
+	_affection_label.text = "守夜老人 0  铁匠青年 0\n花店少女 0  商人 0"
+	_affection_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_affection_label.add_theme_font_size_override("font_size", 12)
+	_affection_label.add_theme_color_override("font_color", Color(0.7, 0.6, 0.9, 1.0))
+	aff_panel.add_child(_affection_label)
+
 	# Task board interaction hint (shown when nearby)
 	_board_prompt = Label.new()
 	_board_prompt.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
@@ -341,12 +358,13 @@ func _open_popup(npc_id: String) -> void:
 	for child in _popup_body.get_children():
 		child.queue_free()
 	_popup.visible = true
+	_popup_npc_id = npc_id
 	_popup_title.text = str(NPC_NAMES.get(npc_id, npc_id))
 	match npc_id:
 		"blacksmith":
 			var is_night_now: bool = _day_cycle != null and _day_cycle.get("is_night")
 			if is_night_now:
-				_add_button("结束夜晚，迎来新的一天", Callable(self, "_end_night"))
+				_add_button("睡到天亮，迎来新一天", Callable(self, "_end_night"))
 			else:
 				var tracker: Object = _runtime.get("morality_tracker") if _runtime else null
 				var stage: int = tracker.get_narrative_stage() if tracker and tracker.has_method("get_narrative_stage") else 0
@@ -370,6 +388,7 @@ func _open_popup(npc_id: String) -> void:
 					var greyed: Button = _add_button(msg, Callable())
 					greyed.disabled = true
 			_add_button("装备商店", Callable(self, "_open_equipment_shop"))
+			_add_button("赠送礼物", Callable(self, "_open_gift_picker"))
 			_add_button("聊聊", Callable(self, "_talk_npc").bind(npc_id))
 		"florist":
 			_open_warehouse_picker(
@@ -388,8 +407,10 @@ func _open_popup(npc_id: String) -> void:
 			var night_now: bool = _day_cycle != null and _day_cycle.get("is_night")
 			if night_now:
 				_add_button("开店（吸引流动客商）", Callable(self, "_open_night_shop"))
+			_add_button("赠送礼物", Callable(self, "_open_gift_picker"))
 			_add_button("聊聊", Callable(self, "_talk_npc").bind(npc_id))
 		"elder":
+			_add_button("赠送礼物", Callable(self, "_open_gift_picker"))
 			_add_button("聊聊", Callable(self, "_talk_npc").bind(npc_id))
 	_add_button("离开", Callable(self, "_close_popup"))
 
@@ -539,7 +560,7 @@ func _enter_mine() -> void:
 		return
 	if not _day_cycle.can_enter_mine():
 		if _day_cycle.get("is_night"):
-			_show_toast("夜晚矿洞已关闭，请先结束夜晚。")
+			_show_toast("傍晚矿洞已关闭，请先休息到天亮。")
 		else:
 			_show_toast("今日下矿次数已用完（%d/%d）。" % [_day_cycle.get("mine_entries_today"), _day_cycle.MAX_MINE_ENTRIES])
 		_close_popup()
@@ -656,6 +677,23 @@ func _on_narrative_stage_changed(_old_stage: int, new_stage: int) -> void:
 		_show_toast(toast)
 
 
+func _connect_affection_signal() -> void:
+	if _runtime == null:
+		return
+	var affection: Object = _runtime.get("npc_affection")
+	if affection and affection.has_signal("threshold_reached"):
+		if not affection.threshold_reached.is_connected(_on_affection_threshold):
+			affection.threshold_reached.connect(_on_affection_threshold)
+
+
+func _on_affection_threshold(npc_id: String, threshold: int) -> void:
+	if threshold == 20:
+		_show_toast("%s对你的态度温和了一些。明天或许会有事找你帮忙。" % NPC_NAMES.get(npc_id, npc_id))
+	elif threshold == 50:
+		_emit_story_event("affection_milestone_50", {"npc_id": npc_id, "value": 50})
+		_show_toast("%s与你成为了挚友。" % NPC_NAMES.get(npc_id, npc_id))
+
+
 # ---- Mine Entrance Popup ----
 
 func _open_mine_entrance_popup() -> void:
@@ -667,7 +705,7 @@ func _open_mine_entrance_popup() -> void:
 	var is_night_now: bool = _day_cycle != null and _day_cycle.get("is_night")
 	if is_night_now:
 		var hint := Label.new()
-		hint.text = "矿洞在夜晚关闭。请先休息到天亮。"
+		hint.text = "矿洞在傍晚关闭。请先休息到天亮。"
 		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_popup_body.add_child(hint)
 		_add_button("离开", Callable(self, "_close_popup"))
@@ -707,41 +745,57 @@ func _open_bed_popup() -> void:
 		child.queue_free()
 	_popup_title.text = "床"
 
-	var is_night_now: bool = _day_cycle != null and _day_cycle.get("is_night")
-	if is_night_now:
-		var desc := Label.new()
-		desc.text = "夜深了。睡到天亮吗？"
-		desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		_popup_body.add_child(desc)
-		_add_button("睡到天亮", Callable(self, "_sleep_to_morning"))
-	else:
-		var desc := Label.new()
-		desc.text = "要提前休息吗？"
-		desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		_popup_body.add_child(desc)
-		_add_button("休息到夜晚", Callable(self, "_rest_to_night"))
+	if _day_cycle == null:
+		_add_button("离开", Callable(self, "_close_popup"))
+		return
+
+	var period: int = _day_cycle.get("time_period")
+	match period:
+		_day_cycle.TimePeriod.MORNING:
+			var desc := Label.new()
+			desc.text = "现在是上午。要休息到下午吗？"
+			desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			_popup_body.add_child(desc)
+			_add_button("休息到下午", Callable(self, "_rest_advance_time"))
+		_day_cycle.TimePeriod.AFTERNOON:
+			var desc := Label.new()
+			desc.text = "现在是下午。要休息到傍晚吗？"
+			desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			_popup_body.add_child(desc)
+			_add_button("休息到傍晚", Callable(self, "_rest_advance_time"))
+		_day_cycle.TimePeriod.EVENING:
+			var desc := Label.new()
+			desc.text = "天黑了。睡到天亮吗？"
+			desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			_popup_body.add_child(desc)
+			_add_button("睡到天亮", Callable(self, "_sleep_to_morning"))
 
 	_add_button("离开", Callable(self, "_close_popup"))
 
 
 # ---- Bed Actions ----
 
-func _rest_to_night() -> void:
+func _rest_advance_time() -> void:
 	if _day_cycle == null:
 		_close_popup()
 		return
-	# Jump directly to night phase without consuming tickets.
-	_day_cycle.on_mine_return()
-	if _stability and _stability.has_method("apply_daily_decay"):
-		_stability.apply_daily_decay()
-	_apply_town_tint()
-	_refresh_hud("")
-	_close_popup()
-	_show_toast("夜幕降临……矿洞已关闭。")
+	_day_cycle.advance_time()
+	var after_period: int = _day_cycle.get("time_period")
+	# If advancing to evening, apply town tint
+	if after_period == _day_cycle.TimePeriod.EVENING:
+		_apply_town_tint()
+		if _stability and _stability.has_method("apply_daily_decay"):
+			_stability.apply_daily_decay()
+		_refresh_hud("")
+		_close_popup()
+		_show_toast("傍晚来临……矿洞已关闭。")
+	else:
+		_refresh_hud("")
+		_close_popup()
+		_show_toast("时间来到%s。" % _day_cycle.get_time_period_name())
 
 
 func _sleep_to_morning() -> void:
-	# Same as _end_night but called from bed
 	_end_night()
 
 
@@ -774,6 +828,8 @@ func _identify_item(item_id: String) -> void:
 	if result.get("ok", false):
 		var mineral_id: String = str(result.get("item_id", ""))
 		if mineral_id == "star_crystal":
+			# Emit star_identified event for story task tracking
+			_emit_story_event("star_identified", {"item_id": mineral_id})
 			# Record first touch in morality tracker
 			var tracker: Object = _runtime.get("morality_tracker")
 			if tracker and tracker.has_method("record_star_touched"):
@@ -894,8 +950,25 @@ func _deliver_task(task_id: String) -> void:
 		_refresh_hud("")
 		_close_popup()
 		return
+	# If this was an NPC affinity task, grant the affection reward.
+	var catalog: Object = _runtime.get("catalog") if _runtime else null
+	if catalog != null:
+		var task: Dictionary = catalog.get_task(task_id)
+		var flags: Array = task.get("flags", [])
+		if "npc" in flags:
+			var npc_id: String = str(task.get("npc_id", ""))
+			var aff_reward: int = int(task.get("affection_reward", 0))
+			if npc_id != "" and aff_reward > 0:
+				var affection2: Object = _runtime.get("npc_affection") if _runtime else null
+				if affection2 and affection2.has_method("modify_affection"):
+					var new_val: int = affection2.modify_affection(npc_id, aff_reward)
+					_show_toast("委托完成！%s好感度 +%d（当前 %d/100）" % [NPC_NAMES.get(npc_id, npc_id), aff_reward, new_val])
 	# Success toast mirrors the in-game reward line.
-	_show_toast("任务奖励已领取。")
+	# If all story tasks are done, remind the player to mine.
+	if task_service.has_method("get_active_story_task_count") and task_service.get_active_story_task_count() == 0:
+		_show_toast("任务奖励已领取。去挖挖矿吧，明天或许有新的任务")
+	else:
+		_show_toast("任务奖励已领取。")
 	# Refresh the warehouse label so the new reward stack shows up.
 	_refresh_hud("")
 	# Rebuild the popup so the now-completed task disappears from the
@@ -948,6 +1021,18 @@ func _show_floating_label(text: String) -> void:
 	)
 
 
+# ---- Story Event Emission ----
+
+## Emit an event through the GameRuntime event bus so the TaskService
+## can track story task progress.
+func _emit_story_event(event_name: String, payload: Dictionary = {}) -> void:
+	if _runtime == null:
+		return
+	var event_bus: Object = _runtime.get("event_bus")
+	if event_bus != null and event_bus.has_method("emit_game_event"):
+		event_bus.emit_game_event(event_name, payload)
+
+
 func _close_popup() -> void:
 	_popup.visible = false
 
@@ -959,6 +1044,7 @@ func _refresh_hud(message: String) -> void:
 	_update_stability_display()
 	_update_morality_display()
 	_update_day_display()
+	_update_affection_display()
 	_refresh_task_panel()
 	var rows: Array[String] = []
 	# Town HUD shows the warehouse contents. The hotbar is the in-mine
@@ -993,9 +1079,15 @@ func _refresh_task_panel() -> void:
 			continue
 		has_any = true
 
-		# Task name
+		# Task name — append (每日) or (委托) hint for daily/npc tasks
 		var name_label := Label.new()
-		name_label.text = str(task.get("name", task_id))
+		var display_name: String = str(task.get("name", task_id))
+		var task_flags: Array = task.get("flags", [])
+		if "daily" in task_flags:
+			display_name += "（每日）"
+		elif "npc" in task_flags:
+			display_name += "（委托）"
+		name_label.text = display_name
 		name_label.add_theme_font_size_override("font_size", 13)
 		name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_task_body.add_child(name_label)
@@ -1023,9 +1115,13 @@ func _refresh_task_panel() -> void:
 
 	if not has_any:
 		var empty := Label.new()
-		empty.text = "暂无任务"
+		if task_service.has_method("get_active_story_task_count") and task_service.get_active_story_task_count() == 0:
+			empty.text = "去挖挖矿吧，明天或许有新的任务"
+			empty.add_theme_color_override("font_color", Color(0.75, 0.7, 0.4, 1.0))
+		else:
+			empty.text = "暂无任务"
+			empty.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 1.0))
 		empty.add_theme_font_size_override("font_size", 12)
-		empty.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 1.0))
 		_task_body.add_child(empty)
 
 
@@ -1041,6 +1137,29 @@ func _task_objective_label(obj_id: String) -> String:
 		"deliver_copper5": return "交付铜块"
 		"deliver_iron3": return "交付铁片"
 		"deliver_silver2": return "交付银脉"
+		"deliver_gold1": return "交付金脉"
+		"deliver_crystal2": return "交付水晶花"
+		"deliver_moonlit1": return "交付月光水晶"
+		"sell_3": return "出售矿物"
+		"identify_2": return "鉴定原石"
+		# NPC quest objective labels
+		"deliver_moonlit_elder": return "交付月光水晶"
+		"deliver_starfrag_elder": return "交付星辰碎片"
+		"deliver_star_elder": return "交付星辰矿"
+		"deliver_copper_smith": return "交付铜块"
+		"deliver_iron_smith": return "交付铁片"
+		"deliver_silver_smith": return "交付银脉"
+		"deliver_gold_smith": return "交付金脉"
+		"deliver_star_smith": return "交付星辰矿"
+		"deliver_crystal_florist": return "交付水晶花"
+		"deliver_starfrag_florist": return "交付星辰碎片"
+		"deliver_moonlit_florist": return "交付月光水晶"
+		"deliver_star_florist": return "交付星辰矿"
+		"deliver_crystal_buyer": return "交付水晶花"
+		"deliver_moonlit_buyer": return "交付月光水晶"
+		"deliver_gold_buyer": return "交付金脉"
+		"deliver_silver_buyer": return "交付银脉"
+		"deliver_star_buyer": return "交付星辰矿"
 	return obj_id
 
 
@@ -1096,6 +1215,8 @@ func _sell_star_crystal() -> void:
 	var tracker: Object = _runtime.get("morality_tracker")
 	if tracker and tracker.has_method("record_star_sold"):
 		tracker.record_star_sold()
+	# Emit star_choice_made for story task tracking
+	_emit_story_event("star_choice_made", {"choice": "sold"})
 	_apply_town_tint()
 	_refresh_hud("")
 	_close_popup()
@@ -1122,6 +1243,8 @@ func _gift_star_crystal() -> void:
 	var tracker: Object = _runtime.get("morality_tracker")
 	if tracker and tracker.has_method("record_star_gifted"):
 		tracker.record_star_gifted()
+	# Emit star_choice_made for story task tracking
+	_emit_story_event("star_choice_made", {"choice": "gifted"})
 	_refresh_hud("")
 	_close_popup()
 
@@ -1215,6 +1338,21 @@ func _talk_npc(npc_id: String) -> void:
 		_show_toast("%s没有说话。" % NPC_NAMES.get(npc_id, npc_id))
 		return
 
+	# ---- Affection-based tone prefix ----
+	# Insert a subtle tone hint before the first dialogue line.
+	# This makes the NPC feel reactive to the player's relationship.
+	var affection: Object = _runtime.get("npc_affection")
+	var aff_val: int = affection.get_affection(npc_id) if affection else 0
+	var tone_line: String = ""
+	if aff_val >= 80:
+		tone_line = "（%s看着你，眼中满是信任。）" % NPC_NAMES.get(npc_id, npc_id)
+	elif aff_val >= 50:
+		tone_line = "（%s微笑着开口。）" % NPC_NAMES.get(npc_id, npc_id)
+	elif aff_val >= 20:
+		tone_line = "（%s朝你点了点头。）" % NPC_NAMES.get(npc_id, npc_id)
+	if not tone_line.is_empty():
+		lines.insert(0, tone_line)
+
 	_dialogue_npc_id = npc_id
 	_ensure_dialogue_ui()
 	if _dialogue_ui:
@@ -1256,6 +1394,7 @@ func _on_dialogue_close() -> void:
 # ---- Gift System ----
 
 func _open_gift_picker() -> void:
+	var npc_id: String = _popup_npc_id
 	var catalog: Object = _runtime.get("catalog")
 	var warehouse: Object = _runtime.get("warehouse")
 	if warehouse == null or catalog == null:
@@ -1263,9 +1402,10 @@ func _open_gift_picker() -> void:
 		return
 	for child in _popup_body.get_children():
 		child.queue_free()
-	_popup_title.text = "赠送礼物给 %s" % NPC_NAMES.get("florist", "花店少女")
+	var npc_name: String = NPC_NAMES.get(npc_id, npc_id)
+	_popup_title.text = "赠送礼物给 %s" % npc_name
 	var hint := Label.new()
-	hint.text = "从仓库选择矿物赠送给花店少女。好感度有上限。"
+	hint.text = "从仓库选择矿物赠送给%s。好感度有上限。" % npc_name
 	_popup_body.add_child(hint)
 	var found := false
 	for stack_variant in warehouse.get_stacks():
@@ -1282,26 +1422,27 @@ func _open_gift_picker() -> void:
 		_add_button("赠送 %s" % label_text, Callable(self, "_do_gift").bind(item_id))
 	if not found:
 		_add_button("仓库里没有可赠送的矿物", Callable())
-	_add_button("返回", Callable(self, "_open_popup").bind("florist"))
+	_add_button("返回", Callable(self, "_open_popup").bind(npc_id))
 
 
 func _do_gift(item_id: String) -> void:
 	if _runtime == null:
 		return
+	var npc_id: String = _popup_npc_id
 	var affection: Object = _runtime.get("npc_affection")
 	if affection == null:
 		_show_toast("好感系统未初始化。")
 		return
-	if not affection.can_gift_today("florist"):
-		_show_toast("今天已经赠送给花店少女了，明天再来吧。")
+	if not affection.can_gift_today(npc_id):
+		_show_toast("今天已经赠送给%s了，明天再来吧。" % NPC_NAMES.get(npc_id, npc_id))
 		_refresh_hud("")
 		_close_popup()
 		return
 
 	# First star crystal gift to florist -> tears narrative
-	if item_id == "star_crystal" and not _runtime.is_florist_first_star_gifted():
+	if item_id == "star_crystal" and npc_id == "florist" and not _runtime.is_florist_first_star_gifted():
 		_runtime.set_florist_first_star_gifted()
-		_dialogue_npc_id = "florist"
+		_dialogue_npc_id = npc_id
 		_close_popup()
 		_ensure_dialogue_ui()
 		var tears_lines: Array[String] = [
@@ -1321,6 +1462,7 @@ func _on_florist_tears_dialogue_done(item_id: String) -> void:
 
 
 func _perform_gift(item_id: String) -> void:
+	var npc_id: String = _popup_npc_id
 	# Determine rarity from item category
 	var affection: Object = _runtime.get("npc_affection")
 	var catalog: Object = _runtime.get("catalog")
@@ -1338,13 +1480,16 @@ func _perform_gift(item_id: String) -> void:
 		_refresh_hud("")
 		_close_popup()
 		return
-	var new_val: int = affection.gift("florist", rarity)
+	var new_val: int = affection.gift(npc_id, rarity)
+	# Emit item_gifted for story task tracking
+	_emit_story_event("item_gifted", {"item_id": item_id, "rarity": rarity, "npc_id": npc_id})
 	# Small stability reward for any gift
 	if _stability and _stability.has_method("reward_gift_normal"):
 		_stability.reward_gift_normal()
-	# Check if equipment reward should trigger
-	_check_florist_reward()
-	_show_toast("已赠送！好感度 %d/100" % new_val)
+	# Check florist equipment reward
+	if npc_id == "florist":
+		_check_florist_reward()
+	_show_toast("已赠送！%s好感度 %d/100" % [NPC_NAMES.get(npc_id, npc_id), new_val])
 	_refresh_hud("")
 	_close_popup()
 
@@ -1364,6 +1509,7 @@ func _buy_deep_ticket() -> void:
 	# Deduct cost - note: deep mine scene loading is future work (Day 5)
 	if wallet:
 		wallet.spend(cost)
+	_emit_story_event("deep_ticket_bought", {})
 	_show_toast("购买了深层入场券！深层矿洞入口已开放（功能开发中，Day 5）。")
 	_refresh_hud("")
 	_close_popup()
@@ -1389,22 +1535,26 @@ func _check_mine_return() -> void:
 		return
 	if not _day_cycle.has_pending_return():
 		return
-	# Only force night when all daily entries are used.
-	var remaining: int = _day_cycle.get_remaining_entries() if _day_cycle.has_method("get_remaining_entries") else 0
-	if remaining > 0:
-		_day_cycle.clear_pending_return()
-		_show_toast("回到小镇。今日剩余下矿 %d 次。" % remaining)
-		return
 	_day_cycle.on_mine_return()
-	if _stability and _stability.has_method("apply_daily_decay"):
-		_stability.apply_daily_decay()
-	_show_toast("夜幕降临……矿洞已关闭。")
+	var is_evening: bool = _day_cycle.time_period == _day_cycle.TimePeriod.EVENING
+	var remaining: int = _day_cycle.get_remaining_entries() if _day_cycle.has_method("get_remaining_entries") else 0
+	# Emit mine_run_completed for story task tracking
+	_emit_story_event("mine_run_completed", {"total_runs": _day_cycle.get_total_mine_runs()})
+	if is_evening:
+		if _stability and _stability.has_method("apply_daily_decay"):
+			_stability.apply_daily_decay()
+		_apply_town_tint()
+		_refresh_hud("")
+		_show_toast("傍晚来临……矿洞已关闭。")
+	else:
+		_refresh_hud("")
+		_show_toast("回到小镇。现在是%s，剩余下矿 %d 次。" % [_day_cycle.get_time_period_name(), remaining])
 
 
 func _end_night() -> void:
-	if _day_cycle == null or not _day_cycle.has_method("end_night"):
+	if _day_cycle == null or not _day_cycle.has_method("sleep_to_morning"):
 		return
-	_day_cycle.end_night()
+	_day_cycle.sleep_to_morning()
 	# Reset daily gift limits
 	var affection: Object = _runtime.get("npc_affection") if _runtime else null
 	if affection and affection.has_method("reset_daily"):
@@ -1413,10 +1563,16 @@ func _end_night() -> void:
 	var ts: Object = _runtime.get("task_service") if _runtime else null
 	if ts and ts.has_method("refresh_daily_tasks"):
 		ts.refresh_daily_tasks()
+	# Unlock NPC affinity quests for the new day
+	if ts and ts.has_method("refresh_npc_tasks"):
+		ts.refresh_npc_tasks(affection)
+	# Unlock next batch of story tasks for the new day
+	if ts and ts.has_method("process_story_queue"):
+		ts.process_story_queue(_day_cycle.get("day_count"))
 	_apply_town_tint()
 	_refresh_hud("")
 	_close_popup()
-	_show_toast("第 %d 天开始了！" % _day_cycle.get("day_count"))
+	_show_toast("第 %d 天开始了！上午好。" % _day_cycle.get("day_count"))
 
 
 func _apply_town_tint() -> void:
@@ -1472,12 +1628,25 @@ func _update_day_display() -> void:
 	if _day_cycle == null or _day_info_label == null:
 		return
 	var day: int = _day_cycle.get("day_count")
+	var period_name: String = _day_cycle.get_time_period_name() if _day_cycle.has_method("get_time_period_name") else ""
 	var is_night_now: bool = _day_cycle.get("is_night")
 	var remaining: int = _day_cycle.get_remaining_entries() if _day_cycle.has_method("get_remaining_entries") else 0
 	if is_night_now:
-		_day_info_label.text = "第 %d 天 | 夜晚" % day
+		_day_info_label.text = "第 %d 天 | %s 剩余下矿 0 次" % [day, period_name]
 	else:
-		_day_info_label.text = "第 %d 天 | 剩余下矿 %d 次" % [day, remaining]
+		_day_info_label.text = "第 %d 天 | %s 剩余下矿 %d 次" % [day, period_name, remaining]
+
+
+func _update_affection_display() -> void:
+	if _affection_label == null or _runtime == null:
+		return
+	var affection: Object = _runtime.get("npc_affection")
+	if affection == null:
+		return
+	var vals := PackedInt32Array()
+	for npc_id: String in ["elder", "blacksmith", "florist", "buyer"]:
+		vals.append(affection.get_affection(npc_id))
+	_affection_label.text = "老人 %d  铁匠 %d\n少女 %d  商人 %d" % [vals[0], vals[1], vals[2], vals[3]]
 
 
 # ---- Equipment Shop ----
@@ -1551,48 +1720,6 @@ func _buy_equipment(eid: String, cost: int) -> void:
 	_show_toast("购买了（%s）！已自动装备。" % name)
 	_refresh_hud("")
 	_open_equipment_shop()
-
-
-# ---- Refine Workstation (pre-placed in scene) ----
-
-
-func _open_refine_picker() -> void:
-	if _runtime == null:
-		return
-	var warehouse: Object = _runtime.get("warehouse")
-	var catalog: Object = _runtime.get("catalog")
-	if warehouse == null or catalog == null:
-		return
-	for child in _popup_body.get_children():
-		child.queue_free()
-	_popup.visible = true
-	_popup_title.text = "精炼台 — 矿物升格"
-	var hint := Label.new()
-	hint.text = "消耗铜板将矿物精炼为高价值版本（售价×2，送礼×2）。"
-	_popup_body.add_child(hint)
-	for stack_variant in warehouse.get_stacks():
-		var stack: Dictionary = stack_variant
-		var item_id: String = str(stack.get("item_id", ""))
-		var item: Dictionary = catalog.get_item(item_id)
-		if str(item.get("category", "")) != "mineral":
-			continue
-		var cost: int = _refine_station.get_refine_cost(str(item.get("rarity", "common")))
-		var name: String = str(item.get("name", item_id))
-		var qty: int = int(stack.get("quantity", 0))
-		_add_button("精炼 %s x%d（需 %d 铜）" % [name, qty, cost], Callable(self, "_do_refine").bind(item_id))
-	_add_button("离开", Callable(self, "_close_popup"))
-
-
-func _do_refine(item_id: String) -> void:
-	if _refine_station == null:
-		return
-	var result: Dictionary = _refine_station.refine(item_id)
-	if result.get("ok", false):
-		_show_toast("已精炼为 %s！" % str(result.get("name", "")))
-	else:
-		_show_toast(str(result.get("error", "精炼失败")))
-	_refresh_hud("")
-	_open_refine_picker()
 
 
 # ---- Night Shop ----

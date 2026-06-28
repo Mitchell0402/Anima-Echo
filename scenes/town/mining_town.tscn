@@ -6,7 +6,6 @@
 [ext_resource type="PackedScene" uid="uid://dpq2mu2tqdg06" path="res://scenes/town/npc_florist.tscn" id="4"]
 [ext_resource type="PackedScene" uid="uid://dd5h0o286tldl" path="res://scenes/town/npc_buyer.tscn" id="5"]
 [ext_resource type="PackedScene" uid="uid://cv5cbiaiy8cca" path="res://scenes/town/npc_elder.tscn" id="6"]
-[ext_resource type="Script" uid="uid://2fyxd5uysg2f" path="res://scripts/town/refine_workstation.gd" id="7"]
 [ext_resource type="Texture2D" uid="uid://3aflkmnn0am6" path="res://assets/props/task_board.png" id="7_v0k1h"]
 [ext_resource type="PackedScene" uid="uid://c3ypvuc2p0k1h" path="res://scenes/town/town_player.tscn" id="9"]
 [ext_resource type="PackedScene" uid="uid://bmn1kwqo8xppp" path="res://scenes/town/mine_entrance.tscn" id="10"]
@@ -46,20 +45,6 @@ offset_top = -51.0
 offset_right = 24.0
 offset_bottom = -28.0
 text = "公告板"
-
-[node name="RefineStation" type="Node2D" parent="." unique_id=1010317600]
-position = Vector2(900, 500)
-script = ExtResource("7")
-
-[node name="Sprite2D" type="Sprite2D" parent="RefineStation" unique_id=777131898]
-scale = Vector2(0.8, 0.8)
-
-[node name="Label" type="Label" parent="RefineStation" unique_id=1399688840]
-offset_left = -20.0
-offset_top = -40.0
-offset_right = -20.0
-offset_bottom = -40.0
-text = "精炼台"
 
 [node name="MineEntrance" parent="." unique_id=2123456789 instance=ExtResource("10")]
 position = Vector2(329, 202)
