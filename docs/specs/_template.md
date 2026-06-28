@@ -17,6 +17,7 @@ Describe the user-facing outcome in one or two sentences.
 - [ ] Observable behavior or result.
 - [ ] Relevant docs/tests are updated.
 - [ ] Existing gameplay routes still work.
+- [ ] MCP evidence is captured for editor, runtime, visual, UI, input, or scene behavior when applicable.
 
 ## Relevant Files
 
@@ -30,4 +31,5 @@ Describe the user-facing outcome in one or two sentences.
 ## Verification
 
 - Automated:
+- MCP:
 - Manual:

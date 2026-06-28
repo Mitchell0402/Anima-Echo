@@ -1309,7 +1309,7 @@ func _do_gift(item_id: String) -> void:
 			"（她的眼泪落了下来——全镇近十年来，第一滴眼泪。）",
 			"（花架上的枯枝中，似乎闪过一缕微不可见的绿色光点。）",
 		]
-		_dialogue_ui.open("花店少女", "res://assets/props/npc_identifier_sprites_alpha.png", tears_lines, Callable(self, "_on_florist_tears_dialogue_done").bind(item_id))
+		_dialogue_ui.open("花店少女", "res://assets/ui/portraits/florist_neutral.png", tears_lines, Callable(self, "_on_florist_tears_dialogue_done").bind(item_id))
 		return
 
 	_perform_gift(item_id)

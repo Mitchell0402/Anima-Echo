@@ -158,10 +158,10 @@ This section lists files that exist as generated candidates or loaded temporary 
 | `assets/town/decor/flower_patch_red.png` | `flower_patch_red.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/town/decor/grass_clump_a.png` | `grass_clump_a.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/town/decor/grass_clump_b.png` | `grass_clump_b.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/npcs/blacksmith_idle.png` | `blacksmith_idle.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/npcs/buyer_idle.png` | `buyer_idle.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/npcs/elder_idle.png` | `elder_idle.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/npcs/florist_idle.png` | `florist_idle.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/town/npcs/blacksmith_idle.png` | `blacksmith_idle.png.meta.md` | `assets/props/npc_miner_alpha.png` | `scenes/town/npc_blacksmith.tscn` | `placeholder` |
+| `assets/town/npcs/buyer_idle.png` | `buyer_idle.png.meta.md` | `assets/props/npc_buyer_sprites_alpha.png` | `scenes/town/npc_buyer.tscn` | `placeholder` |
+| `assets/town/npcs/elder_idle.png` | `elder_idle.png.meta.md` | `assets/props/npc_task_clerk_sprites_alpha.png` | `scenes/town/npc_elder.tscn` | `placeholder` |
+| `assets/town/npcs/florist_idle.png` | `florist_idle.png.meta.md` | `assets/props/npc_identifier_sprites_alpha.png` | `scenes/town/npc_florist.tscn` | `placeholder` |
 | `assets/town/props/barrel.png` | `barrel.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/town/props/bench.png` | `bench.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/town/props/crate_stack.png` | `crate_stack.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
@@ -203,20 +203,20 @@ This section lists files that exist as generated candidates or loaded temporary 
 | `assets/ui/icons/equipment/pickaxe_basic.png` | `pickaxe_basic.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/ui/icons/equipment/slot_empty.png` | `slot_empty.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/ui/icons/health.png` | `health.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/copper_nugget.png` | `copper_nugget.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/crystal_bloom.png` | `crystal_bloom.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/gold_vein.png` | `gold_vein.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/iron_shard.png` | `iron_shard.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/memory_core.png` | `memory_core.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/moonlit_crystal.png` | `moonlit_crystal.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/raw_common_geode.png` | `raw_common_geode.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/raw_fine_geode.png` | `raw_fine_geode.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/raw_rare_geode.png` | `raw_rare_geode.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/raw_star_geode.png` | `raw_star_geode.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/icons/items/copper_nugget.png` | `copper_nugget.png.meta.md` | `assets/props/copper_nugget_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/crystal_bloom.png` | `crystal_bloom.png.meta.md` | `assets/props/crystal_bloom_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/gold_vein.png` | `gold_vein.png.meta.md` | `assets/props/gold_vein_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/iron_shard.png` | `iron_shard.png.meta.md` | `assets/props/iron_shard_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/memory_core.png` | `memory_core.png.meta.md` | `assets/props/memory_core_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/moonlit_crystal.png` | `moonlit_crystal.png.meta.md` | `assets/props/moonlit_crystal_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/raw_common_geode.png` | `raw_common_geode.png.meta.md` | `assets/props/raw_common_geode_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/raw_fine_geode.png` | `raw_fine_geode.png.meta.md` | `assets/props/raw_fine_geode_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/raw_rare_geode.png` | `raw_rare_geode.png.meta.md` | `assets/props/raw_rare_geode_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/raw_star_geode.png` | `raw_star_geode.png.meta.md` | `assets/props/raw_anomalous_geode_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
 | `assets/ui/icons/items/refined_badge.png` | `refined_badge.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/silver_vein.png` | `silver_vein.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/star_crystal.png` | `star_crystal.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/star_fragment.png` | `star_fragment.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/icons/items/silver_vein.png` | `silver_vein.png.meta.md` | `assets/props/silver_vein_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/star_crystal.png` | `star_crystal.png.meta.md` | `assets/props/raw_anomalous_geode_pickup_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/star_fragment.png` | `star_fragment.png.meta.md` | `assets/props/star_fragment_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
 | `assets/ui/icons/night.png` | `night.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/ui/icons/oxygen.png` | `oxygen.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/ui/icons/stability.png` | `stability.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
@@ -230,16 +230,16 @@ This section lists files that exist as generated candidates or loaded temporary 
 | `assets/ui/panels/tooltip.png` | `tooltip.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/ui/panels/warehouse_panel.png` | `warehouse_panel.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/ui/portraits/blacksmith_concerned.png` | `blacksmith_concerned.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/portraits/blacksmith_neutral.png` | `blacksmith_neutral.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/portraits/blacksmith_neutral.png` | `blacksmith_neutral.png.meta.md` | `assets/props/npc_miner_alpha.png` | `data/narrative/dialogues.json` | `placeholder` |
 | `assets/ui/portraits/buyer_concerned.png` | `buyer_concerned.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/portraits/buyer_neutral.png` | `buyer_neutral.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/portraits/buyer_neutral.png` | `buyer_neutral.png.meta.md` | `assets/props/npc_buyer_sprites_alpha.png` | `data/narrative/dialogues.json` | `placeholder` |
 | `assets/ui/portraits/elder_concerned.png` | `elder_concerned.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/portraits/elder_neutral.png` | `elder_neutral.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/portraits/elder_neutral.png` | `elder_neutral.png.meta.md` | `assets/props/npc_task_clerk_sprites_alpha.png` | `data/narrative/dialogues.json` | `placeholder` |
 | `assets/ui/portraits/florist_concerned.png` | `florist_concerned.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/portraits/florist_neutral.png` | `florist_neutral.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/screens/intro_background.png` | `intro_background.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/portraits/florist_neutral.png` | `florist_neutral.png.meta.md` | `assets/props/npc_identifier_sprites_alpha.png` | `data/narrative/dialogues.json`; `scripts/town/mining_town_scene.gd` | `placeholder` |
+| `assets/ui/screens/intro_background.png` | `intro_background.png.meta.md` | _none; generated candidate_ | `scripts/ui/intro.gd` | `placeholder` |
 | `assets/ui/screens/settings_panel.png` | `settings_panel.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/screens/title_background.png` | `title_background.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/screens/title_background.png` | `title_background.png.meta.md` | _none; generated candidate_ | `scripts/ui/title_menu.gd` | `placeholder` |
 | `assets/ui/slots/slot_disabled.png` | `slot_disabled.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/ui/slots/slot_empty.png` | `slot_empty.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/ui/slots/slot_filled.png` | `slot_filled.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |

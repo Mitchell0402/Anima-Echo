@@ -1,6 +1,6 @@
 # Current Tasks
 
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 ## Current Baseline
 
@@ -111,11 +111,25 @@ The full narrative/worldbuilding design lives in [`docs/specs/narrative_design.m
 - **Morality Tracker**: `scripts/core/morality_tracker.gd`. Tracks star crystals sold vs gifted.
 - **Equipment System**: `scripts/player/equipment_system.gd`. 4 slots, good/evil exclusive items, basic upgrades (pickaxe, backpack, talisman).
 
+## MCP Development Baseline
+
+Godot MCP Pro is part of the expected local development loop. See [testing.md](testing.md) for the full MCP health check and acceptance workflow.
+
+Last verified: 2026-06-28 through in-thread MCP tools.
+
+- `get_project_info`: connected to `Mine Platform V2`, Godot `4.6.3-stable`, main scene `res://scenes/ui/title_menu.tscn`, renderer `forward_plus`, viewport `1152x720`.
+- MCP autoloads present: `MCPScreenshot`, `MCPInputService`, `MCPGameInspector`.
+- `get_scene_tree`: current edited scene is `res://scenes/ui/title_menu.tscn`, root `TitleMenu`, script `res://scripts/ui/title_menu.gd`.
+- `get_output_log` filtered by `MCP`: addon started on ports `6505-6514` and registered 171 commands.
+- `get_editor_errors`: currently reports repeated `Condition "!is_inside_tree()" is true.` errors. Treat these as current editor noise unless a task changes tree/lifecycle behavior, then compare before/after.
+
+For development and review, use MCP evidence when a change affects scenes, visuals, UI, input, runtime behavior, or acceptance criteria. Headless tests still provide the regression gate; MCP proves the editor/runtime behavior that tests do not cover.
+
 ## Known Risks And TODOs
 
 - TODO: Add a CI workflow if GitHub should enforce the Godot regression suite.
 - TODO: Confirm how contributors should discover the Godot executable across machines.
-- TODO: Decide the maintenance policy for `addons/godot_mcp`.
+- TODO: Decide the maintenance policy for `addons/godot_mcp`; keep it tooling-only until that decision is made.
 - TODO: Record asset source and license metadata for generated or third-party art.
 - TODO: Define the next gameplay cleanup in a focused spec before implementation.
 - TODO: Complete end-to-end testing of the weight system (speed/noise/UI) in Godot editor.
@@ -127,7 +141,8 @@ The full narrative/worldbuilding design lives in [`docs/specs/narrative_design.m
 - TODO: Populate `docs/visual_assets/inventory.md` with the full asset list.
 - TODO: Generate missing UI icons using external image-generation AI.
 - DONE 2026-06-28: Generated current-playable visual candidates listed in `docs/specs/visual_asset_audit_generation_plan.md`, including the three-level mine tileset set (`shallow_cave_tileset.png`, `mid_cave_tileset.png`, `deep_cave_tileset.png`). Player/enemy animation, good/evil-specific variants, ending screens, and other future-only assets remain deferred.
-- TODO: Review generated visual candidates and wire approved assets into scenes/resources without replacing player/enemy animation.
+- DONE 2026-06-28: Wired first-pass generated placeholder candidates for item icons, NPC world sprites, NPC dialogue portraits, title background, and intro background. The candidates remain `placeholder` art until a later visual review approves final quality.
+- TODO: Review remaining generated visual candidates and wire approved assets into scenes/resources without replacing player/enemy animation.
 - TODO: Apply the three-layer display model to the mine scene.
 - TODO: Add buyer remaining budget indicator to buyer NPC popup.
 - TODO: Add 7 per-concern warehouse regression tests.

@@ -10,12 +10,20 @@ func _ready() -> void:
 	_build()
 
 func _build() -> void:
-	# Full-screen dark background
-	var bg := ColorRect.new()
-	bg.color = Color(0.06, 0.04, 0.08, 1.0)
+	var bg := TextureRect.new()
+	bg.texture = preload("res://assets/ui/screens/title_background.png")
+	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bg.stretch_mode = TextureRect.STRETCH_SCALE
+	bg.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(bg)
+
+	var shade := ColorRect.new()
+	shade.color = Color(0.03, 0.02, 0.04, 0.48)
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(shade)
 
 	# Center container — anchors at (0.5,0.5), grows outward in both directions
 	var center := VBoxContainer.new()

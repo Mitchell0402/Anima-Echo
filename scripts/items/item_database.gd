@@ -7,23 +7,23 @@ extends Node
 # ---- Raw Ore Textures (for hotbar, category=raw_stone) ----
 
 @export_group("Raw Ores")
-@export var icon_raw_common_geode: Texture2D = preload("res://assets/props/raw_common_geode_alpha.png")
-@export var icon_raw_fine_geode: Texture2D = preload("res://assets/props/raw_fine_geode_alpha.png")
-@export var icon_raw_rare_geode: Texture2D = preload("res://assets/props/raw_rare_geode_alpha.png")
-@export var icon_raw_star_geode: Texture2D = preload("res://assets/props/raw_anomalous_geode_alpha.png")
+@export var icon_raw_common_geode: Texture2D = preload("res://assets/ui/icons/items/raw_common_geode.png")
+@export var icon_raw_fine_geode: Texture2D = preload("res://assets/ui/icons/items/raw_fine_geode.png")
+@export var icon_raw_rare_geode: Texture2D = preload("res://assets/ui/icons/items/raw_rare_geode.png")
+@export var icon_raw_star_geode: Texture2D = preload("res://assets/ui/icons/items/raw_star_geode.png")
 
 # ---- Identified Mineral Textures (for warehouse / buyer, category=mineral) ----
 
 @export_group("Identified Minerals")
-@export var icon_copper_nugget: Texture2D = preload("res://assets/props/copper_nugget_alpha.png")
-@export var icon_iron_shard: Texture2D = preload("res://assets/props/iron_shard_alpha.png")
-@export var icon_silver_vein: Texture2D = preload("res://assets/props/silver_vein_alpha.png")
-@export var icon_gold_vein: Texture2D = preload("res://assets/props/gold_vein_alpha.png")
-@export var icon_crystal_bloom: Texture2D = preload("res://assets/props/crystal_bloom_alpha.png")
-@export var icon_moonlit_crystal: Texture2D = preload("res://assets/props/moonlit_crystal_alpha.png")
-@export var icon_star_fragment: Texture2D = preload("res://assets/props/star_fragment_alpha.png")
-@export var icon_memory_core: Texture2D = preload("res://assets/props/memory_core_alpha.png")
-@export var icon_star_crystal: Texture2D = preload("res://assets/props/raw_anomalous_geode_pickup_alpha.png")  # placeholder, needs dedicated art
+@export var icon_copper_nugget: Texture2D = preload("res://assets/ui/icons/items/copper_nugget.png")
+@export var icon_iron_shard: Texture2D = preload("res://assets/ui/icons/items/iron_shard.png")
+@export var icon_silver_vein: Texture2D = preload("res://assets/ui/icons/items/silver_vein.png")
+@export var icon_gold_vein: Texture2D = preload("res://assets/ui/icons/items/gold_vein.png")
+@export var icon_crystal_bloom: Texture2D = preload("res://assets/ui/icons/items/crystal_bloom.png")
+@export var icon_moonlit_crystal: Texture2D = preload("res://assets/ui/icons/items/moonlit_crystal.png")
+@export var icon_star_fragment: Texture2D = preload("res://assets/ui/icons/items/star_fragment.png")
+@export var icon_memory_core: Texture2D = preload("res://assets/ui/icons/items/memory_core.png")
+@export var icon_star_crystal: Texture2D = preload("res://assets/ui/icons/items/star_crystal.png")
 
 # Stack limit fallback.
 

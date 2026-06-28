@@ -16,6 +16,36 @@ pwsh -File scripts/check.ps1 -Godot "path/to/godot"
 
 `scripts/check.ps1` runs three steps in order: (1) refresh Godot's import cache in headless mode, (2) run the project regression suite, (3) optionally smoke-start the town and mine scenes. Use `-SkipImportRefresh` after a clean checkout when no assets have changed.
 
+## Godot MCP Development And Acceptance
+
+Use Godot MCP Pro as the preferred live-editor verification path whenever the editor is already open. Headless commands remain the CI-style regression path, but MCP should be used during development to confirm the current editor scene, inspect runtime state, take screenshots, and exercise UI/input flows that are hard to prove from file diffs alone.
+
+Minimum MCP health check before editor-driven work:
+
+1. `get_project_info`: confirm the connected project path, Godot version, main scene, renderer, viewport, and MCP autoloads.
+2. `get_scene_tree`: confirm the currently edited scene before changing or validating scene-specific behavior.
+3. `get_editor_errors`: record current editor errors before and after the change. Pre-existing errors should be named in the task report instead of silently ignored.
+4. `get_output_log` with filter `MCP`: confirm the addon started and registered commands if connectivity is in doubt.
+
+For feature development, prefer MCP editor tools over hand-editing Godot-owned files when practical:
+
+- Use `open_scene`, `get_node_properties`, `update_property`, `connect_signal`, and `save_scene` for targeted scene work.
+- Use `set_project_setting` or `set_input_action` instead of manually rewriting `project.godot`.
+- Use `validate_script` after script edits that touch GDScript parser-sensitive areas.
+- Use `get_editor_screenshot` or `get_game_screenshot` for visual acceptance evidence when a change affects art, layout, camera, UI, or animation.
+
+For runtime acceptance, call `play_scene` first, then use runtime MCP tools such as `get_game_scene_tree`, `find_ui_elements`, `simulate_key`, `simulate_action`, `click_button_by_text`, `assert_screen_text`, and `stop_scene`. Runtime tools are not valid until the game is running.
+
+If the in-thread MCP transport is unavailable but Godot is open, use the bundled CLI bridge as a fallback:
+
+```powershell
+node path/to/godot-mcp-pro/server/build/cli.js --help
+node path/to/godot-mcp-pro/server/build/cli.js project info
+node path/to/godot-mcp-pro/server/build/cli.js scene tree
+```
+
+If CLI works but MCP tools report `Transport closed` or `Godot editor is not connected`, restart the Codex thread/app and rerun the minimum MCP health check.
+
 ## Manual Commands
 
 Refresh Godot imports after a fresh checkout or asset move:
@@ -88,4 +118,4 @@ The three-layer display model is verified by `scripts/mcp_warehouse_regression.p
 
 - TODO: Add GitHub Actions or another CI runner if this project needs enforced checks on pull requests.
 - TODO: Add the seven per-concern regression tests spelled out in the [warehouse spec](specs/warehouse-system.md) (warehouse 48-slot cap, 999-item cap, hotbar reset on mine entry, hotbar dump on town return, warehouse intact on mine death, weight system gating, customer budget consumption and exhaustion, deliverable-task filtering). The current `_test_core_economy_loop` covers the end-to-end flow but not each rule in isolation.
-- TODO: Add manual QA notes for editor-driven playtesting once the warehouse spec is fully exercised.
+- TODO: Expand MCP runtime acceptance scripts for editor-driven playtesting once the warehouse spec is fully exercised.
