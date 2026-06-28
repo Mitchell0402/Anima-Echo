@@ -34,6 +34,8 @@ var morality_tracker: Object
 var npc_affection: Object
 var equipment_system: Object
 var customer_remaining_budget: Dictionary = {}  # customer_id -> int
+var _blacksmith_first_talk_done: bool = false
+var _florist_first_star_gifted: bool = false
 
 signal mine_run_started
 signal mine_run_ended(remaining_untransferred: int)
@@ -55,7 +57,7 @@ func initialize_for_new_game() -> Dictionary:
 	hotbar.max_items = HOTBAR_DEFAULT_MAX_ITEMS
 	warehouse = GameInventoryScript.new(WAREHOUSE_CAPACITY)
 	warehouse.max_items = WAREHOUSE_DEFAULT_MAX_ITEMS
-	wallet = GameWalletScript.new(50)
+	wallet = GameWalletScript.new(0)
 	rng = RandomNumberGenerator.new()
 	rng.randomize()
 	_init_customer_budget()
@@ -72,6 +74,8 @@ func initialize_for_new_game() -> Dictionary:
 	npc_affection = NpcAffectionScript.new()
 	equipment_system = EquipmentSystemScript.new()
 	equipment_system.load_data()
+	_blacksmith_first_talk_done = false
+	_florist_first_star_gifted = false
 	return {"ok": true}
 
 
@@ -154,6 +158,34 @@ func is_in_mine_scene() -> bool:
 	return str(current.name) == MINE_SCENE_NAME
 
 
+func add_mine_tickets(n: int) -> void:
+	if warehouse == null:
+		return
+	warehouse.add_item("mine_ticket", n)
+
+func consume_mine_ticket() -> bool:
+	if warehouse == null:
+		return false
+	return warehouse.remove_item("mine_ticket", 1).get("ok", false)
+
+func get_mine_tickets() -> int:
+	if warehouse == null:
+		return 0
+	return warehouse.count_item("mine_ticket")
+
+func set_blacksmith_first_talk_done() -> void:
+	_blacksmith_first_talk_done = true
+
+func is_blacksmith_first_talk_done() -> bool:
+	return _blacksmith_first_talk_done
+
+func set_florist_first_star_gifted() -> void:
+	_florist_first_star_gifted = true
+
+func is_florist_first_star_gifted() -> bool:
+	return _florist_first_star_gifted
+
+
 func shutdown() -> void:
 	if task_service != null and task_service.has_method("dispose"):
 		task_service.dispose()
@@ -161,6 +193,8 @@ func shutdown() -> void:
 	morality_tracker = null
 	npc_affection = null
 	equipment_system = null
+	_blacksmith_first_talk_done = false
+	_florist_first_star_gifted = false
 	shop_service = null
 	negotiation_service = null
 	identification_service = null

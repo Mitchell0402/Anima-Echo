@@ -8,16 +8,16 @@ const ERROR_WAREHOUSE_SOFT_CAP: String = "warehouse_soft_cap"
 
 var catalog: Object
 var inventory: Object         # Alias of GameRuntime.hotbar. Kept as `inventory` so the
-                              # service can be constructed and tested in isolation;
-                              # the public field on GameRuntime is `hotbar`.
+							  # service can be constructed and tested in isolation;
+							  # the public field on GameRuntime is `hotbar`.
 var warehouse: Object
 var wallet: Object
 var event_bus: Object
 var rng: Object
 var runtime: Object  # Optional reference to GameRuntime. Used by _sell_item to
-                     # check and decrement the customer budget atomically with
-                     # the rest of the transaction. When null, budget is not
-                     # enforced (legacy / test paths).
+					 # check and decrement the customer budget atomically with
+					 # the rest of the transaction. When null, budget is not
+					 # enforced (legacy / test paths).
 
 
 func _init(game_catalog: Object = null, game_inventory: Object = null, game_warehouse: Object = null, game_wallet: Object = null, game_event_bus: Object = null, game_rng: Object = null) -> void:

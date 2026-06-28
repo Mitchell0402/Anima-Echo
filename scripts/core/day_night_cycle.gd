@@ -8,7 +8,7 @@ extends Node
 ## 3. 夜晚阶段 → 矿洞入口关闭，仅 NPC 交互可用
 ## 4. 玩家结束夜晚 → 新的一天，矿洞次数重置，稳定度自然衰减
 
-const MAX_MINE_ENTRIES: int = 3
+const MAX_MINE_ENTRIES: int = 2
 
 var is_night: bool = false
 var day_count: int = 1

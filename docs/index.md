@@ -10,6 +10,8 @@ Anima Echo is a Godot 4.x 2D mining prototype being cleaned up into a baseline f
 - [testing.md](testing.md): how to run the existing project checks and manual smoke tests.
 - [glossary.md](glossary.md): project-specific terms.
 - [specs/narrative_design.md](specs/narrative_design.md): complete narrative/worldbuilding design — characters, secrets, progression, endings. **Mandatory reading for all agents.**
+- [specs/daily_content_design.md](specs/daily_content_design.md): **player-facing daily content design for Day 1–6**, mapping narrative beats to task flow and system introductions.
+- [specs/narrative_remaining.md](specs/narrative_remaining.md): **剩余剧情开发清单** — all unimplemented narrative features, bugs, and phases, with dependency ordering.
 - [specs/development_plan.md](specs/development_plan.md): 6-day phased development plan (Day 1 complete, Day 2-6 planned).
 - [specs/weight_system.md](specs/weight_system.md): tiered encumbrance (Light/Heavy/Overload) with speed and noise penalties.
 - [visual_assets.md](visual_assets.md) and [visual_assets/inventory.md](visual_assets/inventory.md): the contract and the work order for the visual assets an external image-generation AI will produce.
