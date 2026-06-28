@@ -1,6 +1,28 @@
 {
   "items": [
 	{
+	  "id": "mine_ticket",
+	  "name": "普通票券",
+	  "description": "进入浅层矿洞的通行证。铁匠铺有售，50 铜板一张。",
+	  "category": "ticket",
+	  "rarity": "common",
+	  "stack_size": 99,
+	  "base_price": 0,
+	  "weight": 0,
+	  "tags": ["ticket", "consumable"]
+	},
+	{
+	  "id": "deep_mine_ticket",
+	  "name": "深层票券",
+	  "description": "进入深层矿洞的通行证。累计挖矿 5 次后可从铁匠处购买，500 铜板一张。",
+	  "category": "ticket",
+	  "rarity": "rare",
+	  "stack_size": 99,
+	  "base_price": 0,
+	  "weight": 0,
+	  "tags": ["ticket", "consumable"]
+	},
+	{
 	  "id": "raw_common_geode",
 	  "name": "Clouded Geode",
 	  "description": "A dull stone pulled from the wall. The veins inside are barely visible, but the weight suggests there is more than meets the eye.",

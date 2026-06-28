@@ -9,6 +9,8 @@
 [ext_resource type="Script" uid="uid://2fyxd5uysg2f" path="res://scripts/town/refine_workstation.gd" id="7"]
 [ext_resource type="Texture2D" uid="uid://3aflkmnn0am6" path="res://assets/props/task_board.png" id="7_v0k1h"]
 [ext_resource type="PackedScene" uid="uid://c3ypvuc2p0k1h" path="res://scenes/town/town_player.tscn" id="9"]
+[ext_resource type="PackedScene" uid="uid://bmn1kwqo8xppp" path="res://scenes/town/mine_entrance.tscn" id="10"]
+[ext_resource type="PackedScene" uid="uid://b3q4pwyhfxnnn" path="res://scenes/town/bed.tscn" id="11"]
 
 [node name="MiningTown" type="Node2D" unique_id=1470820021]
 script = ExtResource("1")
@@ -58,6 +60,12 @@ offset_top = -40.0
 offset_right = -20.0
 offset_bottom = -40.0
 text = "精炼台"
+
+[node name="MineEntrance" parent="." unique_id=2123456789 instance=ExtResource("10")]
+position = Vector2(329, 202)
+
+[node name="Bed" parent="." unique_id=2123456790 instance=ExtResource("11")]
+position = Vector2(1050, 580)
 
 [node name="TownPlayer" parent="." unique_id=165085066 instance=ExtResource("9")]
 position = Vector2(814, 379)

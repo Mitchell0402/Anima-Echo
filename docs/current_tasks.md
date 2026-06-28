@@ -95,6 +95,8 @@ The full narrative/worldbuilding design lives in [`docs/specs/narrative_design.m
 - 4 NPCs with stage 0–3 dialogues: implemented in `data/narrative/dialogues.json`
 - Stage transitions gated by behavior milestones (first star crystal touch, first sell/gift, multiple choices): not yet wired
 - Opening task "talk to all NPCs": implemented (guidance for first-time players)
+- Daily content design (Day 1–20, ~2 hr): spec at [`docs/specs/daily_content_design.md`](specs/daily_content_design.md). 20 game days, 2 mine entries/day, ~6 min/day. 7 narrative phases (引导→积累→深渊→抉择→固化→真相→结局). Stability parameters will need tuning around Day 10.
+- Remaining narrative work: catalogued at [`docs/specs/narrative_remaining.md`](specs/narrative_remaining.md). 2 bugs + 11 features across 6 phases, with dependency ordering. Priority: fix dialogue deduplication (B1/B2) → stage transition toasts (P0-1) → flower-girl tears (P0-2) → blacksmith evil-path lockout (P0-3).
 
 ## Existing Systems (from previous baseline)
 
@@ -104,7 +106,7 @@ The full narrative/worldbuilding design lives in [`docs/specs/narrative_design.m
 - **Display System**: Three-layer world/camera/UI model. World 1152x648, integer zoom, anchor-based UI. [Decision](../decisions/0004-display-system.md)
 - **Economy**: `GameRuntime` autoload owns catalog, event bus, hotbar, warehouse, wallet, RNG, transaction service, identification, negotiation, shop, and task services.
 - **Stability System**: `StabilitySystem` autoload (0–100). Selling star crystal = -15, gifting = +15, gifting normal = +2. Daily decay 3. Affects enemy spawn/detection. Town tint changes with stability.
-- **Day/Night Cycle**: `DayNightCycle` autoload. Mine→town return triggers night. Night ends → new day. 3 free mine entries per day.
+- **Day/Night Cycle**: `DayNightCycle` autoload. Mine→town return triggers night. Night ends → new day. 2 mine entries per day.
 - **NPC Affection**: `scripts/narrative/npc_affection.gd`. 0–100, gift +1/+3/+5. 1 gift per NPC per day.
 - **Morality Tracker**: `scripts/core/morality_tracker.gd`. Tracks star crystals sold vs gifted.
 - **Equipment System**: `scripts/player/equipment_system.gd`. 4 slots, good/evil exclusive items, basic upgrades (pickaxe, backpack, talisman).

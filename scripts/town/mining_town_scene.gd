@@ -25,9 +25,13 @@ var _warehouse_ui = null  # WarehouseUI CanvasLayer. Exposed for freeze checks.
 var _dialogue_ui = null   # DialogueUI CanvasLayer
 var _dialogue_npc_id := ""  # NPC id whose dialogue is currently open
 var _dialogues_cache: Dictionary = {}
+var _shown_daily_indices: Dictionary = {}  # "npcId_stage" -> int (last index shown)
+var _last_narrative_stage: int = 0
 var _task_board: Node2D
 var _board_prompt: Label
 var _refine_station: Node
+var _mine_entrance: Node
+var _bed: Node
 var _task_panel: PanelContainer
 var _task_body: VBoxContainer
 var _shop_night_customer_id: String = ""
@@ -57,6 +61,8 @@ func _ready() -> void:
 	_check_mine_return()
 	_apply_town_tint()
 	_refresh_hud("靠近 NPC 后按 E 交谈。按 I 打开仓库。")
+	_check_intro_guidance()
+	_connect_stage_signal()
 
 
 func _process(_delta: float) -> void:
@@ -80,6 +86,12 @@ func _process(_delta: float) -> void:
 		_board_prompt.text = "按 E 查看公告板"
 	elif _refine_station and _refine_station.is_nearby(_player.position):
 		_prompt_label.text = "按 E 使用精炼台"
+		_board_prompt.text = ""
+	elif _mine_entrance and _mine_entrance.is_nearby(_player.position):
+		_prompt_label.text = "按 E 进入矿洞"
+		_board_prompt.text = ""
+	elif _bed and _bed.is_nearby(_player.position):
+		_prompt_label.text = "按 E 歇息"
 		_board_prompt.text = ""
 	else:
 		_prompt_label.text = ""
@@ -131,6 +143,14 @@ func _unhandled_input(event: InputEvent) -> void:
 			_open_refine_picker()
 			get_viewport().set_input_as_handled()
 			return
+		if _mine_entrance and _mine_entrance.is_nearby(_player.position):
+			_open_mine_entrance_popup()
+			get_viewport().set_input_as_handled()
+			return
+		if _bed and _bed.is_nearby(_player.position):
+			_open_bed_popup()
+			get_viewport().set_input_as_handled()
+			return
 
 
 func _setup_scene_refs() -> void:
@@ -148,6 +168,8 @@ func _setup_scene_refs() -> void:
 	# Find pre-placed TaskBoard and RefineStation from the scene.
 	_task_board = get_node_or_null("TaskBoard")
 	_refine_station = get_node_or_null("RefineStation")
+	_mine_entrance = get_node_or_null("MineEntrance")
+	_bed = get_node_or_null("Bed")
 	# Player is pre-placed as a scene instance; wire up the pre-placed
 	# AnimatedSprite2D child (collision is scene-authored, not code-driven).
 	_player = get_node_or_null("TownPlayer")
@@ -326,13 +348,26 @@ func _open_popup(npc_id: String) -> void:
 			if is_night_now:
 				_add_button("结束夜晚，迎来新的一天", Callable(self, "_end_night"))
 			else:
-				var remaining: int = _day_cycle.get_remaining_entries() if _day_cycle and _day_cycle.has_method("get_remaining_entries") else 0
-				_add_button("进入矿洞（剩余 %d 次）" % remaining, Callable(self, "_enter_mine"))
+				var tracker: Object = _runtime.get("morality_tracker") if _runtime else null
+				var stage: int = tracker.get_narrative_stage() if tracker and tracker.has_method("get_narrative_stage") else 0
+				var is_evil: bool = tracker and tracker.get("current_alignment") == "evil"
+				var blacksmith_refused: bool = stage >= 2 and is_evil
+				if blacksmith_refused:
+					var refused_btn: Button = _add_button("不卖了。你自己去。", Callable())
+					refused_btn.disabled = true
+				else:
+					var tickets: int = _runtime.get_mine_tickets() if _runtime else 0
+					_add_button("购买矿洞门票（50 铜板，持有 %d 张）" % tickets, Callable(self, "_buy_mine_ticket"))
 				var total_runs: int = _day_cycle.get_total_mine_runs() if _day_cycle else 0
 				if total_runs >= 5:
-					_add_button("购买深层入场券（500 铜板）", Callable(self, "_buy_deep_ticket"))
+					if blacksmith_refused:
+						var greyed: Button = _add_button("我不会再卖给你了。", Callable())
+						greyed.disabled = true
+					else:
+						_add_button("购买深层入场券（500 铜板）", Callable(self, "_buy_deep_ticket"))
 				else:
-					var greyed: Button = _add_button("深层入场券（需累计挖矿 5 次，当前 %d）" % total_runs, Callable())
+					var msg: String = "我不会再卖给你了。" if blacksmith_refused else "深层入场券（需累计挖矿 5 次，当前 %d）" % total_runs
+					var greyed: Button = _add_button(msg, Callable())
 					greyed.disabled = true
 			_add_button("装备商店", Callable(self, "_open_equipment_shop"))
 			_add_button("聊聊", Callable(self, "_talk_npc").bind(npc_id))
@@ -509,6 +544,12 @@ func _enter_mine() -> void:
 			_show_toast("今日下矿次数已用完（%d/%d）。" % [_day_cycle.get("mine_entries_today"), _day_cycle.MAX_MINE_ENTRIES])
 		_close_popup()
 		return
+	if _runtime == null:
+		return
+	if not _runtime.consume_mine_ticket():
+		_show_toast("矿洞门票不足（持有 %d 张）。" % _runtime.get_mine_tickets())
+		_close_popup()
+		return
 	_day_cycle.use_mine_entry()
 	if _runtime != null and _runtime.has_method("begin_mine_run"):
 		_runtime.begin_mine_run()
@@ -518,6 +559,209 @@ func _enter_mine() -> void:
 
 func _change_to_mine() -> void:
 	get_tree().change_scene_to_file(MINE_SCENE)
+
+
+# ---- Intro Guidance Overlay ----
+
+func _check_intro_guidance() -> void:
+	# Show guidance only on very first entry (when player hasn't talked to anyone yet).
+	if _runtime == null:
+		return
+	if _runtime.is_blacksmith_first_talk_done():
+		return
+	var wallet: Object = _runtime.get("wallet")
+	if wallet == null:
+		return
+	# Only show if wallet is at starting balance (50) and no warehouse items.
+	var warehouse: Object = _runtime.get("warehouse")
+	if wallet.get_balance() != 50:
+		return
+	if warehouse != null and not warehouse.get_stacks().is_empty():
+		return
+	_build_intro_guidance()
+
+
+func _build_intro_guidance() -> void:
+	_player.movement_paused = true
+	var layer := CanvasLayer.new()
+	layer.layer = 13
+	layer.name = "IntroGuidance"
+	add_child(layer)
+
+	# Semi-transparent dark backdrop
+	var bg := ColorRect.new()
+	bg.color = Color(0.0, 0.0, 0.0, 0.75)
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.mouse_filter = Control.MOUSE_FILTER_STOP
+	bg.gui_input.connect(_on_intro_guidance_click)
+	layer.add_child(bg)
+
+	# Center text
+	var label := Label.new()
+	label.text = "大家怎么都如此沉默……和他们聊一聊吧。"
+	label.anchor_left = 0.5
+	label.anchor_top = 0.5
+	label.anchor_right = 0.5
+	label.anchor_bottom = 0.5
+	label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	label.grow_vertical = Control.GROW_DIRECTION_BOTH
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 21)
+	label.add_theme_color_override("font_color", Color(0.92, 0.92, 0.92, 1.0))
+	layer.add_child(label)
+
+	# Hint at bottom
+	var hint := Label.new()
+	hint.text = "（点击鼠标左键继续）"
+	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	hint.offset_bottom = -50
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.add_theme_font_size_override("font_size", 13)
+	hint.add_theme_color_override("font_color", Color(0.4, 0.4, 0.4, 1.0))
+	layer.add_child(hint)
+
+
+func _on_intro_guidance_click(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		_player.movement_paused = false
+		_refresh_hud("靠近 NPC 后按 E 交谈。按 I 打开仓库。")
+		var layer: Node = get_node_or_null("IntroGuidance")
+		if layer:
+			layer.queue_free()
+		get_viewport().set_input_as_handled()
+
+
+# ---- Narrative Stage Change Toast (P0-1) ----
+
+func _connect_stage_signal() -> void:
+	if _runtime == null:
+		return
+	var tracker: Object = _runtime.get("morality_tracker")
+	if tracker and tracker.has_signal("narrative_stage_changed"):
+		if not tracker.narrative_stage_changed.is_connected(_on_narrative_stage_changed):
+			tracker.narrative_stage_changed.connect(_on_narrative_stage_changed)
+
+
+func _on_narrative_stage_changed(_old_stage: int, new_stage: int) -> void:
+	var toast: String = ""
+	match new_stage:
+		1:
+			toast = "你触碰了不该触碰的东西。小镇感觉到了。"
+		2:
+			toast = "你做出了选择。小镇在看着你。"
+		3:
+			toast = "真相如潮水般涌来。你终于明白了。"
+	if not toast.is_empty():
+		_show_toast(toast)
+
+
+# ---- Mine Entrance Popup ----
+
+func _open_mine_entrance_popup() -> void:
+	_popup.visible = true
+	for child in _popup_body.get_children():
+		child.queue_free()
+	_popup_title.text = "矿洞入口"
+
+	var is_night_now: bool = _day_cycle != null and _day_cycle.get("is_night")
+	if is_night_now:
+		var hint := Label.new()
+		hint.text = "矿洞在夜晚关闭。请先休息到天亮。"
+		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_popup_body.add_child(hint)
+		_add_button("离开", Callable(self, "_close_popup"))
+		return
+
+	if _runtime == null:
+		_add_button("离开", Callable(self, "_close_popup"))
+		return
+
+	var tickets: int = _runtime.get_mine_tickets()
+
+	# Normal mine button
+	var normal_label: String = "普通矿洞（需门票 x1，持有 %d 张）" % tickets
+	if _day_cycle != null and not _day_cycle.can_enter_mine():
+		normal_label = "普通矿洞（今日次数已用完）"
+		var greyed_n: Button = _add_button(normal_label, Callable())
+		greyed_n.disabled = true
+	elif tickets < 1:
+		var greyed_n: Button = _add_button(normal_label, Callable())
+		greyed_n.disabled = true
+	else:
+		_add_button(normal_label, Callable(self, "_enter_mine"))
+
+	# Deep mine button (always greyed until Day 5)
+	var deep_label: String = "深层矿洞（需深层入场券）" if tickets >= 1 else "深层矿洞（需深层入场券）"
+	var greyed_d: Button = _add_button(deep_label, Callable())
+	greyed_d.disabled = true
+
+	_add_button("离开", Callable(self, "_close_popup"))
+
+
+# ---- Bed Popup ----
+
+func _open_bed_popup() -> void:
+	_popup.visible = true
+	for child in _popup_body.get_children():
+		child.queue_free()
+	_popup_title.text = "床"
+
+	var is_night_now: bool = _day_cycle != null and _day_cycle.get("is_night")
+	if is_night_now:
+		var desc := Label.new()
+		desc.text = "夜深了。睡到天亮吗？"
+		desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_popup_body.add_child(desc)
+		_add_button("睡到天亮", Callable(self, "_sleep_to_morning"))
+	else:
+		var desc := Label.new()
+		desc.text = "要提前休息吗？"
+		desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_popup_body.add_child(desc)
+		_add_button("休息到夜晚", Callable(self, "_rest_to_night"))
+
+	_add_button("离开", Callable(self, "_close_popup"))
+
+
+# ---- Bed Actions ----
+
+func _rest_to_night() -> void:
+	if _day_cycle == null:
+		_close_popup()
+		return
+	# Jump directly to night phase without consuming tickets.
+	_day_cycle.on_mine_return()
+	if _stability and _stability.has_method("apply_daily_decay"):
+		_stability.apply_daily_decay()
+	_apply_town_tint()
+	_refresh_hud("")
+	_close_popup()
+	_show_toast("夜幕降临……矿洞已关闭。")
+
+
+func _sleep_to_morning() -> void:
+	# Same as _end_night but called from bed
+	_end_night()
+
+
+# ---- Mine Ticket Purchase ----
+
+func _buy_mine_ticket() -> void:
+	if _runtime == null:
+		return
+	var wallet: Object = _runtime.get("wallet")
+	var cost: int = 50
+	if wallet and wallet.get_balance() < cost:
+		_show_toast("铜板不足（需要 %d）。" % cost)
+		_refresh_hud("")
+		_close_popup()
+		return
+	wallet.spend_currency(cost)
+	_runtime.add_mine_tickets(1)
+	_show_toast("购买了 1 张矿洞门票。持有 %d 张。" % _runtime.get_mine_tickets())
+	_refresh_hud("")
+	_open_popup("blacksmith")
 
 
 # Called when the player picks a raw stone from the warehouse picker.
@@ -676,6 +920,32 @@ func _show_toast(message: String) -> void:
 	_toast_timer.timeout.connect(func() -> void:
 		if is_instance_valid(_status_label):
 			_status_label.text = "%s | Coins %d" % ["", int(_runtime.get("wallet").get_balance())] if _runtime else "")
+
+
+## Show a floating label above the player that pops up, holds, then floats away.
+func _show_floating_label(text: String) -> void:
+	if _player == null or not is_instance_valid(_player):
+		return
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 16)
+	label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3, 1.0))
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.position = _player.position + Vector2(-40, -60)
+	label.size = Vector2(80, 24)
+	add_child(label)
+
+	# Hold for 1 second, then float up and fade out.
+	var timer := get_tree().create_timer(1.0)
+	timer.timeout.connect(func() -> void:
+		if not is_instance_valid(label):
+			return
+		var tween := create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(label, "position:y", label.position.y - 30, 0.8)
+		tween.tween_property(label, "modulate:a", 0.0, 0.8)
+		tween.finished.connect(label.queue_free)
+	)
 
 
 func _close_popup() -> void:
@@ -895,26 +1165,51 @@ func _talk_npc(npc_id: String) -> void:
 	# Determine which dialogue to show: first-time, daily, or special
 	var is_evil: bool = tracker and tracker.get("current_alignment") == "evil"
 	var lines: Array[String] = []
-	var has_first: bool = stage_data.has("first")
-	var has_first_evil: bool = stage_data.has("first_evil")
-	var has_first_good: bool = stage_data.has("first_good")
 
-	if stage == 1 and has_first:
-		lines.append(stage_data["first"])
-	elif has_first_evil and is_evil:
-		lines.append(stage_data["first_evil"])
-	elif has_first_good and not is_evil:
-		lines.append(stage_data["first_good"])
+	# ---- First-time dialogues (B1 fix: only once per npc+stage) ----
+	var _show_first: bool = false
+	if (stage == 0 or stage == 1) and stage_data.has("first"):
+		if not tracker.has_shown_first_dialogue(npc_id, stage_key):
+			if stage == 0:
+				# Stage 0 first dialogue: split into paragraphs, one per click
+				var paragraphs: PackedStringArray = stage_data["first"].split("\n\n")
+				for para in paragraphs:
+					var stripped: String = para.strip_edges()
+					if not stripped.is_empty():
+						lines.append(stripped)
+				_show_first = true
+			else:
+				lines.append(stage_data["first"])
+			tracker.mark_first_dialogue_shown(npc_id, stage_key)
+	elif is_evil and stage_data.has("first_evil"):
+		if not tracker.has_shown_first_dialogue(npc_id, stage_key):
+			lines.append(stage_data["first_evil"])
+			tracker.mark_first_dialogue_shown(npc_id, stage_key)
+	elif not is_evil and stage_data.has("first_good"):
+		if not tracker.has_shown_first_dialogue(npc_id, stage_key):
+			lines.append(stage_data["first_good"])
+			tracker.mark_first_dialogue_shown(npc_id, stage_key)
 
-	# Add daily lines
-	var daily: Array = stage_data.get("daily", [])
-	if not daily.is_empty():
-		lines.append_array(daily)
+	# ---- Daily dialogues (B2 fix: 1 per conversation, cycling) ----
+	# Skip daily after Stage 0 intro — player should return to interaction panel.
+	if not _show_first:
+		var daily: Array = stage_data.get("daily", [])
+		if not daily.is_empty():
+			var seen_key := "%s_%s" % [npc_id, stage_key]
+			var last_idx: int = _shown_daily_indices.get(seen_key, -1)
+			var next_idx: int = (last_idx + 1) % daily.size()
+			_shown_daily_indices[seen_key] = next_idx
+			lines.append(daily[next_idx])
 
-	# Add evil/good specific lines for stage 3
+	# ---- Stage 3 special lines ----
 	if stage >= 3:
 		var extra: Array = stage_data.get("evil" if is_evil else "good", [])
-		lines.append_array(extra)
+		if not extra.is_empty():
+			var extra_key := "%s_%s_extra" % [npc_id, stage_key]
+			var extra_idx: int = _shown_daily_indices.get(extra_key, -1)
+			var next_extra: int = (extra_idx + 1) % extra.size()
+			_shown_daily_indices[extra_key] = next_extra
+			lines.append(extra[next_extra])
 
 	if lines.is_empty():
 		_show_toast("%s没有说话。" % NPC_NAMES.get(npc_id, npc_id))
@@ -941,13 +1236,21 @@ func _on_dialogue_close() -> void:
 	if not _dialogue_npc_id.is_empty():
 		var npc_id: String = _dialogue_npc_id
 		_dialogue_npc_id = ""
-		# Emit event for task progress tracking (e.g. "talk to NPCs")
+		# First blacksmith talk: gift 2 mine tickets
+		if npc_id == "blacksmith" and _runtime != null and not _runtime.is_blacksmith_first_talk_done():
+			_runtime.set_blacksmith_first_talk_done()
+			_runtime.add_mine_tickets(2)
+			_show_toast("铁匠青年递给你两张矿洞门票。持有 %d 张。" % _runtime.get_mine_tickets())
+		# Emit event for task progress tracking
 		if _runtime != null:
 			var event_bus: Object = _runtime.get("event_bus")
 			if event_bus != null and event_bus.has_signal("game_event"):
 				event_bus.game_event.emit("npc_talked_%s" % npc_id, {"quantity": 1, "npc_id": npc_id})
 		_refresh_task_panel()
 		_open_popup(npc_id)
+		# Show floating ticket label after popup is visible (deferred).
+		if npc_id == "blacksmith":
+			call_deferred("_show_floating_label", "普通票券 +2")
 
 
 # ---- Gift System ----
@@ -994,7 +1297,32 @@ func _do_gift(item_id: String) -> void:
 		_refresh_hud("")
 		_close_popup()
 		return
+
+	# First star crystal gift to florist -> tears narrative
+	if item_id == "star_crystal" and not _runtime.is_florist_first_star_gifted():
+		_runtime.set_florist_first_star_gifted()
+		_dialogue_npc_id = "florist"
+		_close_popup()
+		_ensure_dialogue_ui()
+		var tears_lines: Array[String] = [
+			"你把它给了我。我可以再闻一闻春天了。",
+			"（她的眼泪落了下来——全镇近十年来，第一滴眼泪。）",
+			"（花架上的枯枝中，似乎闪过一缕微不可见的绿色光点。）",
+		]
+		_dialogue_ui.open("花店少女", "res://assets/props/npc_identifier_sprites_alpha.png", tears_lines, Callable(self, "_on_florist_tears_dialogue_done").bind(item_id))
+		return
+
+	_perform_gift(item_id)
+
+
+func _on_florist_tears_dialogue_done(item_id: String) -> void:
+	_dialogue_npc_id = ""
+	_perform_gift(item_id)
+
+
+func _perform_gift(item_id: String) -> void:
 	# Determine rarity from item category
+	var affection: Object = _runtime.get("npc_affection")
 	var catalog: Object = _runtime.get("catalog")
 	var rarity: String = "common"
 	if catalog != null:
