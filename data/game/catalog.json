@@ -239,7 +239,7 @@
 	  "price_multiplier": 1.1,
 	  "preferred_tags": ["metal", "blacksmith"],
 	  "rejected_tags": ["volatile"],
-	  "budget": 400
+	  "budget": 999999
 	},
 	{
 	  "id": "buyer_alchemist",
@@ -247,7 +247,7 @@
 	  "price_multiplier": 1.18,
 	  "preferred_tags": ["crystal", "ancient"],
 	  "rejected_tags": [],
-	  "budget": 520
+	  "budget": 999999
 	},
 	{
 	  "id": "buyer_jeweler",
@@ -255,7 +255,7 @@
 	  "price_multiplier": 1.25,
 	  "preferred_tags": ["jeweler", "cosmic"],
 	  "rejected_tags": ["blacksmith"],
-	  "budget": 650
+	  "budget": 999999
 	}
   ],
   "tasks": [
@@ -263,6 +263,7 @@
 	  "id": "task_talk_to_townspeople",
 	  "name": "小镇初识",
 	  "description": "与四位小镇居民聊聊天，了解这个地方。",
+	  "flags": ["story"],
 	  "objectives": [
 		{"id": "elder", "type": "event_count", "event": "npc_talked_elder", "count": 1},
 		{"id": "blacksmith", "type": "event_count", "event": "npc_talked_blacksmith", "count": 1},
@@ -272,24 +273,28 @@
 	  "rewards": [
 		{"item_id": "raw_common_geode", "quantity": 2}
 	  ],
-	  "currency_reward": 30
+	  "currency_reward": 30,
+	  "unlocks": ["story_first_sell"]
 	},
 	{
 	  "id": "task_first_identification",
-	  "name": "First Reveal",
-	  "description": "Identify any raw geode in town.",
+	  "name": "初次鉴定",
+	  "description": "在镇上鉴定任意一块原石。",
+	  "flags": ["story"],
 	  "objectives": [
 		{"id": "identified_any", "type": "event_count", "event": "item_identified", "count": 1}
 	  ],
 	  "rewards": [
 		{"item_id": "raw_fine_geode", "quantity": 1}
 	  ],
-	  "currency_reward": 20
+	  "currency_reward": 20,
+	  "unlocks": ["story_mine_3_times"]
 	},
 	{
 	  "id": "task_blacksmith_order",
-	  "name": "Blacksmith Order",
-	  "description": "Deliver three iron shards.",
+	  "name": "铁匠订单",
+	  "description": "向铁匠交付三个铁片。",
+	  "flags": ["story"],
 	  "objectives": [
 		{"id": "deliver_iron", "type": "deliver_item", "item_id": "iron_shard", "count": 3}
 	  ],
@@ -300,8 +305,9 @@
 	},
 	{
 	  "id": "task_market_trial",
-	  "name": "Market Trial",
-	  "description": "Sell minerals worth at least 120 coins.",
+	  "name": "市场试炼",
+	  "description": "出售矿物收入至少 120 铜板。",
+	  "flags": ["story"],
 	  "objectives": [
 		{"id": "earn_sales", "type": "event_sum", "event": "item_sold", "field": "total_price", "target": 120}
 	  ],
@@ -311,9 +317,124 @@
 	  "currency_reward": 30
 	},
 	{
+	  "id": "story_first_sell",
+	  "name": "第一桶金",
+	  "description": "向商人出售任意一种矿物。",
+	  "flags": ["story"],
+	  "objectives": [
+		{"id": "first_sell", "type": "event_count", "event": "item_sold", "count": 1}
+	  ],
+	  "rewards": [],
+	  "currency_reward": 50,
+	  "unlocks": ["story_first_gift"]
+	},
+	{
+	  "id": "story_first_gift",
+	  "name": "善意初显",
+	  "description": "向花店少女赠送一份礼物。",
+	  "flags": ["story"],
+	  "objectives": [
+		{"id": "first_gift", "type": "event_count", "event": "item_gifted", "count": 1}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_common_geode", "quantity": 1}
+	  ],
+	  "currency_reward": 30
+	},
+	{
+	  "id": "story_mine_3_times",
+	  "name": "矿工日常",
+	  "description": "累计完成 3 次采矿。",
+	  "flags": ["story"],
+	  "objectives": [
+		{"id": "mine_3", "type": "event_count", "event": "mine_run_completed", "count": 3}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_fine_geode", "quantity": 2}
+	  ],
+	  "currency_reward": 60,
+	  "unlocks": ["story_earn_300", "story_buy_deep_ticket"]
+	},
+	{
+	  "id": "story_earn_300",
+	  "name": "精明商人",
+	  "description": "累计出售矿物收入达到 300 铜板。",
+	  "flags": ["story"],
+	  "objectives": [
+		{"id": "earn_300", "type": "event_sum", "event": "item_sold", "field": "total_price", "target": 300}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_rare_geode", "quantity": 1}
+	  ],
+	  "currency_reward": 80
+	},
+	{
+	  "id": "story_buy_deep_ticket",
+	  "name": "深渊门票",
+	  "description": "在铁匠青年处购买一张深层入场券。",
+	  "flags": ["story"],
+	  "objectives": [
+		{"id": "deep_ticket", "type": "event_count", "event": "deep_ticket_bought", "count": 1}
+	  ],
+	  "currency_reward": 150,
+	  "unlocks": ["story_find_star"]
+	},
+	{
+	  "id": "story_find_star",
+	  "name": "星辰呼唤",
+	  "description": "鉴定一块星辰矿。",
+	  "flags": ["story"],
+	  "objectives": [
+		{"id": "find_star", "type": "event_count", "event": "star_identified", "count": 1}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_rare_geode", "quantity": 1}
+	  ],
+	  "currency_reward": 200,
+	  "unlocks": ["story_make_choice"]
+	},
+	{
+	  "id": "story_make_choice",
+	  "name": "命运抉择",
+	  "description": "做出第一次星辰矿的选择——卖给商人，或赠予小镇居民。",
+	  "flags": ["story"],
+	  "objectives": [
+		{"id": "choice_made", "type": "event_count", "event": "star_choice_made", "count": 1}
+	  ],
+	  "currency_reward": 300,
+	  "unlocks": ["story_three_choices", "story_affection_50"]
+	},
+	{
+	  "id": "story_three_choices",
+	  "name": "坚定不移",
+	  "description": "累计做出 3 次同方向的星辰矿选择（全部卖出或全部赠予）。",
+	  "flags": ["story"],
+	  "objectives": [
+		{"id": "three_choices", "type": "event_count", "event": "star_choice_made", "count": 3}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_rare_geode", "quantity": 1}
+	  ],
+	  "currency_reward": 500
+	},
+	{
+	  "id": "story_affection_50",
+	  "name": "真心相待",
+	  "description": "任意一位 NPC 的好感度达到 50。",
+	  "flags": ["story"],
+	  "objectives": [
+		{"id": "affection_50", "type": "event_count", "event": "affection_milestone_50", "count": 1}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_rare_geode", "quantity": 1}
+	  ],
+	  "currency_reward": 200
+	},
+	{
 	  "id": "daily_copper_run",
 	  "name": "铜矿订单",
 	  "description": "交付铜块 x5",
+	  "flags": ["daily"],
 	  "objectives": [
 		{"id": "deliver_copper5", "type": "deliver_item", "item_id": "copper_nugget", "count": 5}
 	  ],
@@ -325,6 +446,7 @@
 	  "id": "daily_iron_forge",
 	  "name": "铁匠的急单",
 	  "description": "交付铁片 x3",
+	  "flags": ["daily"],
 	  "objectives": [
 		{"id": "deliver_iron3", "type": "deliver_item", "item_id": "iron_shard", "count": 3}
 	  ],
@@ -336,12 +458,274 @@
 	  "id": "daily_silver_chain",
 	  "name": "珠宝匠的银链",
 	  "description": "交付银脉 x2",
+	  "flags": ["daily"],
 	  "objectives": [
 		{"id": "deliver_silver2", "type": "deliver_item", "item_id": "silver_vein", "count": 2}
 	  ],
 	  "rewards": [{"item_id": "raw_rare_geode", "quantity": 1}],
 	  "currency_reward": 150,
 	  "daily_pool": [true]
+	},
+	{
+	  "id": "daily_gold_smelt",
+	  "name": "金匠的委托",
+	  "description": "交付金脉 x1",
+	  "flags": ["daily"],
+	  "objectives": [
+		{"id": "deliver_gold1", "type": "deliver_item", "item_id": "gold_vein", "count": 1}
+	  ],
+	  "rewards": [{"item_id": "raw_rare_geode", "quantity": 1}],
+	  "currency_reward": 200,
+	  "daily_pool": [true]
+	},
+	{
+	  "id": "daily_crystal_order",
+	  "name": "收藏家的水晶",
+	  "description": "交付水晶花 x2",
+	  "flags": ["daily"],
+	  "objectives": [
+		{"id": "deliver_crystal2", "type": "deliver_item", "item_id": "crystal_bloom", "count": 2}
+	  ],
+	  "rewards": [{"item_id": "raw_fine_geode", "quantity": 1}],
+	  "currency_reward": 130,
+	  "daily_pool": [true]
+	},
+	{
+	  "id": "daily_moonlit_delivery",
+	  "name": "月光石的订单",
+	  "description": "交付月光水晶 x1",
+	  "flags": ["daily"],
+	  "objectives": [
+		{"id": "deliver_moonlit1", "type": "deliver_item", "item_id": "moonlit_crystal", "count": 1}
+	  ],
+	  "rewards": [{"item_id": "raw_rare_geode", "quantity": 1}],
+	  "currency_reward": 180,
+	  "daily_pool": [true]
+	},
+	{
+	  "id": "daily_quick_sell",
+	  "name": "快速出货",
+	  "description": "向商人出售矿物 3 次",
+	  "flags": ["daily"],
+	  "objectives": [
+		{"id": "sell_3", "type": "event_count", "event": "item_sold", "count": 3}
+	  ],
+	  "rewards": [],
+	  "currency_reward": 60,
+	  "daily_pool": [true]
+	},
+	{
+	  "id": "daily_identify_batch",
+	  "name": "鉴定清单",
+	  "description": "鉴定原石 2 次",
+	  "flags": ["daily"],
+	  "objectives": [
+		{"id": "identify_2", "type": "event_count", "event": "item_identified", "count": 2}
+	  ],
+	  "rewards": [{"item_id": "raw_common_geode", "quantity": 2}],
+	  "currency_reward": 50,
+	  "daily_pool": [true]
+	},
+	{
+	  "id": "npc_elder_light",
+	  "name": "夜灯",
+	  "description": "守夜老人的灯油耗尽了。月光水晶的光可以为他照亮一个夜晚。",
+	  "flags": ["npc"],
+	  "npc_id": "elder",
+	  "affection_required": 20,
+	  "tier": 1,
+	  "objectives": [
+		{"id": "deliver_moonlit_elder", "type": "deliver_item", "item_id": "moonlit_crystal", "count": 1}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_common_geode", "quantity": 1}
+	  ],
+	  "currency_reward": 100,
+	  "affection_reward": 10
+	},
+	{
+	  "id": "npc_elder_tale",
+	  "name": "往事",
+	  "description": "守夜老人想用星辰碎片激活一段早已模糊的记忆。",
+	  "flags": ["npc"],
+	  "npc_id": "elder",
+	  "affection_required": 50,
+	  "tier": 2,
+	  "objectives": [
+		{"id": "deliver_starfrag_elder", "type": "deliver_item", "item_id": "star_fragment", "count": 1}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_rare_geode", "quantity": 1}
+	  ],
+	  "currency_reward": 200,
+	  "affection_reward": 15
+	},
+	{
+	  "id": "npc_elder_name",
+	  "name": "真名",
+	  "description": "守夜老人请求一块星辰矿作为共鸣——他想回忆起地底那头巨兽的名字。",
+	  "flags": ["npc"],
+	  "npc_id": "elder",
+	  "affection_required": 80,
+	  "tier": 3,
+	  "objectives": [
+		{"id": "deliver_star_elder", "type": "deliver_item", "item_id": "star_crystal", "count": 1}
+	  ],
+	  "rewards": [],
+	  "currency_reward": 500,
+	  "affection_reward": 20
+	},
+	{
+	  "id": "npc_smith_rush",
+	  "name": "急单",
+	  "description": "铁匠铺来了急单——需要铜块和铁片补库存。",
+	  "flags": ["npc"],
+	  "npc_id": "blacksmith",
+	  "affection_required": 20,
+	  "tier": 1,
+	  "objectives": [
+		{"id": "deliver_copper_smith", "type": "deliver_item", "item_id": "copper_nugget", "count": 5},
+		{"id": "deliver_iron_smith", "type": "deliver_item", "item_id": "iron_shard", "count": 3}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_fine_geode", "quantity": 1}
+	  ],
+	  "currency_reward": 120,
+	  "affection_reward": 10
+	},
+	{
+	  "id": "npc_smith_debt",
+	  "name": "舍与得",
+	  "description": "铁匠青年有一笔老债要还——银脉和金脉。他不想解释为什么。",
+	  "flags": ["npc"],
+	  "npc_id": "blacksmith",
+	  "affection_required": 50,
+	  "tier": 2,
+	  "objectives": [
+		{"id": "deliver_silver_smith", "type": "deliver_item", "item_id": "silver_vein", "count": 2},
+		{"id": "deliver_gold_smith", "type": "deliver_item", "item_id": "gold_vein", "count": 1}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_fine_geode", "quantity": 1}
+	  ],
+	  "currency_reward": 300,
+	  "affection_reward": 15
+	},
+	{
+	  "id": "npc_smith_closure",
+	  "name": "诀别",
+	  "description": "铁匠青年要把一块星辰矿封入剑中——与过去诀别。",
+	  "flags": ["npc"],
+	  "npc_id": "blacksmith",
+	  "affection_required": 80,
+	  "tier": 3,
+	  "objectives": [
+		{"id": "deliver_star_smith", "type": "deliver_item", "item_id": "star_crystal", "count": 1}
+	  ],
+	  "rewards": [],
+	  "currency_reward": 500,
+	  "affection_reward": 20
+	},
+	{
+	  "id": "npc_florist_soil",
+	  "name": "新土",
+	  "description": "花店少女需要水晶花作为新土——虽然她已经记不清为什么花需要新土了。",
+	  "flags": ["npc"],
+	  "npc_id": "florist",
+	  "affection_required": 20,
+	  "tier": 1,
+	  "objectives": [
+		{"id": "deliver_crystal_florist", "type": "deliver_item", "item_id": "crystal_bloom", "count": 3}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_common_geode", "quantity": 1}
+	  ],
+	  "currency_reward": 80,
+	  "affection_reward": 10
+	},
+	{
+	  "id": "npc_florist_color",
+	  "name": "颜色",
+	  "description": "花店少女想起了某种颜色——需要星辰碎片和月光水晶来确认。",
+	  "flags": ["npc"],
+	  "npc_id": "florist",
+	  "affection_required": 50,
+	  "tier": 2,
+	  "objectives": [
+		{"id": "deliver_starfrag_florist", "type": "deliver_item", "item_id": "star_fragment", "count": 1},
+		{"id": "deliver_moonlit_florist", "type": "deliver_item", "item_id": "moonlit_crystal", "count": 1}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_fine_geode", "quantity": 1}
+	  ],
+	  "currency_reward": 150,
+	  "affection_reward": 15
+	},
+	{
+	  "id": "npc_florist_bloom",
+	  "name": "花开",
+	  "description": "花店少女想用一块星辰矿催生第一朵真正的活花——镇上的第一抹生机。",
+	  "flags": ["npc"],
+	  "npc_id": "florist",
+	  "affection_required": 80,
+	  "tier": 3,
+	  "objectives": [
+		{"id": "deliver_star_florist", "type": "deliver_item", "item_id": "star_crystal", "count": 1}
+	  ],
+	  "rewards": [],
+	  "currency_reward": 600,
+	  "affection_reward": 20
+	},
+	{
+	  "id": "npc_buyer_sample",
+	  "name": "样品",
+	  "description": "商人需要水晶花和月光水晶作为样品去拓展他的市场渠道。",
+	  "flags": ["npc"],
+	  "npc_id": "buyer",
+	  "affection_required": 20,
+	  "tier": 1,
+	  "objectives": [
+		{"id": "deliver_crystal_buyer", "type": "deliver_item", "item_id": "crystal_bloom", "count": 1},
+		{"id": "deliver_moonlit_buyer", "type": "deliver_item", "item_id": "moonlit_crystal", "count": 1}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_common_geode", "quantity": 1}
+	  ],
+	  "currency_reward": 150,
+	  "affection_reward": 10
+	},
+	{
+	  "id": "npc_buyer_rare",
+	  "name": "珍品",
+	  "description": "镇外有一个大客户点名要金脉和银脉。商人说这是难得的机会。",
+	  "flags": ["npc"],
+	  "npc_id": "buyer",
+	  "affection_required": 50,
+	  "tier": 2,
+	  "objectives": [
+		{"id": "deliver_gold_buyer", "type": "deliver_item", "item_id": "gold_vein", "count": 2},
+		{"id": "deliver_silver_buyer", "type": "deliver_item", "item_id": "silver_vein", "count": 3}
+	  ],
+	  "rewards": [
+		{"item_id": "raw_rare_geode", "quantity": 1}
+	  ],
+	  "currency_reward": 300,
+	  "affection_reward": 15
+	},
+	{
+	  "id": "npc_buyer_honor",
+	  "name": "荣誉",
+	  "description": "商人想要一块星辰矿作为镇店之宝。他最想要的就是星辰矿——这个镇子上最值钱也最危险的东西。",
+	  "flags": ["npc"],
+	  "npc_id": "buyer",
+	  "affection_required": 80,
+	  "tier": 3,
+	  "objectives": [
+		{"id": "deliver_star_buyer", "type": "deliver_item", "item_id": "star_crystal", "count": 1}
+	  ],
+	  "rewards": [],
+	  "currency_reward": 800,
+	  "affection_reward": 20
 	}
   ],
   "night_customers": [
