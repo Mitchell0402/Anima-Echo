@@ -178,21 +178,6 @@ offset_right = 24.0
 offset_bottom = -28.0
 text = "公告板"
 
-[node name="RefineStation" type="Node2D" parent="." unique_id=1010317600]
-position = Vector2(900, 500)
-script = ExtResource("7")
-
-[node name="Sprite2D" type="Sprite2D" parent="RefineStation" unique_id=777131898]
-scale = Vector2(0.8, 0.8)
-texture = ExtResource("town_refine_station")
-
-[node name="Label" type="Label" parent="RefineStation" unique_id=1399688840]
-offset_left = -20.0
-offset_top = -40.0
-offset_right = -20.0
-offset_bottom = -40.0
-text = "精炼台"
-
 [node name="MineEntrance" parent="." unique_id=2123456789 instance=ExtResource("10")]
 position = Vector2(329, 202)
 

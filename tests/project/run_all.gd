@@ -61,7 +61,9 @@ func _init() -> void:
 	_run_test("equipment json parses with evil good and neutral items", Callable(self, "_test_equipment_json"))
 	_run_test("equipment system buy and equip flow works", Callable(self, "_test_equipment_buy_equip"))
 	_run_test("catalog has daily task pool and night customers", Callable(self, "_test_catalog_daily_pool"))
-	_run_test("refine workstation generates refined item id", Callable(self, "_test_refine_workstation"))
+	# Day 5: NPC Affinity Quests
+	_run_test("catalog has 12 npc tasks with correct flags", Callable(self, "_test_catalog_npc_tasks"))
+	_run_test("npc affection modify_affection triggers threshold", Callable(self, "_test_npc_affection_modify"))
 
 	if _failures.is_empty():
 		print("RESULT: PASS %d assertions" % _assertions)
@@ -857,20 +859,32 @@ func _test_stability_system_modifiers() -> void:
 
 func _test_day_night_cycle_limits() -> void:
 	var dc: Node = _new_day_cycle_for_test()
-	_assert_false(dc.is_night, "starts in daytime")
-	_assert_true(dc.can_enter_mine(), "can enter mine during day with quota unused")
+	_assert_eq(dc.TimePeriod.MORNING, int(dc.time_period), "starts in morning")
+	_assert_false(dc.is_night, "is_night is false in morning")
+	_assert_true(dc.can_enter_mine(), "can enter mine in morning")
+	_assert_eq(2, int(dc.get_remaining_entries()), "2 entries available in morning")
+
+	# First mine run: morning -> afternoon
 	dc.use_mine_entry()
+	_assert_eq(1, int(dc.get_remaining_entries()), "1 entry remaining after 1st use")
 	dc.on_mine_return()
-	_assert_true(dc.is_night, "enters night after mine return")
-	_assert_false(dc.can_enter_mine(), "cannot enter mine at night")
-	dc.end_night()
-	_assert_false(dc.is_night, "back to day after end_night")
-	_assert_eq(2, int(dc.get_remaining_entries()), "quota refilled to 2 after night")
-	# Use both entries continuously without returning in between
+	_assert_eq(dc.TimePeriod.AFTERNOON, int(dc.time_period), "enters afternoon after 1st mine return")
+	_assert_false(dc.is_night, "is_night is false in afternoon")
+	_assert_true(dc.can_enter_mine(), "can still enter mine in afternoon")
+
+	# Second mine run: afternoon -> evening
 	dc.use_mine_entry()
-	dc.use_mine_entry()
-	_assert_eq(0, int(dc.get_remaining_entries()), "quota 0 after using both entries")
-	_assert_false(dc.can_enter_mine(), "cannot enter mine when quota is 0")
+	_assert_eq(0, int(dc.get_remaining_entries()), "0 entries remaining after 2nd use")
+	dc.on_mine_return()
+	_assert_eq(dc.TimePeriod.EVENING, int(dc.time_period), "enters evening after 2nd mine return")
+	_assert_true(dc.is_night, "is_night is true in evening")
+	_assert_false(dc.can_enter_mine(), "cannot enter mine in evening")
+
+	# Sleep to next morning
+	dc.sleep_to_morning()
+	_assert_eq(dc.TimePeriod.MORNING, int(dc.time_period), "back to morning after sleep")
+	_assert_false(dc.is_night, "is_night is false after sleep to morning")
+	_assert_eq(2, int(dc.get_remaining_entries()), "quota refilled to 2 after sleep")
 	dc.free()
 
 
@@ -878,15 +892,20 @@ func _test_day_night_cycle_resets() -> void:
 	var dc: Node = _new_day_cycle_for_test()
 	_assert_eq(1, int(dc.day_count), "initial day is 1")
 	_assert_eq(2, int(dc.get_remaining_entries()), "initial remaining entries is 2")
+	# First mine: morning -> afternoon
 	dc.use_mine_entry()
 	_assert_eq(1, int(dc.get_remaining_entries()), "1 use => 1 remaining")
+	dc.on_mine_return()
+	# Second mine: afternoon -> evening
 	dc.use_mine_entry()
 	_assert_eq(0, int(dc.get_remaining_entries()), "2 uses => 0 remaining")
 	dc.on_mine_return()
-	dc.end_night()
-	_assert_eq(2, int(dc.day_count), "day counter increments after end_night")
+	_assert_eq(dc.TimePeriod.EVENING, int(dc.time_period), "evening after 2 mine returns")
+	dc.sleep_to_morning()
+	_assert_eq(2, int(dc.day_count), "day counter increments after sleep_to_morning")
 	_assert_eq(2, int(dc.get_remaining_entries()), "quota resets to 2 after new day")
-	_assert_false(dc.is_night, "daytime after new day")
+	_assert_eq(dc.TimePeriod.MORNING, int(dc.time_period), "morning after new day")
+	_assert_false(dc.is_night, "not night after new day")
 	dc.free()
 
 
@@ -909,10 +928,10 @@ func _test_npc_affection_basics() -> void:
 	aff.gift("florist", "common")
 	_assert_eq(1, int(aff.get_affection("florist")), "common gift gives +1")
 	aff.gift("florist", "rare")
-	_assert_eq(4, int(aff.get_affection("florist")), "rare gift gives +3 (1+3=4)")
+	_assert_eq(6, int(aff.get_affection("florist")), "rare gift gives +5 (1+5=6)")
 	aff.gift("florist", "star")
-	_assert_eq(9, int(aff.get_affection("florist")), "star gift gives +5 (4+5=9)")
-	aff = null
+	_assert_eq(11, int(aff.get_affection("florist")), "star gift gives +5 (6+5=11)")
+	aff.free()
 
 
 func _test_npc_affection_gift() -> void:
@@ -994,18 +1013,44 @@ func _test_equipment_buy_equip() -> void:
 func _test_catalog_daily_pool() -> void:
 	var cat: Object = _new_catalog_for_test()
 	var pool: Array = cat.get_tasks_for_pool("daily_pool")
-	_assert_true(pool.size() >= 3, "daily task pool has at least 3 entries")
+	_assert_true(pool.size() >= 8, "daily task pool has at least 8 entries")
 	var night: Array = cat.get_night_customers()
 	_assert_true(night.size() >= 1, "at least 1 night customer exists")
 	cat = null
 
 
-func _test_refine_workstation() -> void:
-	var ws: Node = _new_refine_for_test()
-	_assert_eq("refined_copper_nugget", str(ws.get_refined_item_id("copper_nugget")), "refined item id is prefixed")
-	_assert_eq(30, int(ws.get_refine_cost("common")), "common refine cost is 30")
-	_assert_eq(80, int(ws.get_refine_cost("rare")), "rare refine cost is 80")
-	ws.free()
+func _test_catalog_npc_tasks() -> void:
+	var cat: Node = _new_catalog_for_test()
+	var npc_task_count := 0
+	var npc_ids: Array = []
+	for task_variant in cat.get_tasks():
+		var task: Dictionary = task_variant
+		var flags: Array = task.get("flags", [])
+		if "npc" in flags:
+			npc_task_count += 1
+			var nid: String = str(task.get("npc_id", ""))
+			if nid != "" and nid not in npc_ids:
+				npc_ids.append(nid)
+			_assert_true(task.has("affection_required"), "npc task %s has affection_required" % task.get("id"))
+			_assert_true(task.has("affection_reward"), "npc task %s has affection_reward" % task.get("id"))
+			_assert_true(task.has("tier"), "npc task %s has tier" % task.get("id"))
+	_assert_eq(12, npc_task_count, "catalog has exactly 12 npc tasks")
+	_assert_eq(4, npc_ids.size(), "npc tasks cover all 4 npcs")
+	cat.free()
+
+
+func _test_npc_affection_modify() -> void:
+	var aff: Node = _new_affection_for_test()
+	var triggered: bool = false
+	aff.threshold_reached.connect(func(_npc_id: String, _threshold: int): triggered = true)
+	aff.modify_affection("elder", 50)
+	_assert_eq(50, int(aff.get_affection("elder")), "modify_affection sets to 50")
+	_assert_true(triggered, "threshold_reached fired for 50")
+	aff.modify_affection("elder", 40)
+	_assert_eq(90, int(aff.get_affection("elder")), "modify_affection adds 40 (50+40=90)")
+	aff.modify_affection("elder", 30)
+	_assert_eq(100, int(aff.get_affection("elder")), "modify_affection clamps at 100")
+	aff.free()
 
 
 func _new_equipment_for_test() -> Object:
@@ -1020,11 +1065,6 @@ func _new_catalog_for_test() -> Object:
 	var cat: Object = script.new()
 	cat.load_defaults()
 	return cat
-
-
-func _new_refine_for_test() -> Node:
-	var script: GDScript = load("res://scripts/town/refine_workstation.gd")
-	return script.new()
 
 
 func _res_path(path: String) -> String:

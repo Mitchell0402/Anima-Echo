@@ -31,7 +31,7 @@ The display system is a strict three-layer model. See [decisions/0004-display-sy
 - `WeightSystem`: tiered encumbrance system (Light/Heavy/Overload) that updates only while the current scene is the mine (`testScene`). In town the bar is dormant; the warehouse does not contribute to weight.
 - `ItemDatabase`: compatibility item icon, stack limit, display-name, description, and stack-key helper for the hotbar/inventory UI. Stack limits and descriptions are read from `GameRuntime.catalog` (not held locally).
 - `StabilitySystem`: town stability 0–100. Selling star crystal → -15, gifting → +15, gifting normal → +2. Daily decay 3. Affects enemy spawn/detection range and town visual tint.
-- `DayNightCycle`: day counter + night flag. Mine→town return triggers night. 3 free mine entries per day. Daily task refresh at night end.
+- `DayNightCycle`: day counter + time period (上午/下午/傍晚). Mine→town return advances time: 上午→下午→傍晚. 2 mine entries per day. 傍晚 closes mine. Sleep→next morning resets entries and refreshes daily tasks.
 - `MCPScreenshot`, `MCPInputService`, `MCPGameInspector`: Godot MCP helper autoloads from `addons/godot_mcp`.
 
 ## Godot MCP Tooling Boundary
@@ -49,7 +49,7 @@ If MCP is unavailable, use the Godot MCP Pro CLI bridge as a temporary fallback 
 
 ### Runtime Narrative Systems (RefCounted, owned by GameRuntime)
 
-- **TaskService** (`scripts/economy/task_service.gd`): `event_count`/`event_sum`/`deliver_item` objectives, progress via `GameEventBus`. Auto-accepts `task_talk_to_townspeople` and `task_first_identification` on new game. Right-side task panel in town HUD.
+- **TaskService** (`scripts/economy/task_service.gd`): `event_count`/`event_sum`/`deliver_item` objectives, progress via `GameEventBus`. Auto-accepts `task_talk_to_townspeople` and `task_first_identification` on new game. Right-side task panel in town HUD. Tasks are classified by `flags` field: `["story"]` persists across days until completed; `["daily"]` is wiped each morning and 3 new ones are drawn from the daily pool. Story tasks form a 12-task progressive chain: completing one auto-accepts the next via the `unlocks` field.
 - **NpcAffection** (`scripts/narrative/npc_affection.gd`): 0–100 per NPC, +1/+3/+5 by rarity, 1 gift/day/NPC.
 - **MoralityTracker** (`scripts/core/morality_tracker.gd`): star crystals sold vs gifted.
 - **EquipmentSystem** (`scripts/player/equipment_system.gd`): 4 slots, good/evil exclusive, basic upgrades. Data at `data/equipment/equipment.json`.
@@ -79,7 +79,7 @@ All inventory, warehouse, wallet, and budget changes should go through `GameTran
 
 1. The game starts at the **title screen** (`res://scenes/ui/title_menu.tscn`).
 2. Clicking **START** opens the **intro narration** (`res://scenes/ui/intro.tscn`): 14 lines of black-screen text, left-click to advance. The last line auto-transitions to town. A **TEST** button on the title screen skips intro and goes directly to town.
-3. The town (`res://scenes/town/mining_town.tscn`) is the central hub. Players move freely, talk to NPCs (E key), check the task board, access the warehouse (I key), and use the refine station.
+3. The town (`res://scenes/town/mining_town.tscn`) is the central hub. Players move freely, talk to NPCs (E key), check the task board, and access the warehouse (I key).
 4. The blacksmith NPC (after 5+ shallow mine runs) sells deep mine tickets. Entering the mine calls `GameRuntime.begin_mine_run()` (clears hotbar) and opens `res://scenes/mine/test_scene.tscn`.
 5. Mine interactions collect raw geodes into the hotbar.
 6. `MinecartExit` calls `GameRuntime.end_mine_run()` (dumps hotbar into warehouse) and returns the player to town.
@@ -94,7 +94,7 @@ Because `GameRuntime` is an autoload, hotbar state, warehouse state, wallet bala
 - `scripts/items`: item database, gem pickup behavior, and hotbar compatibility.
 - `scripts/player`: mine player state, stats, movement, and death handling.
 - `scripts/mine`: mineable nodes, covers, mine stats, and oxygen pump interactable.
-- `scripts/town`: town scene logic, town player controller, town movement, NPC interaction, mine return route, refine station, and warehouse UI host.
+- `scripts/town`: town scene logic, town player controller, town movement, NPC interaction, mine return route, and warehouse UI host.
 - `scripts/narrative`: dialogue UI, NPC affection, morality tracker.
 - `scripts/enemies`: enemy AI.
 - `scripts/ui`: title menu, intro narration, health bar, hotbar, warehouse UI, NPC warehouse popups, dialogue UI, weight bar, oxygen bar, QTE circle, and progress UI.
