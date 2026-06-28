@@ -27,16 +27,16 @@ Both town and mine use the same convention: **default WALK, hold Shift to RUN**.
 
 ### NPC & Portrait Assets
 
-All NPC portrait images live under `res://assets/props/`:
+NPC world sprites and default portraits use the generated visual candidate set:
 
-| NPC | Portrait path | Scene path |
-|-----|---------------|------------|
-| 守夜老人 (elder) | `res://assets/props/npc_task_clerk_sprites_alpha.png` | `scenes/town/npc_elder.tscn` |
-| 铁匠青年 (blacksmith) | `res://assets/props/npc_miner_alpha.png` | `scenes/town/npc_blacksmith.tscn` |
-| 花店少女 (florist) | `res://assets/props/npc_identifier_sprites_alpha.png` | `scenes/town/npc_florist.tscn` |
-| 商人 (buyer) | `res://assets/props/npc_buyer_sprites_alpha.png` | `scenes/town/npc_buyer.tscn` |
+| NPC | World sprite | Default portrait | Scene path |
+|-----|--------------|------------------|------------|
+| 守夜老人 (elder) | `res://assets/town/npcs/elder_idle.png` | `res://assets/ui/portraits/elder_neutral.png` | `scenes/town/npc_elder.tscn` |
+| 铁匠青年 (blacksmith) | `res://assets/town/npcs/blacksmith_idle.png` | `res://assets/ui/portraits/blacksmith_neutral.png` | `scenes/town/npc_blacksmith.tscn` |
+| 花店少女 (florist) | `res://assets/town/npcs/florist_idle.png` | `res://assets/ui/portraits/florist_neutral.png` | `scenes/town/npc_florist.tscn` |
+| 商人 (buyer) | `res://assets/town/npcs/buyer_idle.png` | `res://assets/ui/portraits/buyer_neutral.png` | `scenes/town/npc_buyer.tscn` |
 
-`data/narrative/dialogues.json` references these portrait paths in each NPC's `"portrait"` field.
+`data/narrative/dialogues.json` references the neutral portrait paths in each NPC's `"portrait"` field. Concerned portrait variants exist as placeholder candidates but are not wired to emotion-specific dialogue yet.
 
 ### Task System
 
@@ -80,8 +80,11 @@ All NPC portrait images live under `res://assets/props/`:
 
 ### Visual Assets
 
-- New asset: `assets/props/task_board.png` (48×48 pixel-art wooden bulletin board). Sidecar at `assets/props/task_board.png.meta.md`.
-- Old `assets/town/npcs/*.png` files still exist on disk but appear replaced in current scene/data references by `assets/props/` equivalents; audit them as likely obsolete before deletion.
+- Current generated candidates are tracked in [`docs/visual_assets/inventory.md`](visual_assets/inventory.md). Wired-but-not-final art remains `placeholder` until a later visual review approves final quality.
+- First-pass generated candidates already wired: item icons, NPC world sprites, neutral NPC portraits, title/intro backgrounds.
+- Second-pass generated candidates wired on 2026-06-28: mine gem pickups, mine wall nodes, cover crate, minecart return, oxygen pump, mine gate, refine station, town building/decor/prop/tree overlay layer, dialogue/warehouse/hotbar/popup/button UI skin assets.
+- Old `assets/props/task_board.png` is obsolete; `assets/town/props/task_board.png` is now used by `scenes/town/mining_town.tscn`.
+- Generated town and mine tilesets remain placeholder assets until a focused TileMap migration can preserve collision, traversal, camera framing, and NPC/task-board interaction ranges.
 - Full audit and batch-generation plan lives in [`docs/specs/visual_asset_audit_generation_plan.md`](specs/visual_asset_audit_generation_plan.md). It records 128 current PNGs, 1 current sidecar, the `imagegen` raster-only default, UI/dialogue/warehouse/shop coverage, and the town TileMap replacement requirement.
 
 ---
@@ -142,7 +145,9 @@ For development and review, use MCP evidence when a change affects scenes, visua
 - TODO: Generate missing UI icons using external image-generation AI.
 - DONE 2026-06-28: Generated current-playable visual candidates listed in `docs/specs/visual_asset_audit_generation_plan.md`, including the three-level mine tileset set (`shallow_cave_tileset.png`, `mid_cave_tileset.png`, `deep_cave_tileset.png`). Player/enemy animation, good/evil-specific variants, ending screens, and other future-only assets remain deferred.
 - DONE 2026-06-28: Wired first-pass generated placeholder candidates for item icons, NPC world sprites, NPC dialogue portraits, title background, and intro background. The candidates remain `placeholder` art until a later visual review approves final quality.
-- TODO: Review remaining generated visual candidates and wire approved assets into scenes/resources without replacing player/enemy animation.
+- DONE 2026-06-28: Wired the remaining direct-match generated visual candidates into current scenes/UI: mine pickups/nodes/props, town building/decor/prop/tree overlay, mine gate/refine station/task board, and generated UI button/panel/slot/overlay skin assets.
+- TODO: Migrate generated town and mine tilesets in a focused TileMap pass with collision/pathing validation.
+- TODO: Wire context-specific UI icons that need real UI semantics first (`coin`, `day`, `night`, `health`, `oxygen`, `weight`, equipment icons, `settings_panel`, `toast`, `refined_badge`).
 - TODO: Apply the three-layer display model to the mine scene.
 - TODO: Add buyer remaining budget indicator to buyer NPC popup.
 - TODO: Add 7 per-concern warehouse regression tests.

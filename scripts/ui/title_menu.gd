@@ -1,5 +1,9 @@
 extends CanvasLayer
 
+const BUTTON_NORMAL_TEXTURE := preload("res://assets/ui/buttons/button_normal.png")
+const BUTTON_HOVER_TEXTURE := preload("res://assets/ui/buttons/button_hover.png")
+const BUTTON_DISABLED_TEXTURE := preload("res://assets/ui/buttons/button_disabled.png")
+
 var _btn_start: Button
 var _btn_continue: Button
 var _btn_setting: Button
@@ -99,7 +103,21 @@ func _make_button(text: String) -> Button:
 	btn.text = text
 	btn.custom_minimum_size = Vector2(200, 44)
 	btn.add_theme_font_size_override("font_size", 18)
+	btn.add_theme_stylebox_override("normal", _button_style(BUTTON_NORMAL_TEXTURE))
+	btn.add_theme_stylebox_override("hover", _button_style(BUTTON_HOVER_TEXTURE))
+	btn.add_theme_stylebox_override("pressed", _button_style(BUTTON_HOVER_TEXTURE))
+	btn.add_theme_stylebox_override("disabled", _button_style(BUTTON_DISABLED_TEXTURE))
 	return btn
+
+
+func _button_style(texture: Texture2D) -> StyleBoxTexture:
+	var style := StyleBoxTexture.new()
+	style.texture = texture
+	style.texture_margin_left = 8
+	style.texture_margin_right = 8
+	style.texture_margin_top = 8
+	style.texture_margin_bottom = 8
+	return style
 
 
 func _on_start() -> void:

@@ -7,7 +7,7 @@
 [ext_resource type="Script" uid="uid://bq67qfjk550xb" path="res://scripts/ui/progress_ui.gd" id="3_tmet0"]
 [ext_resource type="PackedScene" uid="uid://cyfi7qy3l1lyx" path="res://scenes/mine/gems/gem_l3.tscn" id="4_glmyf"]
 [ext_resource type="PackedScene" path="res://scenes/mine/gems/gem_star.tscn" id="5_star"]
-[ext_resource type="Texture2D" uid="uid://ttg3fl22ajvx" path="res://assets/gj/environment/stones_1.png" id="6_03nme"]
+[ext_resource type="Texture2D" path="res://assets/mine/nodes/mine_wall_deep.png" id="6_03nme"]
 [ext_resource type="Script" path="res://scripts/ui/qte_circle_ui.gd" id="8_d280x"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kjxxc"]
@@ -37,7 +37,6 @@ script = ExtResource("2_fmt5g")
 position = Vector2(2, -57)
 
 [node name="Sprite2D" type="Sprite2D" parent="Visuals" unique_id=1564044819]
-scale = Vector2(0.5, 0.5)
 texture = ExtResource("6_03nme")
 
 [node name="ProgressUI" type="Control" parent="." unique_id=2052152982]

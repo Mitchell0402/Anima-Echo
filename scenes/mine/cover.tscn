@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d3gx76jdynysk"]
 
 [ext_resource type="Script" uid="uid://dbxiy54wab81l" path="res://scripts/mine/cover.gd" id="1_cover"]
-[ext_resource type="Texture2D" uid="uid://xebije4k38qn" path="res://assets/mine/environment/decor_6.png" id="2_sprite"]
+[ext_resource type="Texture2D" path="res://assets/mine/props/cover_crate.png" id="2_sprite"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_interact"]
 size = Vector2(139, 98)
@@ -10,7 +10,6 @@ size = Vector2(139, 98)
 script = ExtResource("1_cover")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=860080994]
-scale = Vector2(0.6, 0.6)
 texture = ExtResource("2_sprite")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2100934624]

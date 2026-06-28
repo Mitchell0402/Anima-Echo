@@ -1,6 +1,13 @@
 extends Node2D
 
 const WAREHOUSE_UI_SCRIPT = preload("res://scripts/ui/warehouse_ui.gd")
+const BUTTON_NORMAL_TEXTURE := preload("res://assets/ui/buttons/button_normal.png")
+const BUTTON_HOVER_TEXTURE := preload("res://assets/ui/buttons/button_hover.png")
+const BUTTON_DISABLED_TEXTURE := preload("res://assets/ui/buttons/button_disabled.png")
+const POPUP_PANEL_TEXTURE := preload("res://assets/ui/panels/popup_medium.png")
+const TASK_ICON_TEXTURE := preload("res://assets/ui/icons/task.png")
+const STABILITY_ICON_TEXTURE := preload("res://assets/ui/icons/stability.png")
+const WAREHOUSE_ICON_TEXTURE := preload("res://assets/ui/icons/warehouse.png")
 
 const NPC_NAMES := {
 	"blacksmith": "铁匠青年",
@@ -244,10 +251,7 @@ func _build_ui() -> void:
 	left_panel.add_theme_constant_override("separation", 4)
 	layer.add_child(left_panel)
 
-	var stab_header := Label.new()
-	stab_header.text = "◆ 稳定度"
-	stab_header.add_theme_font_size_override("font_size", 15)
-	left_panel.add_child(stab_header)
+	left_panel.add_child(_make_icon_row(STABILITY_ICON_TEXTURE, "稳定度", 15))
 
 	_stability_bar = ColorRect.new()
 	_stability_bar.custom_minimum_size = Vector2(160, 20)
@@ -278,6 +282,7 @@ func _build_ui() -> void:
 	_task_panel.offset_right = -20
 	_task_panel.offset_bottom = 140
 	_task_panel.custom_minimum_size = Vector2(220, 0)
+	_task_panel.add_theme_stylebox_override("panel", _texture_style(POPUP_PANEL_TEXTURE, 10))
 	layer.add_child(_task_panel)
 
 	var task_vbox := VBoxContainer.new()
@@ -290,19 +295,25 @@ func _build_ui() -> void:
 	task_margin.add_child(task_vbox)
 	_task_panel.add_child(task_margin)
 
-	var task_header := Label.new()
-	task_header.text = "◆ 当前任务"
-	task_header.add_theme_font_size_override("font_size", 15)
-	task_vbox.add_child(task_header)
+	task_vbox.add_child(_make_icon_row(TASK_ICON_TEXTURE, "当前任务", 15))
 
 	_task_body = VBoxContainer.new()
 	_task_body.add_theme_constant_override("separation", 4)
 	task_vbox.add_child(_task_body)
 
 	# Bottom-left warehouse label
+	var warehouse_icon := TextureRect.new()
+	warehouse_icon.texture = WAREHOUSE_ICON_TEXTURE
+	warehouse_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	warehouse_icon.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	warehouse_icon.offset_left = 16
+	warehouse_icon.offset_top = 72
+	warehouse_icon.custom_minimum_size = Vector2(24, 24)
+	warehouse_icon.size = Vector2(24, 24)
+	layer.add_child(warehouse_icon)
 	_inventory_label = Label.new()
 	_inventory_label.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	_inventory_label.offset_left = 16
+	_inventory_label.offset_left = 46
 	_inventory_label.offset_top = 70
 	_inventory_label.custom_minimum_size = Vector2(520, 120)
 	layer.add_child(_inventory_label)
@@ -322,6 +333,7 @@ func _build_ui() -> void:
 	_popup.set_anchors_preset(Control.PRESET_CENTER)
 	_popup.custom_minimum_size = Vector2(420, 280)
 	_popup.size = Vector2(420, 280)
+	_popup.add_theme_stylebox_override("panel", _texture_style(POPUP_PANEL_TEXTURE, 10))
 	layer.add_child(_popup)
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 12)
@@ -335,6 +347,33 @@ func _build_ui() -> void:
 	root.add_child(_popup_title)
 	_popup_body = VBoxContainer.new()
 	root.add_child(_popup_body)
+
+
+func _make_icon_row(texture: Texture2D, text: String, font_size: int) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	var icon := TextureRect.new()
+	icon.texture = texture
+	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	icon.custom_minimum_size = Vector2(20, 20)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	row.add_child(icon)
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", font_size)
+	row.add_child(label)
+	return row
+
+
+func _texture_style(texture: Texture2D, margin: int) -> StyleBoxTexture:
+	var style := StyleBoxTexture.new()
+	style.texture = texture
+	style.texture_margin_left = margin
+	style.texture_margin_right = margin
+	style.texture_margin_top = margin
+	style.texture_margin_bottom = margin
+	return style
 
 
 func _open_popup(npc_id: String) -> void:
@@ -527,6 +566,10 @@ func _ensure_town_qte() -> Control:
 func _add_button(text: String, action: Callable) -> Button:
 	var button := Button.new()
 	button.text = text
+	button.add_theme_stylebox_override("normal", _texture_style(BUTTON_NORMAL_TEXTURE, 8))
+	button.add_theme_stylebox_override("hover", _texture_style(BUTTON_HOVER_TEXTURE, 8))
+	button.add_theme_stylebox_override("pressed", _texture_style(BUTTON_HOVER_TEXTURE, 8))
+	button.add_theme_stylebox_override("disabled", _texture_style(BUTTON_DISABLED_TEXTURE, 8))
 	if action.is_valid():
 		button.pressed.connect(action)
 	_popup_body.add_child(button)
