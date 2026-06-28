@@ -124,7 +124,8 @@ The full narrative/worldbuilding design lives in [`docs/specs/narrative_design.m
 - TODO: Audit every existing `assets/**/*.png` and add `<name>.png.meta.md` sidecar.
 - TODO: Populate `docs/visual_assets/inventory.md` with the full asset list.
 - TODO: Generate missing UI icons using external image-generation AI.
-- TODO: Generate the full visual batch listed in `docs/specs/visual_asset_audit_generation_plan.md`, including UI panels, dialogue assets, warehouse/shop/task/refine skins, item/equipment icons, NPC portraits, and TileMap-ready town terrain/building/tree/decor sprites.
+- DONE 2026-06-28: Generated current-playable visual candidates listed in `docs/specs/visual_asset_audit_generation_plan.md`, including the three-level mine tileset set (`shallow_cave_tileset.png`, `mid_cave_tileset.png`, `deep_cave_tileset.png`). Player/enemy animation, good/evil-specific variants, ending screens, and other future-only assets remain deferred.
+- TODO: Review generated visual candidates and wire approved assets into scenes/resources without replacing player/enemy animation.
 - TODO: Apply the three-layer display model to the mine scene.
 - TODO: Add buyer remaining budget indicator to buyer NPC popup.
 - TODO: Add 7 per-concern warehouse regression tests.
