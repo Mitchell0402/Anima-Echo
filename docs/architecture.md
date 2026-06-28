@@ -34,6 +34,19 @@ The display system is a strict three-layer model. See [decisions/0004-display-sy
 - `DayNightCycle`: day counter + night flag. Mine→town return triggers night. 3 free mine entries per day. Daily task refresh at night end.
 - `MCPScreenshot`, `MCPInputService`, `MCPGameInspector`: Godot MCP helper autoloads from `addons/godot_mcp`.
 
+## Godot MCP Tooling Boundary
+
+`addons/godot_mcp` is editor/runtime tooling, not gameplay logic. Game systems must not depend on MCP-only services to run. The addon is used by development agents to inspect the live editor, adjust scene properties, run the game, simulate input, capture screenshots, and collect acceptance evidence.
+
+MCP should be the first choice for Godot-owned state because it talks through the editor and avoids broad text rewrites:
+
+- Project settings and input map changes should go through MCP tools such as `set_project_setting` or `set_input_action`.
+- Scene visual changes should prefer `update_property`, `batch_set_property`, and `save_scene` over unrelated `.tscn` rewrites.
+- Runtime validation should start with `play_scene` and end with `stop_scene`; runtime inspection or input tools are invalid before the scene is running.
+- Screenshots saved through MCP are verification artifacts, not source assets, unless a task explicitly promotes them into `assets/` with inventory metadata.
+
+If MCP is unavailable, use the Godot MCP Pro CLI bridge as a temporary fallback and document that fallback in the task report. The long-term maintenance policy for the addon is still undecided.
+
 ### Runtime Narrative Systems (RefCounted, owned by GameRuntime)
 
 - **TaskService** (`scripts/economy/task_service.gd`): `event_count`/`event_sum`/`deliver_item` objectives, progress via `GameEventBus`. Auto-accepts `task_talk_to_townspeople` and `task_first_identification` on new game. Right-side task panel in town HUD.
@@ -103,7 +116,7 @@ Because `GameRuntime` is an autoload, hotbar state, warehouse state, wallet bala
 
 - [x] **Oxygen System**: Added `OxygenSystem` autoload, `OxygenBar` UI, and `OxygenPump` interactable. See [specs/oxygen_system.md](specs/oxygen_system.md).
 - TODO: Document the intended save/load or persistence model. Current runtime state is session-local. The warehouse makes this question more urgent — cross-process persistence is the natural next step after the warehouse ships.
-- TODO: Decide whether `addons/godot_mcp` is vendor-managed, manually maintained, or periodically refreshed.
+- TODO: Decide whether `addons/godot_mcp` is vendor-managed, manually maintained, or periodically refreshed. Until then, treat it as tooling-only and verify it with the MCP health check in [testing.md](testing.md).
 - TODO: Clarify the long-term product/gameplay direction before adding large new systems.
 - ~~TODO: Verify whether `CustomerShopService.list_customers()` should return customers instead of tasks before any feature relies on it.~~ **Fixed** by PR "[codex/fix-doc-scene-drift]" — see [decisions/0001](../decisions/0001-fix-doc-scene-drift.md).
 - TODO: Document asset generation/source metadata if these assets will be regenerated or replaced.
