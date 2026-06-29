@@ -28,12 +28,20 @@ func _ready() -> void:
 
 
 func _build() -> void:
-	# Full-screen pure black background
-	var bg := ColorRect.new()
-	bg.color = Color.BLACK
+	var bg := TextureRect.new()
+	bg.texture = preload("res://assets/ui/screens/intro_background.png")
+	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bg.stretch_mode = TextureRect.STRETCH_SCALE
+	bg.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(bg)
+
+	var shade := ColorRect.new()
+	shade.color = Color(0, 0, 0, 0.68)
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(shade)
 
 	# Text label — grow from center in both directions so content stays
 	# centered regardless of line length.

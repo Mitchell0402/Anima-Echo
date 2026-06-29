@@ -23,6 +23,12 @@ const MAX_SLOT_SIZE: float = 80.0
 const MIN_PANEL_W: float = 360.0
 const MIN_PANEL_H: float = 280.0
 const PANEL_SCALE: float = 0.8
+const DIM_OVERLAY_TEXTURE := preload("res://assets/ui/overlays/dim_overlay.png")
+const WAREHOUSE_PANEL_TEXTURE := preload("res://assets/ui/panels/warehouse_panel.png")
+const TOOLTIP_PANEL_TEXTURE := preload("res://assets/ui/panels/tooltip.png")
+const SLOT_EMPTY_TEXTURE := preload("res://assets/ui/slots/slot_empty.png")
+const SLOT_FILLED_TEXTURE := preload("res://assets/ui/slots/slot_filled.png")
+const SLOT_DISABLED_TEXTURE := preload("res://assets/ui/slots/slot_disabled.png")
 
 var _panel: PanelContainer
 var _grid: GridContainer
@@ -30,7 +36,7 @@ var _tooltip: PanelContainer
 var _tooltip_name: Label
 var _tooltip_desc: Label
 var _tooltip_price: Label
-var _overlay: ColorRect
+var _overlay: TextureRect
 var _is_open: bool = false
 var _hovered_item_id: String = ""
 var _slot_size: float = 64.0  # Recomputed in _build / _layout from viewport size.
@@ -99,8 +105,11 @@ func _rebuild_slot_sizes() -> void:
 func _build() -> void:
 	# Dimming overlay covers the whole screen and is independent of the
 	# panel. The town scene still renders behind it.
-	_overlay = ColorRect.new()
-	_overlay.color = Color(0.0, 0.0, 0.0, 0.45)
+	_overlay = TextureRect.new()
+	_overlay.texture = DIM_OVERLAY_TEXTURE
+	_overlay.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_overlay.stretch_mode = TextureRect.STRETCH_SCALE
+	_overlay.modulate = Color(1, 1, 1, 0.45)
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_overlay)
@@ -110,6 +119,7 @@ func _build() -> void:
 	# when size changes, leading to misalignment).
 	_panel = PanelContainer.new()
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_panel.add_theme_stylebox_override("panel", _texture_style(WAREHOUSE_PANEL_TEXTURE, 12))
 	_center_panel()
 	add_child(_panel)
 	# Title + grid + footer layout.
@@ -136,6 +146,7 @@ func _build() -> void:
 	_tooltip = PanelContainer.new()
 	_tooltip.visible = false
 	_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_tooltip.add_theme_stylebox_override("panel", _texture_style(TOOLTIP_PANEL_TEXTURE, 8))
 	add_child(_tooltip)
 	var tip_root: VBoxContainer = VBoxContainer.new()
 	_tooltip.add_child(tip_root)
@@ -155,6 +166,7 @@ func _build_slot() -> Panel:
 	slot.custom_minimum_size = Vector2(_slot_size, _slot_size)
 	slot.size = Vector2(_slot_size, _slot_size)
 	slot.mouse_filter = Control.MOUSE_FILTER_PASS
+	slot.add_theme_stylebox_override("panel", _texture_style(SLOT_EMPTY_TEXTURE, 6))
 	var icon: TextureRect = TextureRect.new()
 	icon.name = "Icon"
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -175,6 +187,16 @@ func _build_slot() -> Panel:
 	slot.mouse_entered.connect(_on_slot_hover.bind(slot))
 	slot.mouse_exited.connect(_on_slot_unhover)
 	return slot
+
+
+func _texture_style(texture: Texture2D, margin: int) -> StyleBoxTexture:
+	var style := StyleBoxTexture.new()
+	style.texture = texture
+	style.texture_margin_left = margin
+	style.texture_margin_right = margin
+	style.texture_margin_top = margin
+	style.texture_margin_bottom = margin
+	return style
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -245,9 +267,11 @@ func _refresh_slots() -> void:
 		if item_id.is_empty():
 			icon.texture = null
 			count.text = ""
-			slot.modulate = Color(0.85, 0.85, 0.85, 1.0)
+			slot.add_theme_stylebox_override("panel", _texture_style(SLOT_EMPTY_TEXTURE, 6))
+			slot.modulate = Color.WHITE
 		else:
 			var tex: Texture2D = db.get_icon_by_item_id(item_id) if db != null and db.has_method("get_icon_by_item_id") else null
+			slot.add_theme_stylebox_override("panel", _texture_style(SLOT_FILLED_TEXTURE, 6))
 			if tex != null:
 				icon.texture = tex
 				slot.modulate = Color.WHITE

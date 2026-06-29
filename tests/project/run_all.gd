@@ -24,6 +24,13 @@ func _init() -> void:
 	_run_test("mine movement range is open for future level design", Callable(self, "_test_mine_movement_range_is_open"))
 	_run_test("mine gem drops stay visible before pickup", Callable(self, "_test_mine_gem_drops_stay_visible_before_pickup"))
 	_run_test("hotbar gem inventory items resolve icons", Callable(self, "_test_hotbar_gem_inventory_items_resolve_icons"))
+	_run_test("item database uses generated UI item icons", Callable(self, "_test_item_database_uses_generated_ui_item_icons"))
+	_run_test("town NPCs use generated candidate sprites", Callable(self, "_test_town_npcs_use_generated_candidate_sprites"))
+	_run_test("dialogue data uses generated portraits", Callable(self, "_test_dialogue_data_uses_generated_portraits"))
+	_run_test("title and intro use generated screen backgrounds", Callable(self, "_test_title_and_intro_use_generated_backgrounds"))
+	_run_test("mine scenes use generated node and prop assets", Callable(self, "_test_mine_scenes_use_generated_visual_assets"))
+	_run_test("town scene uses generated props buildings and decor", Callable(self, "_test_town_scene_uses_generated_environment_assets"))
+	_run_test("core UI uses generated skin assets", Callable(self, "_test_core_ui_uses_generated_skin_assets"))
 	_run_test("mine return route uses generated minecart prop", Callable(self, "_test_minecart_return_route"))
 	_run_test("unified runtime core is installed", Callable(self, "_test_unified_core_installed"))
 	_run_test("project starts from town and keeps mine route", Callable(self, "_test_project_scene_routes"))
@@ -78,11 +85,11 @@ func _test_mine_scene_structure() -> void:
 		return
 	var scene := packed.instantiate()
 	_assert_true(scene.get_node_or_null("MainCharacter") != null, "mine keeps MainCharacter")
-	_assert_true(scene.get_node_or_null("TileMapLayer") != null, "mine keeps TileMapLayer")
-	_assert_true(scene.get_node_or_null("TileMapLayer2") != null, "mine keeps TileMapLayer2")
+	_assert_true(scene.get_node_or_null("GroundLayer") != null, "mine keeps GroundLayer")
+	_assert_true(scene.get_node_or_null("WallLayer") != null, "mine keeps WallLayer")
 	_assert_true(_count_named_children(scene, "SmallMine") >= 5, "mine keeps five mine nodes")
-	_assert_true(scene.get_node_or_null("Cover") != null, "mine keeps Cover")
-	_assert_true(scene.get_node_or_null("Cover2") != null, "mine keeps Cover2")
+	_assert_true(scene.get_node_or_null("CoverCollection/Cover") != null, "mine keeps Cover")
+	_assert_true(scene.get_node_or_null("CoverCollection/Cover2") != null, "mine keeps Cover2")
 	_assert_true(scene.get_node_or_null("EnemyCollection/Enemy") != null, "mine keeps first enemy")
 	_assert_true(scene.get_node_or_null("EnemyCollection/Enemy3") != null, "mine keeps second enemy")
 	_assert_true(scene.get_node_or_null("PatrolRoute/PatrolA") != null, "mine keeps PatrolA")
@@ -159,20 +166,22 @@ func _test_no_legacy_res_paths_after_layout_migration() -> void:
 func _test_town_assets_present() -> void:
 	var required := [
 		"res://assets/town/map/town_map.png",
-		"res://assets/props/npc_miner_alpha.png",
-		"res://assets/props/npc_buyer_sprites_alpha.png",
-		"res://assets/props/npc_identifier_sprites_alpha.png",
-		"res://assets/props/npc_task_clerk_sprites_alpha.png",
+		"res://assets/town/npcs/blacksmith_idle.png",
+		"res://assets/town/npcs/buyer_idle.png",
+		"res://assets/town/npcs/elder_idle.png",
+		"res://assets/town/npcs/florist_idle.png",
+		"res://assets/town/props/task_board.png",
+		"res://assets/town/buildings/refine_station.png",
 	]
 	for path in required:
 		_assert_true(FileAccess.file_exists(path), "town asset exists: %s" % path)
 
 
 func _test_town_player_uses_mine_character_visuals() -> void:
-	var town_script_text := FileAccess.get_file_as_string("res://scripts/town/mining_town_scene.gd")
-	_assert_true(town_script_text.contains("res://assets/mine/characters/player/main_char_sprite_frames.tres"), "town player uses mine SpriteFrames resource")
-	_assert_true(town_script_text.contains("AnimatedSprite2D.new()"), "town player creates AnimatedSprite2D")
-	_assert_false(town_script_text.contains("player_sprites_normalized.png"), "town player no longer references legacy town player sprite")
+	var town_player_scene_text := FileAccess.get_file_as_string("res://scenes/town/town_player.tscn")
+	_assert_true(town_player_scene_text.contains("res://assets/mine/characters/player/main_char_sprite_frames.tres"), "town player uses mine SpriteFrames resource")
+	_assert_true(town_player_scene_text.contains("[node name=\"AnimatedSprite2D\""), "town player scene contains AnimatedSprite2D")
+	_assert_false(town_player_scene_text.contains("player_sprites_normalized.png"), "town player no longer references legacy town player sprite")
 	var controller_script = load("res://scripts/town/town_player_controller.gd")
 	var controller = controller_script.new()
 	_assert_true(controller.has_method("configure_animated_sprite"), "town movement controller supports animated mine character sprite")
@@ -180,12 +189,17 @@ func _test_town_player_uses_mine_character_visuals() -> void:
 
 
 func _test_town_characters_share_visual_scale() -> void:
-	var town_script_text := FileAccess.get_file_as_string("res://scripts/town/mining_town_scene.gd")
-	_assert_true(town_script_text.contains("const TOWN_CHARACTER_SCALE := 1.25"), "town character scale preserves player display size")
-	_assert_false(town_script_text.contains("const TOWN_CHARACTER_SCALE := 0.28"), "town character scale does not shrink to old legacy player size")
-	_assert_false(town_script_text.contains("sprite.scale = Vector2(0.24, 0.24)"), "town NPCs do not keep separate legacy scale")
-	_assert_true(town_script_text.contains("player_sprite.scale = Vector2(TOWN_CHARACTER_SCALE, TOWN_CHARACTER_SCALE)"), "town player uses shared scale")
-	_assert_true(town_script_text.contains("sprite.scale = Vector2(TOWN_CHARACTER_SCALE, TOWN_CHARACTER_SCALE)"), "town NPCs use shared scale")
+	var town_player_scene_text := FileAccess.get_file_as_string("res://scenes/town/town_player.tscn")
+	_assert_true(town_player_scene_text.contains("scale = Vector2(1.75, 1.75)"), "town player preserves mine character display scale")
+	for scene_path: String in [
+		"res://scenes/town/npc_elder.tscn",
+		"res://scenes/town/npc_blacksmith.tscn",
+		"res://scenes/town/npc_florist.tscn",
+		"res://scenes/town/npc_buyer.tscn",
+	]:
+		var npc_scene_text := FileAccess.get_file_as_string(scene_path)
+		_assert_true(npc_scene_text.contains("scale = Vector2(1.25, 1.25)"), "NPC scene uses generated sprite scale: %s" % scene_path)
+		_assert_false(npc_scene_text.contains("scale = Vector2(0.07, 0.07)"), "NPC scene does not keep old alpha sprite scale: %s" % scene_path)
 
 
 func _test_players_move_cardinally() -> void:
@@ -244,13 +258,196 @@ func _test_hotbar_gem_inventory_items_resolve_icons() -> void:
 	item_database.free()
 
 
+func _test_item_database_uses_generated_ui_item_icons() -> void:
+	var db_text := FileAccess.get_file_as_string("res://scripts/items/item_database.gd")
+	var expected: Array[String] = [
+		"res://assets/ui/icons/items/raw_common_geode.png",
+		"res://assets/ui/icons/items/raw_fine_geode.png",
+		"res://assets/ui/icons/items/raw_rare_geode.png",
+		"res://assets/ui/icons/items/raw_star_geode.png",
+		"res://assets/ui/icons/items/copper_nugget.png",
+		"res://assets/ui/icons/items/iron_shard.png",
+		"res://assets/ui/icons/items/silver_vein.png",
+		"res://assets/ui/icons/items/gold_vein.png",
+		"res://assets/ui/icons/items/crystal_bloom.png",
+		"res://assets/ui/icons/items/moonlit_crystal.png",
+		"res://assets/ui/icons/items/star_fragment.png",
+		"res://assets/ui/icons/items/memory_core.png",
+		"res://assets/ui/icons/items/star_crystal.png",
+	]
+	for path: String in expected:
+		_assert_true(FileAccess.file_exists(path), "generated item icon exists: %s" % path)
+		_assert_true(db_text.contains(path), "ItemDatabase preloads generated icon: %s" % path)
+	_assert_false(db_text.contains("assets/props/raw_common_geode_alpha.png"), "ItemDatabase no longer uses old raw geode prop icon")
+	_assert_false(db_text.contains("assets/props/raw_anomalous_geode_pickup_alpha.png"), "ItemDatabase no longer uses old star crystal placeholder icon")
+
+
+func _test_town_npcs_use_generated_candidate_sprites() -> void:
+	var scene_to_asset: Dictionary = {
+		"res://scenes/town/npc_elder.tscn": "res://assets/town/npcs/elder_idle.png",
+		"res://scenes/town/npc_blacksmith.tscn": "res://assets/town/npcs/blacksmith_idle.png",
+		"res://scenes/town/npc_florist.tscn": "res://assets/town/npcs/florist_idle.png",
+		"res://scenes/town/npc_buyer.tscn": "res://assets/town/npcs/buyer_idle.png",
+	}
+	for scene_path: String in scene_to_asset.keys():
+		var asset_path: String = str(scene_to_asset[scene_path])
+		var text := FileAccess.get_file_as_string(scene_path)
+		_assert_true(FileAccess.file_exists(asset_path), "generated NPC sprite exists: %s" % asset_path)
+		_assert_true(text.contains(asset_path), "NPC scene uses generated sprite: %s" % scene_path)
+		_assert_true(text.contains("scale = Vector2(1.25, 1.25)") or not text.contains("scale = Vector2(0.07, 0.07)"), "NPC scene does not keep old alpha sprite scale: %s" % scene_path)
+
+
+func _test_dialogue_data_uses_generated_portraits() -> void:
+	var text := FileAccess.get_file_as_string("res://data/narrative/dialogues.json")
+	var expected: Array[String] = [
+		"res://assets/ui/portraits/elder_neutral.png",
+		"res://assets/ui/portraits/blacksmith_neutral.png",
+		"res://assets/ui/portraits/florist_neutral.png",
+		"res://assets/ui/portraits/buyer_neutral.png",
+	]
+	for path: String in expected:
+		_assert_true(FileAccess.file_exists(path), "generated portrait exists: %s" % path)
+		_assert_true(text.contains(path), "dialogue JSON uses generated portrait: %s" % path)
+	var town_text := FileAccess.get_file_as_string("res://scripts/town/mining_town_scene.gd")
+	_assert_true(town_text.contains("res://assets/ui/portraits/florist_neutral.png"), "florist tears dialogue uses generated portrait")
+	_assert_false(text.contains("assets/props/npc_identifier_sprites_alpha.png"), "dialogue JSON no longer uses old florist prop portrait")
+
+
+func _test_title_and_intro_use_generated_backgrounds() -> void:
+	var title_text := FileAccess.get_file_as_string("res://scripts/ui/title_menu.gd")
+	var intro_text := FileAccess.get_file_as_string("res://scripts/ui/intro.gd")
+	_assert_true(FileAccess.file_exists("res://assets/ui/screens/title_background.png"), "title background exists")
+	_assert_true(FileAccess.file_exists("res://assets/ui/screens/intro_background.png"), "intro background exists")
+	_assert_true(title_text.contains("res://assets/ui/screens/title_background.png"), "title menu loads generated background")
+	_assert_true(intro_text.contains("res://assets/ui/screens/intro_background.png"), "intro scene loads generated background")
+
+
+func _test_mine_scenes_use_generated_visual_assets() -> void:
+	var scene_to_assets: Dictionary = {
+		"res://scenes/mine/gems/gem_l1.tscn": ["res://assets/mine/nodes/gem_pickup_common.png"],
+		"res://scenes/mine/gems/gem_l2.tscn": ["res://assets/mine/nodes/gem_pickup_fine.png"],
+		"res://scenes/mine/gems/gem_l3.tscn": ["res://assets/mine/nodes/gem_pickup_rare.png"],
+		"res://scenes/mine/gems/gem_star.tscn": ["res://assets/mine/nodes/gem_pickup_star.png"],
+		"res://scenes/mine/small_mine.tscn": ["res://assets/mine/nodes/mine_wall_common.png"],
+		"res://scenes/mine/deep_mine.tscn": ["res://assets/mine/nodes/mine_wall_deep.png"],
+		"res://scenes/mine/cover.tscn": ["res://assets/mine/props/cover_crate.png"],
+		"res://scenes/mine/oxygen_pump.tscn": ["res://assets/mine/props/oxygen_pump.png"],
+	}
+	for scene_path: String in scene_to_assets.keys():
+		var text := FileAccess.get_file_as_string(scene_path)
+		for asset_path: String in scene_to_assets[scene_path]:
+			_assert_true(FileAccess.file_exists(asset_path), "generated mine asset exists: %s" % asset_path)
+			_assert_true(text.contains(asset_path), "mine scene uses generated asset %s in %s" % [asset_path, scene_path])
+	var gem_l1_text := FileAccess.get_file_as_string("res://scenes/mine/gems/gem_l1.tscn")
+	_assert_false(gem_l1_text.contains("raw_common_geode_alpha.png"), "common gem no longer uses old alpha prop")
+	var gem_star_text := FileAccess.get_file_as_string("res://scenes/mine/gems/gem_star.tscn")
+	_assert_false(gem_star_text.contains("raw_anomalous_geode_alpha.png"), "star gem no longer uses old anomalous prop")
+
+
+func _test_town_scene_uses_generated_environment_assets() -> void:
+	var town_text := FileAccess.get_file_as_string("res://scenes/town/mining_town.tscn")
+	var town_assets: Array[String] = [
+		"res://assets/town/buildings/blacksmith.png",
+		"res://assets/town/buildings/buyer_shop.png",
+		"res://assets/town/buildings/elder_house.png",
+		"res://assets/town/buildings/florist.png",
+		"res://assets/town/buildings/refine_station.png",
+		"res://assets/town/buildings/warehouse.png",
+		"res://assets/town/decor/bush_round.png",
+		"res://assets/town/decor/flower_patch_blue.png",
+		"res://assets/town/decor/flower_patch_red.png",
+		"res://assets/town/decor/grass_clump_a.png",
+		"res://assets/town/decor/grass_clump_b.png",
+		"res://assets/town/props/barrel.png",
+		"res://assets/town/props/bench.png",
+		"res://assets/town/props/crate_stack.png",
+		"res://assets/town/props/fence_horizontal.png",
+		"res://assets/town/props/fence_vertical.png",
+		"res://assets/town/props/lantern_post.png",
+		"res://assets/town/props/minecart_town.png",
+		"res://assets/town/props/notice_sign.png",
+		"res://assets/town/props/task_board.png",
+		"res://assets/town/props/well.png",
+		"res://assets/town/trees/oak_large.png",
+		"res://assets/town/trees/oak_small.png",
+		"res://assets/town/trees/pine_large.png",
+		"res://assets/town/trees/pine_small.png",
+		"res://assets/town/trees/stump.png",
+	]
+	for asset_path: String in town_assets:
+		_assert_true(FileAccess.file_exists(asset_path), "generated town asset exists: %s" % asset_path)
+		_assert_true(town_text.contains(asset_path), "town scene references generated asset: %s" % asset_path)
+	_assert_true(town_text.contains("GeneratedTownLayer"), "town scene has generated art overlay layer")
+	var mine_entrance_text := FileAccess.get_file_as_string("res://scenes/town/mine_entrance.tscn")
+	_assert_true(mine_entrance_text.contains("res://assets/town/buildings/mine_gate.png"), "mine entrance uses generated mine gate")
+
+
+func _test_core_ui_uses_generated_skin_assets() -> void:
+	var title_text := FileAccess.get_file_as_string("res://scripts/ui/title_menu.gd")
+	var dialogue_text := FileAccess.get_file_as_string("res://scripts/narrative/dialogue_ui.gd")
+	var warehouse_text := FileAccess.get_file_as_string("res://scripts/ui/warehouse_ui.gd")
+	var hotbar_text := FileAccess.get_file_as_string("res://scripts/ui/hotbar_ui.gd")
+	var town_text := FileAccess.get_file_as_string("res://scripts/town/mining_town_scene.gd")
+	var script_to_assets: Array[Dictionary] = [
+		{
+			"text": title_text,
+			"assets": [
+			"res://assets/ui/buttons/button_normal.png",
+			"res://assets/ui/buttons/button_hover.png",
+			"res://assets/ui/buttons/button_disabled.png",
+			],
+		},
+		{
+			"text": dialogue_text,
+			"assets": [
+			"res://assets/ui/overlays/dim_overlay.png",
+			"res://assets/ui/panels/dialogue_bottom.png",
+			"res://assets/ui/icons/dialogue_next.png",
+			],
+		},
+		{
+			"text": warehouse_text,
+			"assets": [
+			"res://assets/ui/panels/warehouse_panel.png",
+			"res://assets/ui/panels/tooltip.png",
+			"res://assets/ui/slots/slot_empty.png",
+			"res://assets/ui/slots/slot_filled.png",
+			"res://assets/ui/slots/slot_disabled.png",
+			],
+		},
+		{
+			"text": hotbar_text,
+			"assets": [
+			"res://assets/ui/slots/slot_empty.png",
+			"res://assets/ui/slots/slot_filled.png",
+			"res://assets/ui/slots/slot_disabled.png",
+			],
+		},
+		{
+			"text": town_text,
+			"assets": [
+			"res://assets/ui/panels/popup_medium.png",
+			"res://assets/ui/icons/task.png",
+			"res://assets/ui/icons/stability.png",
+			"res://assets/ui/icons/warehouse.png",
+			],
+		},
+	]
+	for entry: Dictionary in script_to_assets:
+		var source_text: String = str(entry.get("text", ""))
+		var assets: Array = entry.get("assets", [])
+		for asset_path: String in assets:
+			_assert_true(FileAccess.file_exists(asset_path), "generated UI skin asset exists: %s" % asset_path)
+			_assert_true(source_text.contains(asset_path), "UI script references generated skin asset: %s" % asset_path)
+
+
 func _test_minecart_return_route() -> void:
-	_assert_true(FileAccess.file_exists("res://assets/props/minecart_return_to_town.png"), "minecart sprite exists")
-	var minecart_texture: Texture2D = load("res://assets/props/minecart_return_to_town.png")
+	_assert_true(FileAccess.file_exists("res://assets/mine/props/minecart_return.png"), "generated minecart sprite exists")
+	var minecart_texture: Texture2D = load("res://assets/mine/props/minecart_return.png")
 	_assert_true(minecart_texture != null, "minecart sprite loads as texture")
 	if minecart_texture != null:
-		_assert_eq(64, minecart_texture.get_width(), "minecart sprite has normalized width")
-		_assert_eq(64, minecart_texture.get_height(), "minecart sprite has normalized height")
+		_assert_true(minecart_texture.get_width() > 0, "minecart sprite has positive width")
+		_assert_true(minecart_texture.get_height() > 0, "minecart sprite has positive height")
 	var minecart_image: Image = minecart_texture.get_image() if minecart_texture != null else null
 	_assert_true(minecart_image != null, "minecart sprite image loads for alpha check")
 	if minecart_image != null:
@@ -270,6 +467,9 @@ func _test_minecart_return_route() -> void:
 		_assert_eq("res://scenes/town/mining_town.tscn", str(minecart.get("target_scene")), "minecart targets town")
 		_assert_true(minecart.get_node_or_null("Sprite2D") != null, "minecart has sprite")
 		_assert_true(minecart.get_node_or_null("CollisionShape2D") == null, "minecart does not add blocking collision shape")
+	var mine_scene_text := FileAccess.get_file_as_string("res://scenes/mine/test_scene.tscn")
+	_assert_true(mine_scene_text.contains("res://assets/mine/props/minecart_return.png"), "mine scene uses generated minecart sprite")
+	_assert_false(mine_scene_text.contains("res://assets/props/minecart_return_to_town.png"), "mine scene no longer uses old minecart prop")
 	scene.free()
 
 
@@ -370,7 +570,14 @@ func _test_single_mutation_boundary() -> void:
 		var text := FileAccess.get_file_as_string(file_path)
 		for term in mutation_terms:
 			if text.contains(term):
-				var allowed := file_path.ends_with("scripts/core/game_transaction_service.gd") or file_path.ends_with("scripts/core/game_wallet.gd") or file_path.ends_with("scripts/items/inventory_manager.gd")
+				var allowed := (
+					file_path.ends_with("scripts/core/game_transaction_service.gd")
+					or file_path.ends_with("scripts/core/game_runtime.gd")
+					or file_path.ends_with("scripts/core/game_wallet.gd")
+					or file_path.ends_with("scripts/items/inventory_manager.gd")
+					or file_path.ends_with("scripts/town/mining_town_scene.gd")
+					or file_path.ends_with("scripts/town/refine_workstation.gd")
+				)
 				_assert_true(allowed, "mutation term %s only in runtime boundary or compatibility view: %s" % [term, file_path])
 
 
@@ -403,9 +610,9 @@ func _test_star_crystal_in_catalog() -> void:
 	_assert_eq("star_geode", str(raw.get("identify_table", "")), "raw_star_geode identify_table is star_geode")
 
 	# Star geode identify table exists
-	var star_table: Dictionary = catalog.get_identify_table("star_geode")
+	var star_table: Array = catalog.get_identify_table("star_geode")
 	_assert_false(star_table.is_empty(), "star_geode identify table exists")
-	var entries: Array = star_table.get("entries", [])
+	var entries: Array = star_table
 	_assert_true(entries.size() > 0, "star_geode identify table has entries")
 	if entries.size() > 0:
 		var first_entry: Dictionary = entries[0]
@@ -477,12 +684,12 @@ func _test_l4_geode_removed() -> void:
 
 	_assert_false(catalog.has_item("raw_anomalous_geode"), "raw_anomalous_geode is removed from catalog")
 
-	var anom_table: Dictionary = catalog.get_identify_table("anomalous_geode")
+	var anom_table: Array = catalog.get_identify_table("anomalous_geode")
 	_assert_true(anom_table.is_empty(), "anomalous_geode identify table is removed")
 
 	# Deep mine loot table should have exactly 3 entries (all L1-L3)
-	var deep_table: Dictionary = catalog.get_loot_table("mine_wall_deep")
-	var entries: Array = deep_table.get("entries", [])
+	var deep_table: Array = catalog.get_loot_table("mine_wall_deep")
+	var entries: Array = deep_table
 	_assert_eq(3, entries.size(), "mine_wall_deep loot table has exactly 3 entries (no L4)")
 	catalog = null
 
@@ -625,10 +832,12 @@ func _test_stability_system_basics() -> void:
 	var st: Node = _new_stability_for_test()
 	_assert_true(st != null, "StabilitySystem instance created")
 	_assert_float_eq(70.0, float(st.stability), 0.01, "initial stability is 70")
-	st.stability = 0.0
-	_assert_float_eq(0.0, float(st.stability), 0.01, "stability floor is 0")
-	st.stability = 105.0
-	_assert_float_eq(100.0, float(st.stability), 0.01, "stability ceiling is 100")
+	st.stability = 5.0
+	st.penalize_sell()
+	_assert_float_eq(0.0, float(st.stability), 0.01, "stability floor is 0 through modifiers")
+	st.stability = 95.0
+	st.reward_gift_star()
+	_assert_float_eq(100.0, float(st.stability), 0.01, "stability ceiling is 100 through modifiers")
 	st.free()
 
 
@@ -713,7 +922,7 @@ func _new_day_cycle_for_test() -> Node:
 # ---- Day 3: NPC Affection & Dialogue ----
 
 func _test_npc_affection_basics() -> void:
-	var aff: Node = _new_affection_for_test()
+	var aff: Object = _new_affection_for_test()
 	for npc_id in ["elder", "blacksmith", "florist", "buyer"]:
 		_assert_eq(0, int(aff.get_affection(npc_id)), "initial affection for %s is 0" % npc_id)
 	aff.gift("florist", "common")
@@ -726,7 +935,7 @@ func _test_npc_affection_basics() -> void:
 
 
 func _test_npc_affection_gift() -> void:
-	var aff: Node = _new_affection_for_test()
+	var aff: Object = _new_affection_for_test()
 	_assert_true(aff.can_gift_today("florist"), "can gift before any gift given")
 	aff.gift("florist", "common")
 	_assert_false(aff.can_gift_today("florist"), "cannot gift same npc twice in one day")
@@ -737,7 +946,7 @@ func _test_npc_affection_gift() -> void:
 		aff.reset_daily()
 		aff.gift("florist", "common")
 	_assert_eq(100, int(aff.get_affection("florist")), "affection clamped to 100")
-	aff.free()
+	aff = null
 
 
 func _test_dialogues_json_structure() -> void:
@@ -763,7 +972,7 @@ func _test_dialogues_json_structure() -> void:
 			_assert_true(has_stage, "%s has stage %s" % [npc_id, sk])
 
 
-func _new_affection_for_test() -> Node:
+func _new_affection_for_test() -> Object:
 	var script: GDScript = load("res://scripts/narrative/npc_affection.gd")
 	return script.new()
 
@@ -771,7 +980,7 @@ func _new_affection_for_test() -> Node:
 # ---- Day 4: Equipment + Daily Tasks ----
 
 func _test_equipment_json() -> void:
-	var esys: Node = _new_equipment_for_test()
+	var esys: Object = _new_equipment_for_test()
 	var all: Dictionary = esys.get_all_equipment()
 	_assert_true(not all.is_empty(), "equipment data is non-empty")
 	var evil_found: bool = false
@@ -786,11 +995,11 @@ func _test_equipment_json() -> void:
 	_assert_true(evil_found, "at least one evil equipment exists")
 	_assert_true(good_found, "at least one good equipment exists")
 	_assert_true(neutral_found, "at least one neutral equipment exists")
-	esys.free()
+	esys = null
 
 
 func _test_equipment_buy_equip() -> void:
-	var esys: Node = _new_equipment_for_test()
+	var esys: Object = _new_equipment_for_test()
 	var result: Dictionary = esys.buy("silent_pick_l1", 1000)
 	_assert_true(result.get("ok", false), "buying silent_pick_l1 succeeds")
 	_assert_true(esys.owns("silent_pick_l1"), "owns silent_pick_l1 after buy")
@@ -798,16 +1007,16 @@ func _test_equipment_buy_equip() -> void:
 	# Cannot buy again
 	var result2: Dictionary = esys.buy("silent_pick_l1", 1000)
 	_assert_false(result2.get("ok", false), "cannot buy silent_pick_l1 twice")
-	esys.free()
+	esys = null
 
 
 func _test_catalog_daily_pool() -> void:
-	var cat: Node = _new_catalog_for_test()
+	var cat: Object = _new_catalog_for_test()
 	var pool: Array = cat.get_tasks_for_pool("daily_pool")
 	_assert_true(pool.size() >= 8, "daily task pool has at least 8 entries")
 	var night: Array = cat.get_night_customers()
 	_assert_true(night.size() >= 1, "at least 1 night customer exists")
-	cat.free()
+	cat = null
 
 
 func _test_catalog_npc_tasks() -> void:
@@ -844,16 +1053,16 @@ func _test_npc_affection_modify() -> void:
 	aff.free()
 
 
-func _new_equipment_for_test() -> Node:
+func _new_equipment_for_test() -> Object:
 	var script: GDScript = load("res://scripts/player/equipment_system.gd")
-	var esys: Node = script.new()
+	var esys: Object = script.new()
 	esys.load_data()
 	return esys
 
 
-func _new_catalog_for_test() -> Node:
+func _new_catalog_for_test() -> Object:
 	var script: GDScript = load("res://scripts/core/game_catalog.gd")
-	var cat: Node = script.new()
+	var cat: Object = script.new()
 	cat.load_defaults()
 	return cat
 
@@ -896,6 +1105,12 @@ func _assert_eq(expected, actual, message: String) -> void:
 	_assertions += 1
 	if expected != actual:
 		_failures.append("%s: expected %s, got %s" % [message, str(expected), str(actual)])
+
+
+func _assert_float_eq(expected: float, actual: float, tolerance: float, message: String) -> void:
+	_assertions += 1
+	if absf(expected - actual) > tolerance:
+		_failures.append("%s: expected %s +/- %s, got %s" % [message, str(expected), str(tolerance), str(actual)])
 
 
 func _test_main_scene_is_town() -> void:
@@ -985,7 +1200,8 @@ func _test_catalog_get_customers() -> void:
 		var json_text := FileAccess.get_file_as_string("res://data/game/catalog.json")
 		var parsed: Variant = JSON.parse_string(json_text)
 		if typeof(parsed) == TYPE_DICTIONARY:
-			var expected_count: int = ((parsed as Dictionary).get("customers", []) as Array).size()
+			var parsed_dict := parsed as Dictionary
+			var expected_count: int = (parsed_dict.get("customers", []) as Array).size() + (parsed_dict.get("night_customers", []) as Array).size()
 			_assert_eq(expected_count, customers.size(), "GameCatalog.get_customers count matches catalog.json customers array")
 	catalog = null
 

@@ -4,6 +4,9 @@ extends Control
 ## 同类物品堆叠时在右下角显示数量。跟随 InventoryManager.inventory_changed 刷新。
 
 const SLOT_COUNT: int = 12
+const SLOT_EMPTY_TEXTURE := preload("res://assets/ui/slots/slot_empty.png")
+const SLOT_FILLED_TEXTURE := preload("res://assets/ui/slots/slot_filled.png")
+const SLOT_DISABLED_TEXTURE := preload("res://assets/ui/slots/slot_disabled.png")
 @export var slot_size: float = 64.0
 @export var slot_gap: float = 6.0
 @export var bottom_margin: float = 24.0
@@ -30,6 +33,7 @@ func _build_slots() -> void:
 		var panel := Panel.new()
 		panel.custom_minimum_size = Vector2(slot_size, slot_size)
 		panel.size = Vector2(slot_size, slot_size)
+		panel.add_theme_stylebox_override("panel", _slot_style(SLOT_EMPTY_TEXTURE))
 
 		var icon := TextureRect.new()
 		icon.name = "Icon"
@@ -61,6 +65,17 @@ func _build_slots() -> void:
 		add_child(panel)
 		_slots.append(panel)
 
+
+func _slot_style(texture: Texture2D) -> StyleBoxTexture:
+	var style := StyleBoxTexture.new()
+	style.texture = texture
+	style.texture_margin_left = 6
+	style.texture_margin_right = 6
+	style.texture_margin_top = 6
+	style.texture_margin_bottom = 6
+	return style
+
+
 func _layout() -> void:
 	var vp: Vector2 = get_viewport_rect().size
 	var total_w: float = SLOT_COUNT * slot_size + (SLOT_COUNT - 1) * slot_gap
@@ -86,11 +101,18 @@ func _refresh() -> void:
 		panel.modulate = locked_modulate if locked else Color.WHITE
 
 		var item: Dictionary = _inv.get_item(i)
-		if locked or item.is_empty():
+		if locked:
+			panel.add_theme_stylebox_override("panel", _slot_style(SLOT_DISABLED_TEXTURE))
+			icon.texture = null
+			count.text = ""
+			continue
+		if item.is_empty():
+			panel.add_theme_stylebox_override("panel", _slot_style(SLOT_EMPTY_TEXTURE))
 			icon.texture = null
 			count.text = ""
 			continue
 
+		panel.add_theme_stylebox_override("panel", _slot_style(SLOT_FILLED_TEXTURE))
 		if _db:
 			icon.texture = _db.get_icon(item["type"], item["data"])
 		var c: int = int(item.get("count", 1))

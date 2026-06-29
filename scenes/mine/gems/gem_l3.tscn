@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://cyfi7qy3l1lyx"]
 
 [ext_resource type="PackedScene" uid="uid://fe60hkkiiu80" path="res://scenes/mine/gems/gem_abstract.tscn" id="1_gugpg"]
-[ext_resource type="Texture2D" uid="uid://ykftnsb706qe" path="res://assets/props/raw_rare_geode_alpha.png" id="2_7jgxd"]
+[ext_resource type="Texture2D" path="res://assets/mine/nodes/gem_pickup_rare.png" id="2_7jgxd"]
 
 [node name="gem" unique_id=563308230 instance=ExtResource("1_gugpg")]
 gem_level = 3
 
 [node name="Sprite2D" parent="." index="0" unique_id=701452490]
-scale = Vector2(0.1, 0.1)
+scale = Vector2(1, 1)
 texture = ExtResource("2_7jgxd")

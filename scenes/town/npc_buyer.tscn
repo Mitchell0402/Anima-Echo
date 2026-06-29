@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dd5h0o286tldl"]
 
 [ext_resource type="Script" uid="uid://cr2fd2px8hnlw" path="res://scripts/town/npc_base.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://snfkienqsuhv" path="res://assets/props/npc_buyer_sprites_alpha.png" id="2_na61b"]
+[ext_resource type="Texture2D" path="res://assets/town/npcs/buyer_idle.png" id="2_na61b"]
 
 [node name="NPC_Buyer" type="Node2D" unique_id=1848323291]
 script = ExtResource("1_script")
@@ -17,5 +17,5 @@ text = "商人"
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=840743230]
 position = Vector2(0, -28)
-scale = Vector2(0.07, 0.07)
+scale = Vector2(1.25, 1.25)
 texture = ExtResource("2_na61b")

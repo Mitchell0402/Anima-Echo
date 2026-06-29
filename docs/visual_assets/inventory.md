@@ -125,7 +125,6 @@ at the bottom). A future pass lists every file currently on disk in
 
 | Path | Sidecar | Palette | Status | Used by | Last reviewed |
 |------|----------|---------|--------|---------|---------------|
-| `assets/props/task_board.png` | `task_board.png.meta.md` | `props-palette` | `implemented` | `scenes/town/mining_town.tscn` (TaskBoard/Sprite2D texture) | 2026-06-27 |
 
 ## Placeholder
 
@@ -133,45 +132,45 @@ This section lists files that exist as generated candidates or loaded temporary 
 
 | Path | Sidecar | Replaces | Used by | Sidecar status |
 |------|----------|----------|---------|----------------|
-| `assets/mine/nodes/gem_pickup_common.png` | `gem_pickup_common.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/mine/nodes/gem_pickup_fine.png` | `gem_pickup_fine.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/mine/nodes/gem_pickup_rare.png` | `gem_pickup_rare.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/mine/nodes/gem_pickup_star.png` | `gem_pickup_star.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/mine/nodes/mine_wall_common.png` | `mine_wall_common.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/mine/nodes/mine_wall_deep.png` | `mine_wall_deep.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/mine/props/cover_crate.png` | `cover_crate.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/mine/props/minecart_return.png` | `minecart_return.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/mine/props/oxygen_pump.png` | `oxygen_pump.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/mine/nodes/gem_pickup_common.png` | `gem_pickup_common.png.meta.md` | `assets/props/raw_common_geode_alpha.png` | `scenes/mine/gems/gem_l1.tscn` | `placeholder` |
+| `assets/mine/nodes/gem_pickup_fine.png` | `gem_pickup_fine.png.meta.md` | `assets/props/raw_fine_geode_alpha.png` | `scenes/mine/gems/gem_l2.tscn` | `placeholder` |
+| `assets/mine/nodes/gem_pickup_rare.png` | `gem_pickup_rare.png.meta.md` | `assets/props/raw_rare_geode_alpha.png` | `scenes/mine/gems/gem_l3.tscn` | `placeholder` |
+| `assets/mine/nodes/gem_pickup_star.png` | `gem_pickup_star.png.meta.md` | `assets/props/raw_anomalous_geode_alpha.png` | `scenes/mine/gems/gem_star.tscn` | `placeholder` |
+| `assets/mine/nodes/mine_wall_common.png` | `mine_wall_common.png.meta.md` | `assets/mine/environment/stones_1.png` | `scenes/mine/small_mine.tscn` | `placeholder` |
+| `assets/mine/nodes/mine_wall_deep.png` | `mine_wall_deep.png.meta.md` | `assets/gj/environment/stones_1.png` | `scenes/mine/deep_mine.tscn` | `placeholder` |
+| `assets/mine/props/cover_crate.png` | `cover_crate.png.meta.md` | `assets/mine/environment/decor_6.png` | `scenes/mine/cover.tscn` | `placeholder` |
+| `assets/mine/props/minecart_return.png` | `minecart_return.png.meta.md` | `assets/props/minecart_return_to_town.png` | `scenes/mine/test_scene.tscn` (MinecartExit/Sprite2D texture) | `placeholder` |
+| `assets/mine/props/oxygen_pump.png` | `oxygen_pump.png.meta.md` | _none; generated candidate_ | `scenes/mine/oxygen_pump.tscn` | `placeholder` |
 | `assets/mine/tiles/deep_cave_tileset.png` | `deep_cave_tileset.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/mine/tiles/land.png` | `land.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/mine/tiles/mid_cave_tileset.png` | `mid_cave_tileset.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/mine/tiles/shallow_cave_tileset.png` | `shallow_cave_tileset.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/buildings/blacksmith.png` | `blacksmith.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/buildings/buyer_shop.png` | `buyer_shop.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/buildings/elder_house.png` | `elder_house.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/buildings/florist.png` | `florist.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/buildings/mine_gate.png` | `mine_gate.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/buildings/refine_station.png` | `refine_station.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/buildings/warehouse.png` | `warehouse.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/decor/bush_round.png` | `bush_round.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/decor/flower_patch_blue.png` | `flower_patch_blue.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/decor/flower_patch_red.png` | `flower_patch_red.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/decor/grass_clump_a.png` | `grass_clump_a.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/decor/grass_clump_b.png` | `grass_clump_b.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/npcs/blacksmith_idle.png` | `blacksmith_idle.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/npcs/buyer_idle.png` | `buyer_idle.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/npcs/elder_idle.png` | `elder_idle.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/npcs/florist_idle.png` | `florist_idle.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/props/barrel.png` | `barrel.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/props/bench.png` | `bench.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/props/crate_stack.png` | `crate_stack.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/props/fence_horizontal.png` | `fence_horizontal.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/props/fence_vertical.png` | `fence_vertical.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/props/lantern_post.png` | `lantern_post.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/props/minecart_town.png` | `minecart_town.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/props/notice_sign.png` | `notice_sign.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/props/task_board.png` | `task_board.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/props/well.png` | `well.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/town/buildings/blacksmith.png` | `blacksmith.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/buildings/buyer_shop.png` | `buyer_shop.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/buildings/elder_house.png` | `elder_house.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/buildings/florist.png` | `florist.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/buildings/mine_gate.png` | `mine_gate.png.meta.md` | _none; generated candidate_ | `scenes/town/mine_entrance.tscn` | `placeholder` |
+| `assets/town/buildings/refine_station.png` | `refine_station.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (RefineStation/Sprite2D texture) | `placeholder` |
+| `assets/town/buildings/warehouse.png` | `warehouse.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/decor/bush_round.png` | `bush_round.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/decor/flower_patch_blue.png` | `flower_patch_blue.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/decor/flower_patch_red.png` | `flower_patch_red.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/decor/grass_clump_a.png` | `grass_clump_a.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/decor/grass_clump_b.png` | `grass_clump_b.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/npcs/blacksmith_idle.png` | `blacksmith_idle.png.meta.md` | `assets/props/npc_miner_alpha.png` | `scenes/town/npc_blacksmith.tscn` | `placeholder` |
+| `assets/town/npcs/buyer_idle.png` | `buyer_idle.png.meta.md` | `assets/props/npc_buyer_sprites_alpha.png` | `scenes/town/npc_buyer.tscn` | `placeholder` |
+| `assets/town/npcs/elder_idle.png` | `elder_idle.png.meta.md` | `assets/props/npc_task_clerk_sprites_alpha.png` | `scenes/town/npc_elder.tscn` | `placeholder` |
+| `assets/town/npcs/florist_idle.png` | `florist_idle.png.meta.md` | `assets/props/npc_identifier_sprites_alpha.png` | `scenes/town/npc_florist.tscn` | `placeholder` |
+| `assets/town/props/barrel.png` | `barrel.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/props/bench.png` | `bench.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/props/crate_stack.png` | `crate_stack.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/props/fence_horizontal.png` | `fence_horizontal.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/props/fence_vertical.png` | `fence_vertical.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/props/lantern_post.png` | `lantern_post.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/props/minecart_town.png` | `minecart_town.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/props/notice_sign.png` | `notice_sign.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/props/task_board.png` | `task_board.png.meta.md` | `assets/props/task_board.png` | `scenes/town/mining_town.tscn` (TaskBoard/Sprite2D texture) | `placeholder` |
+| `assets/town/props/well.png` | `well.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
 | `assets/town/tiles/dirt_path_center.png` | `dirt_path_center.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/town/tiles/dirt_path_corner_ne.png` | `dirt_path_corner_ne.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/town/tiles/dirt_path_corner_nw.png` | `dirt_path_corner_nw.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
@@ -188,61 +187,61 @@ This section lists files that exist as generated candidates or loaded temporary 
 | `assets/town/tiles/shadow_soft.png` | `shadow_soft.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/town/tiles/water_center.png` | `water_center.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/town/tiles/water_edge.png` | `water_edge.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/trees/oak_large.png` | `oak_large.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/trees/oak_small.png` | `oak_small.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/trees/pine_large.png` | `pine_large.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/trees/pine_small.png` | `pine_small.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/town/trees/stump.png` | `stump.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/buttons/button_disabled.png` | `button_disabled.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/buttons/button_hover.png` | `button_hover.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/buttons/button_normal.png` | `button_normal.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/town/trees/oak_large.png` | `oak_large.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/trees/oak_small.png` | `oak_small.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/trees/pine_large.png` | `pine_large.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/trees/pine_small.png` | `pine_small.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/town/trees/stump.png` | `stump.png.meta.md` | _none; generated candidate_ | `scenes/town/mining_town.tscn` (GeneratedTownLayer) | `placeholder` |
+| `assets/ui/buttons/button_disabled.png` | `button_disabled.png.meta.md` | _none; generated candidate_ | `scripts/ui/title_menu.gd`; `scripts/town/mining_town_scene.gd` | `placeholder` |
+| `assets/ui/buttons/button_hover.png` | `button_hover.png.meta.md` | _none; generated candidate_ | `scripts/ui/title_menu.gd`; `scripts/town/mining_town_scene.gd` | `placeholder` |
+| `assets/ui/buttons/button_normal.png` | `button_normal.png.meta.md` | _none; generated candidate_ | `scripts/ui/title_menu.gd`; `scripts/town/mining_town_scene.gd` | `placeholder` |
 | `assets/ui/icons/coin.png` | `coin.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/ui/icons/day.png` | `day.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/dialogue_next.png` | `dialogue_next.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/icons/dialogue_next.png` | `dialogue_next.png.meta.md` | _none; generated candidate_ | `scripts/narrative/dialogue_ui.gd` | `placeholder` |
 | `assets/ui/icons/equipment/backpack_basic.png` | `backpack_basic.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/ui/icons/equipment/pickaxe_basic.png` | `pickaxe_basic.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/ui/icons/equipment/slot_empty.png` | `slot_empty.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/ui/icons/health.png` | `health.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/copper_nugget.png` | `copper_nugget.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/crystal_bloom.png` | `crystal_bloom.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/gold_vein.png` | `gold_vein.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/iron_shard.png` | `iron_shard.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/memory_core.png` | `memory_core.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/moonlit_crystal.png` | `moonlit_crystal.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/raw_common_geode.png` | `raw_common_geode.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/raw_fine_geode.png` | `raw_fine_geode.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/raw_rare_geode.png` | `raw_rare_geode.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/raw_star_geode.png` | `raw_star_geode.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/icons/items/copper_nugget.png` | `copper_nugget.png.meta.md` | `assets/props/copper_nugget_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/crystal_bloom.png` | `crystal_bloom.png.meta.md` | `assets/props/crystal_bloom_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/gold_vein.png` | `gold_vein.png.meta.md` | `assets/props/gold_vein_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/iron_shard.png` | `iron_shard.png.meta.md` | `assets/props/iron_shard_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/memory_core.png` | `memory_core.png.meta.md` | `assets/props/memory_core_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/moonlit_crystal.png` | `moonlit_crystal.png.meta.md` | `assets/props/moonlit_crystal_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/raw_common_geode.png` | `raw_common_geode.png.meta.md` | `assets/props/raw_common_geode_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/raw_fine_geode.png` | `raw_fine_geode.png.meta.md` | `assets/props/raw_fine_geode_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/raw_rare_geode.png` | `raw_rare_geode.png.meta.md` | `assets/props/raw_rare_geode_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/raw_star_geode.png` | `raw_star_geode.png.meta.md` | `assets/props/raw_anomalous_geode_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
 | `assets/ui/icons/items/refined_badge.png` | `refined_badge.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/silver_vein.png` | `silver_vein.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/star_crystal.png` | `star_crystal.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/items/star_fragment.png` | `star_fragment.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/icons/items/silver_vein.png` | `silver_vein.png.meta.md` | `assets/props/silver_vein_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/star_crystal.png` | `star_crystal.png.meta.md` | `assets/props/raw_anomalous_geode_pickup_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
+| `assets/ui/icons/items/star_fragment.png` | `star_fragment.png.meta.md` | `assets/props/star_fragment_alpha.png` | `scripts/items/item_database.gd` | `placeholder` |
 | `assets/ui/icons/night.png` | `night.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
 | `assets/ui/icons/oxygen.png` | `oxygen.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/stability.png` | `stability.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/task.png` | `task.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/icons/warehouse.png` | `warehouse.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/icons/stability.png` | `stability.png.meta.md` | _none; generated candidate_ | `scripts/town/mining_town_scene.gd` | `placeholder` |
+| `assets/ui/icons/task.png` | `task.png.meta.md` | _none; generated candidate_ | `scripts/town/mining_town_scene.gd` | `placeholder` |
+| `assets/ui/icons/warehouse.png` | `warehouse.png.meta.md` | _none; generated candidate_ | `scripts/town/mining_town_scene.gd` | `placeholder` |
 | `assets/ui/icons/weight.png` | `weight.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/overlays/dim_overlay.png` | `dim_overlay.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/panels/dialogue_bottom.png` | `dialogue_bottom.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/panels/popup_medium.png` | `popup_medium.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/overlays/dim_overlay.png` | `dim_overlay.png.meta.md` | _none; generated candidate_ | `scripts/narrative/dialogue_ui.gd`; `scripts/ui/warehouse_ui.gd` | `placeholder` |
+| `assets/ui/panels/dialogue_bottom.png` | `dialogue_bottom.png.meta.md` | _none; generated candidate_ | `scripts/narrative/dialogue_ui.gd` | `placeholder` |
+| `assets/ui/panels/popup_medium.png` | `popup_medium.png.meta.md` | _none; generated candidate_ | `scripts/town/mining_town_scene.gd` | `placeholder` |
 | `assets/ui/panels/toast.png` | `toast.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/panels/tooltip.png` | `tooltip.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/panels/warehouse_panel.png` | `warehouse_panel.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/panels/tooltip.png` | `tooltip.png.meta.md` | _none; generated candidate_ | `scripts/ui/warehouse_ui.gd` | `placeholder` |
+| `assets/ui/panels/warehouse_panel.png` | `warehouse_panel.png.meta.md` | _none; generated candidate_ | `scripts/ui/warehouse_ui.gd` | `placeholder` |
 | `assets/ui/portraits/blacksmith_concerned.png` | `blacksmith_concerned.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/portraits/blacksmith_neutral.png` | `blacksmith_neutral.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/portraits/blacksmith_neutral.png` | `blacksmith_neutral.png.meta.md` | `assets/props/npc_miner_alpha.png` | `data/narrative/dialogues.json` | `placeholder` |
 | `assets/ui/portraits/buyer_concerned.png` | `buyer_concerned.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/portraits/buyer_neutral.png` | `buyer_neutral.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/portraits/buyer_neutral.png` | `buyer_neutral.png.meta.md` | `assets/props/npc_buyer_sprites_alpha.png` | `data/narrative/dialogues.json` | `placeholder` |
 | `assets/ui/portraits/elder_concerned.png` | `elder_concerned.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/portraits/elder_neutral.png` | `elder_neutral.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/portraits/elder_neutral.png` | `elder_neutral.png.meta.md` | `assets/props/npc_task_clerk_sprites_alpha.png` | `data/narrative/dialogues.json` | `placeholder` |
 | `assets/ui/portraits/florist_concerned.png` | `florist_concerned.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/portraits/florist_neutral.png` | `florist_neutral.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/screens/intro_background.png` | `intro_background.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/portraits/florist_neutral.png` | `florist_neutral.png.meta.md` | `assets/props/npc_identifier_sprites_alpha.png` | `data/narrative/dialogues.json`; `scripts/town/mining_town_scene.gd` | `placeholder` |
+| `assets/ui/screens/intro_background.png` | `intro_background.png.meta.md` | _none; generated candidate_ | `scripts/ui/intro.gd` | `placeholder` |
 | `assets/ui/screens/settings_panel.png` | `settings_panel.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/screens/title_background.png` | `title_background.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/slots/slot_disabled.png` | `slot_disabled.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/slots/slot_empty.png` | `slot_empty.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
-| `assets/ui/slots/slot_filled.png` | `slot_filled.png.meta.md` | _none; generated candidate_ | _not wired yet_ | `placeholder` |
+| `assets/ui/screens/title_background.png` | `title_background.png.meta.md` | _none; generated candidate_ | `scripts/ui/title_menu.gd` | `placeholder` |
+| `assets/ui/slots/slot_disabled.png` | `slot_disabled.png.meta.md` | _none; generated candidate_ | `scripts/ui/hotbar_ui.gd`; `scripts/ui/warehouse_ui.gd` | `placeholder` |
+| `assets/ui/slots/slot_empty.png` | `slot_empty.png.meta.md` | _none; generated candidate_ | `scripts/ui/hotbar_ui.gd`; `scripts/ui/warehouse_ui.gd` | `placeholder` |
+| `assets/ui/slots/slot_filled.png` | `slot_filled.png.meta.md` | _none; generated candidate_ | `scripts/ui/hotbar_ui.gd`; `scripts/ui/warehouse_ui.gd` | `placeholder` |
 
 ## Todo (planned, not yet drawn)
 
@@ -260,7 +259,7 @@ The current full batch-generation plan lives in
 
 | Path | Sidecar | Replaced by | Retirement rationale |
 |------|----------|-------------|---------------------|
-| _none yet_ | | | |
+| `assets/props/task_board.png` | `task_board.png.meta.md` | `assets/town/props/task_board.png` | Superseded by the generated town prop used by `scenes/town/mining_town.tscn`. |
 
 ## Appendix: keeping the inventory in sync
 

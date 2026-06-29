@@ -2,10 +2,15 @@
 extends CanvasLayer
 class_name DialogueUI
 
+const DIM_OVERLAY_TEXTURE := preload("res://assets/ui/overlays/dim_overlay.png")
+const DIALOGUE_PANEL_TEXTURE := preload("res://assets/ui/panels/dialogue_bottom.png")
+const DIALOGUE_NEXT_TEXTURE := preload("res://assets/ui/icons/dialogue_next.png")
+
 var _box: PanelContainer
 var _portrait: TextureRect
 var _name_label: Label
 var _text_label: Label
+var _next_icon: TextureRect
 var _lines: Array[String] = []
 var _line_index: int = 0
 var _on_done: Callable
@@ -23,8 +28,11 @@ func _ready() -> void:
 
 func _build() -> void:
 	# Full-screen dark background (click-through)
-	var bg := ColorRect.new()
-	bg.color = Color(0, 0, 0, 0.45)
+	var bg := TextureRect.new()
+	bg.texture = DIM_OVERLAY_TEXTURE
+	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bg.stretch_mode = TextureRect.STRETCH_SCALE
+	bg.modulate = Color(1, 1, 1, 0.55)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
@@ -36,6 +44,7 @@ func _build() -> void:
 	_box.offset_right = -40
 	_box.offset_top = -180
 	_box.offset_bottom = -20
+	_box.add_theme_stylebox_override("panel", _texture_style(DIALOGUE_PANEL_TEXTURE, 12))
 	add_child(_box)
 
 	var hbox := HBoxContainer.new()
@@ -65,6 +74,28 @@ func _build() -> void:
 	_text_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_text_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox.add_child(_text_label)
+
+	var next_row := HBoxContainer.new()
+	next_row.alignment = BoxContainer.ALIGNMENT_END
+	vbox.add_child(next_row)
+	_next_icon = TextureRect.new()
+	_next_icon.texture = DIALOGUE_NEXT_TEXTURE
+	_next_icon.custom_minimum_size = Vector2(24, 24)
+	_next_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_next_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_next_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_next_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	next_row.add_child(_next_icon)
+
+
+func _texture_style(texture: Texture2D, margin: int) -> StyleBoxTexture:
+	var style := StyleBoxTexture.new()
+	style.texture = texture
+	style.texture_margin_left = margin
+	style.texture_margin_right = margin
+	style.texture_margin_top = margin
+	style.texture_margin_bottom = margin
+	return style
 
 
 func open(npc_name: String, portrait_path: String, lines: Array[String], on_done: Callable) -> void:

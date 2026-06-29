@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bbpld72w603ty"]
 
 [ext_resource type="Script" uid="uid://cr2fd2px8hnlw" path="res://scripts/town/npc_base.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://c0jjgr3knrrhj" path="res://assets/props/npc_miner_alpha.png" id="2_e2swh"]
+[ext_resource type="Texture2D" path="res://assets/town/npcs/blacksmith_idle.png" id="2_e2swh"]
 
 [node name="NPC_Blacksmith" type="Node2D" unique_id=1529586718]
 script = ExtResource("1_script")
@@ -17,5 +17,5 @@ text = "铁匠青年"
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1759030090]
 position = Vector2(0, -26)
-scale = Vector2(0.07, 0.07)
+scale = Vector2(1.25, 1.25)
 texture = ExtResource("2_e2swh")

@@ -10,7 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://d3gx76jdynysk" path="res://scenes/mine/cover.tscn" id="10_cy2ab"]
 [ext_resource type="Texture2D" uid="uid://cp1iehu7h26yi" path="res://assets/mine/environment/2D_Top_Down_Cave_Tileset.png" id="11_tileset"]
 [ext_resource type="Script" uid="uid://cmm5vxys2ey2q" path="res://scripts/town/mine_exit.gd" id="12_mine_exit"]
-[ext_resource type="Texture2D" uid="uid://dsqmmmqhit2ar" path="res://assets/props/minecart_return_to_town.png" id="13_minecart_sprite"]
+[ext_resource type="Texture2D" path="res://assets/mine/props/minecart_return.png" id="13_minecart_sprite"]
 [ext_resource type="PackedScene" uid="uid://dxy0xgenpump1" path="res://scenes/mine/oxygen_pump.tscn" id="14_oxygen_pump"]
 [ext_resource type="Script" uid="uid://qkyhy3318yet" path="res://scripts/ui/mine_vignette.gd" id="15_vignette"]
 [ext_resource type="PackedScene" uid="uid://civec3if5irdw" path="res://scenes/mine/enemy.tscn" id="16_enemy"]
@@ -156,7 +156,6 @@ script = ExtResource("12_mine_exit")
 
 [node name="Sprite2D" type="Sprite2D" parent="MinecartExit" unique_id=1480543072]
 texture_filter = 1
-scale = Vector2(2, 2)
 texture = ExtResource("13_minecart_sprite")
 
 [node name="Label" type="Label" parent="MinecartExit" unique_id=1806198056]

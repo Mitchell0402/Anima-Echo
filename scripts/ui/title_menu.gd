@@ -1,5 +1,9 @@
 extends CanvasLayer
 
+const BUTTON_NORMAL_TEXTURE := preload("res://assets/ui/buttons/button_normal.png")
+const BUTTON_HOVER_TEXTURE := preload("res://assets/ui/buttons/button_hover.png")
+const BUTTON_DISABLED_TEXTURE := preload("res://assets/ui/buttons/button_disabled.png")
+
 var _btn_start: Button
 var _btn_continue: Button
 var _btn_setting: Button
@@ -10,12 +14,20 @@ func _ready() -> void:
 	_build()
 
 func _build() -> void:
-	# Full-screen dark background
-	var bg := ColorRect.new()
-	bg.color = Color(0.06, 0.04, 0.08, 1.0)
+	var bg := TextureRect.new()
+	bg.texture = preload("res://assets/ui/screens/title_background.png")
+	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bg.stretch_mode = TextureRect.STRETCH_SCALE
+	bg.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(bg)
+
+	var shade := ColorRect.new()
+	shade.color = Color(0.03, 0.02, 0.04, 0.48)
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(shade)
 
 	# Center container — anchors at (0.5,0.5), grows outward in both directions
 	var center := VBoxContainer.new()
@@ -91,7 +103,21 @@ func _make_button(text: String) -> Button:
 	btn.text = text
 	btn.custom_minimum_size = Vector2(200, 44)
 	btn.add_theme_font_size_override("font_size", 18)
+	btn.add_theme_stylebox_override("normal", _button_style(BUTTON_NORMAL_TEXTURE))
+	btn.add_theme_stylebox_override("hover", _button_style(BUTTON_HOVER_TEXTURE))
+	btn.add_theme_stylebox_override("pressed", _button_style(BUTTON_HOVER_TEXTURE))
+	btn.add_theme_stylebox_override("disabled", _button_style(BUTTON_DISABLED_TEXTURE))
 	return btn
+
+
+func _button_style(texture: Texture2D) -> StyleBoxTexture:
+	var style := StyleBoxTexture.new()
+	style.texture = texture
+	style.texture_margin_left = 8
+	style.texture_margin_right = 8
+	style.texture_margin_top = 8
+	style.texture_margin_bottom = 8
+	return style
 
 
 func _on_start() -> void:
