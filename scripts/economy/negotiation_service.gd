@@ -22,11 +22,23 @@ func resolve_offer(customer_id: String, item_id: String, quantity: int = 1, cont
 	for tag in customer.get("rejected_tags", []):
 		if tags.has(tag):
 			return _fail("customer_rejected_item", "%s rejected %s." % [customer_id, item_id])
+	var base_price: int = int(item.get("base_price", 1))
+	if str(context.get("price_mode", "")) == "base":
+		var base_unit_price: int = maxi(1, base_price)
+		return {
+			"ok": true,
+			"customer_id": customer_id,
+			"item_id": item_id,
+			"quantity": quantity,
+			"unit_price": base_unit_price,
+			"total_price": base_unit_price * quantity,
+			"price_mode": "base",
+		}
 	var multiplier: float = float(customer.get("price_multiplier", 1.0))
 	var preferred_bonus: float = _preferred_bonus(tags, customer.get("preferred_tags", []))
 	var timing_bonus: float = _timing_bonus(str(context.get("timing", "normal")))
 	var variance: float = lerpf(0.96, 1.04, _randf())
-	var unit_price: int = maxi(1, int(round(float(item.get("base_price", 1)) * multiplier * preferred_bonus * timing_bonus * variance)))
+	var unit_price: int = maxi(1, int(round(float(base_price) * multiplier * preferred_bonus * timing_bonus * variance)))
 	return {
 		"ok": true,
 		"customer_id": customer_id,

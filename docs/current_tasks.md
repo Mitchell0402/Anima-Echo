@@ -245,7 +245,7 @@ For development and review, use MCP evidence when a change affects scenes, visua
 - TODO: Migrate `_test_project_scene_routes` to compare the main scene uid instead of `res://` path.
 - TODO: Re-evaluate autoload order in `project.godot`. `ItemDatabase` depends on `GameRuntime`.
 - TODO: Wire every catalog item to a texture resource so the warehouse UI can show real icons.
-- TODO: **Direct-sell price mismatch**: tooltip shows `base_price` but actual price includes `price_multiplier` and `preferred_bonus`. Pick: (a) fix sell path to match tooltip, or (b) extend tooltip to show range.
+- DONE 2026-06-30: **Direct-sell price mismatch** fixed. Town direct-sell and star-crystal sell now pass `price_mode: "base"` so the actual wallet/budget transaction matches the displayed `base_price`; QTE negotiation still uses offer multipliers.
 - TODO: Audit every existing `assets/**/*.png` and add `<name>.png.meta.md` sidecar.
 - TODO: Populate `docs/visual_assets/inventory.md` with the full asset list.
 - TODO: Generate missing UI icons using external image-generation AI.
