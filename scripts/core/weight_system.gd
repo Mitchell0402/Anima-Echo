@@ -5,6 +5,7 @@ extends Node
 ## town and there is no in-town movement that weight should affect.
 
 const MINE_SCENE_NAME: String = "testScene"
+const DUNGEON_SCENE_NAME: String = "DungeonRoom"
 
 enum Tier { LIGHT, HEAVY, OVERLOAD }
 
@@ -83,7 +84,7 @@ func _is_in_mine_scene() -> bool:
 	var current: Node = tree.current_scene
 	if current == null:
 		return false
-	return str(current.name) == MINE_SCENE_NAME
+	return str(current.name) == MINE_SCENE_NAME or str(current.name) == DUNGEON_SCENE_NAME
 
 
 func _calc_tier(weight: float) -> Tier:

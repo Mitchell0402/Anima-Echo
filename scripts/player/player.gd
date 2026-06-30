@@ -4,13 +4,25 @@ extends CharacterBody2D
 ## 所有「锁定移动」的需求都通过状态机表达，子系统（移动/挖矿/掩体）查询或修改状态，
 ## 不再用 set_physics_process(false) 或散落的 meta 标记来跨系统通信。
 
-enum State { FREE, MINING, HIDDEN, HURT, DEAD }
+enum State { FREE, MINING, HIDDEN, HURT, DEAD, ATTACK }
 
 var state: State = State.FREE
 
 # 生命值
 @export var max_health: float = 100.0
 var current_health: float = 100.0
+
+# 攻击
+const ATTACK_COOLDOWN: float = 0.4
+const ATTACK_DURATION: float = 0.25
+const ATTACK_RANGE: float = 80.0
+const ATTACK_ANGLE: float = 120.0
+const ATTACK_DAMAGE: float = 3.0
+const ATTACK_KNOCKBACK: float = 60.0
+var _attack_cooldown: float = 0.0
+var _attack_timer: float = 0.0
+var _last_aim_direction: Vector2 = Vector2.DOWN
+var _attack_hitbox: Area2D = null
 
 # 受击击退
 var _knockback: Vector2 = Vector2.ZERO
@@ -30,9 +42,17 @@ signal died
 
 func _ready() -> void:
 	current_health = max_health
+	# 地牢模式：跨场景恢复血量
+	var rt: Node = get_node_or_null("/root/GameRuntime")
+	if rt and rt.get("dungeon_current_room") != null:
+		current_health = rt.get("dungeon_player_health")
+		health_changed.emit(current_health, max_health)
 
 func can_move() -> bool:
 	return state == State.FREE
+
+func is_attacking() -> bool:
+	return state == State.ATTACK
 
 func is_mining() -> bool:
 	return state == State.MINING
@@ -75,6 +95,9 @@ func exit_hidden() -> void:
 func take_hit(source_pos: Vector2, force: float, duration: float = 0.35) -> void:
 	if state == State.HIDDEN or state == State.DEAD:
 		return
+	# 被攻击时清除攻击状态
+	if state == State.ATTACK:
+		_end_attack()
 	state = State.HURT
 	_hurt_timer = duration
 	var away: Vector2 = (global_position - source_pos)
@@ -91,14 +114,19 @@ func take_damage(amount: float) -> void:
 	damaged.emit(amount)
 	health_changed.emit(current_health, max_health)
 	print("[Player] 受到伤害: %.0f | 剩余血量: %.0f/%.0f" % [amount, current_health, max_health])
+	# 地牢模式：同步血量到 GameRuntime
+	var rt: Node = get_node_or_null("/root/GameRuntime")
+	if rt and rt.get("dungeon_current_room") != null:
+		rt.set("dungeon_player_health", current_health)
 	if current_health <= 0.0:
 		die()
 
 func die() -> void:
 	if state == State.DEAD:
 		return
-	# 结束当前挖矿，再置死亡冻结
-	if state == State.MINING:
+	# 结束当前挖矿/攻击，再置死亡冻结
+	if state == State.MINING or state == State.ATTACK:
+		_destroy_attack_hitbox()
 		state = State.FREE
 	state = State.DEAD
 	velocity = Vector2.ZERO
@@ -132,8 +160,8 @@ func _play_death_animation() -> void:
 
 
 func _on_death_transition() -> void:
-	var oxygen: Node = get_node_or_null("/root/OxygenSystem")
-	if oxygen and oxygen.has_method("is_in_mine_scene") and oxygen.is_in_mine_scene():
+	var scene_path: String = get_tree().current_scene.scene_file_path
+	if scene_path.ends_with("test_scene.tscn") or scene_path.ends_with("dungeon_room.tscn"):
 		var runtime: Node = get_node_or_null("/root/GameRuntime")
 		if runtime and runtime.get("inventory") and runtime.get("inventory").has_method("clear"):
 			runtime.get("inventory").clear()
@@ -193,3 +221,111 @@ func hurt_velocity() -> Vector2:
 func force_free() -> void:
 	state = State.FREE
 	_knockback = Vector2.ZERO
+
+
+# ---- 攻击系统 ----
+
+func _process(delta: float) -> void:
+	if state == State.ATTACK:
+		_attack_timer -= delta
+		if _attack_timer <= 0.0:
+			_end_attack()
+	elif _attack_cooldown > 0.0:
+		_attack_cooldown -= delta
+
+	# 记录瞄准方向（玩家最后移动方向）
+	var input_dir := Input.get_vector("left", "right", "up", "down")
+	if input_dir.length() > 0.1:
+		_last_aim_direction = input_dir.normalized()
+
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("attack"):
+		if state == State.HIDDEN:
+			exit_hidden()
+		if state == State.FREE and _attack_cooldown <= 0.0:
+			_start_attack()
+
+
+func _start_attack() -> void:
+	state = State.ATTACK
+	_attack_timer = ATTACK_DURATION
+	_attack_cooldown = ATTACK_COOLDOWN
+	velocity = Vector2.ZERO
+
+	# 动画
+	var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D")
+	if sprite:
+		var dir: String = "f"
+		var angle := _last_aim_direction.angle()
+		if angle >= -PI / 4 and angle < PI / 4: dir = "r"
+		elif angle >= PI / 4 and angle < 3 * PI / 4: dir = "b"
+		elif angle <= -PI / 4 and angle > -3 * PI / 4: dir = "l"
+		if sprite.sprite_frames and sprite.sprite_frames.has_animation("attack_" + dir):
+			sprite.play("attack_" + dir)
+		else:
+			sprite.modulate = Color(1.2, 1.0, 0.8)
+
+	# 攻击碰撞盒
+	_create_attack_hitbox()
+	_perform_attack_damage()
+
+
+func _end_attack() -> void:
+	_destroy_attack_hitbox()
+	var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D")
+	if sprite:
+		sprite.modulate = Color.WHITE
+	if state == State.ATTACK:
+		state = State.FREE
+
+
+func _create_attack_hitbox() -> void:
+	if _attack_hitbox != null:
+		return
+	_attack_hitbox = Area2D.new()
+	_attack_hitbox.name = "AttackHitbox"
+	_attack_hitbox.collision_layer = 0
+	_attack_hitbox.collision_mask = 4  # enemy layer
+
+	var col := CollisionShape2D.new()
+	# 使用圆形近似扇形
+	var shape := CircleShape2D.new()
+	shape.radius = ATTACK_RANGE
+	col.shape = shape
+	_attack_hitbox.add_child(col)
+
+	_attack_hitbox.global_position = global_position + _last_aim_direction * (ATTACK_RANGE * 0.5)
+	add_child(_attack_hitbox)
+
+	# 短暂存在（0.1s）
+	get_tree().create_timer(0.1).timeout.connect(_destroy_attack_hitbox)
+
+
+func _destroy_attack_hitbox() -> void:
+	if _attack_hitbox != null and is_instance_valid(_attack_hitbox):
+		_attack_hitbox.queue_free()
+	_attack_hitbox = null
+
+
+func _perform_attack_damage() -> void:
+	if _attack_hitbox == null:
+		return
+
+	# 查找范围内所有敌人
+	var bodies: Array = _attack_hitbox.get_overlapping_bodies()
+	for body in bodies:
+		if body == self:
+			continue
+		if body.has_method("take_damage"):
+			var dist: float = global_position.distance_to(body.global_position)
+			# 角度检查：只在扇形内
+			var to_enemy: Vector2 = (body.global_position - global_position).normalized()
+			var angle_diff: float = _last_aim_direction.angle_to(to_enemy)
+			if abs(angle_diff) < deg_to_rad(ATTACK_ANGLE / 2.0):
+				var kb_dir: Vector2 = to_enemy
+				body.take_damage(ATTACK_DAMAGE)
+				if body.has_method("apply_knockback"):
+					body.apply_knockback(kb_dir, ATTACK_KNOCKBACK)
+		if body.has_method("push_back"):
+			body.push_back(ATTACK_KNOCKBACK)

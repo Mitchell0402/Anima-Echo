@@ -15,7 +15,8 @@ const NPC_NAMES := {
 	"elder": "守夜老人",
 	"florist": "花店少女",
 }
-const MINE_SCENE := "res://scenes/mine/test_scene.tscn"
+const MINE_SCENE := "res://scenes/mine/dungeon_room.tscn"
+const MINE_SCENE_LEGACY := "res://scenes/mine/test_scene.tscn"
 const INTERACTION_RADIUS := 86.0
 
 var _runtime: Node
@@ -597,7 +598,7 @@ func _add_button(text: String, action: Callable) -> Button:
 	return button
 
 
-func _enter_mine() -> void:
+func _enter_mine(difficulty: int = 1) -> void:
 	if _day_cycle == null or not _day_cycle.has_method("can_enter_mine"):
 		_show_toast("无法进入矿洞。")
 		return
@@ -610,13 +611,30 @@ func _enter_mine() -> void:
 		return
 	if _runtime == null:
 		return
-	if not _runtime.consume_mine_ticket():
-		_show_toast("矿洞门票不足（持有 %d 张）。" % _runtime.get_mine_tickets())
+
+	# 门票：Lv1-2 免费，Lv3+ 消耗门票
+	var tickets_needed: int = 0
+	if difficulty >= 3:
+		tickets_needed = difficulty - 2  # Lv3=1, Lv4=2, Lv5=3
+	var tickets_held: int = _runtime.get_mine_tickets()
+	if tickets_needed > 0 and tickets_held < tickets_needed:
+		_show_toast("矿洞门票不足（需要 %d 张，持有 %d 张）。" % [tickets_needed, tickets_held])
 		_close_popup()
 		return
+
+	# 消耗门票
+	for i in range(tickets_needed):
+		if not _runtime.consume_mine_ticket():
+			break
+
 	_day_cycle.use_mine_entry()
 	if _runtime != null and _runtime.has_method("begin_mine_run"):
 		_runtime.begin_mine_run()
+
+	# 将难度存入 GameRuntime 供 dungeon_run 读取
+	if _runtime.has_method("set_pending_mine_difficulty"):
+		_runtime.set_pending_mine_difficulty(difficulty)
+
 	_close_popup()
 	call_deferred("_change_to_mine")
 
@@ -743,7 +761,7 @@ func _open_mine_entrance_popup() -> void:
 	_popup.visible = true
 	for child in _popup_body.get_children():
 		child.queue_free()
-	_popup_title.text = "矿洞入口"
+	_popup_title.text = "选择矿洞难度"
 
 	var is_night_now: bool = _day_cycle != null and _day_cycle.get("is_night")
 	if is_night_now:
@@ -759,23 +777,30 @@ func _open_mine_entrance_popup() -> void:
 		return
 
 	var tickets: int = _runtime.get_mine_tickets()
+	var can_enter: bool = _day_cycle != null and _day_cycle.can_enter_mine()
 
-	# Normal mine button
-	var normal_label: String = "普通矿洞（需门票 x1，持有 %d 张）" % tickets
-	if _day_cycle != null and not _day_cycle.can_enter_mine():
-		normal_label = "普通矿洞（今日次数已用完）"
-		var greyed_n: Button = _add_button(normal_label, Callable())
-		greyed_n.disabled = true
-	elif tickets < 1:
-		var greyed_n: Button = _add_button(normal_label, Callable())
-		greyed_n.disabled = true
-	else:
-		_add_button(normal_label, Callable(self, "_enter_mine"))
+	# 难度选项：[名称, 难度值, 所需门票]
+	var difficulties := [
+		["★ Lv1  浅层矿道（免费）", 1, 0],
+		["★★ Lv2  中层矿道（免费）", 2, 0],
+		["★★★ Lv3  深层矿道（需1门票）", 3, 1],
+		["★★★★ Lv4  深渊裂隙（需2门票）", 4, 2],
+		["★★★★★ Lv5  巨兽之喉（需3门票）", 5, 3],
+	]
 
-	# Deep mine button (always greyed until Day 5)
-	var deep_label: String = "深层矿洞（需深层入场券）" if tickets >= 1 else "深层矿洞（需深层入场券）"
-	var greyed_d: Button = _add_button(deep_label, Callable())
-	greyed_d.disabled = true
+	for entry in difficulties:
+		var label_text: String = entry[0]
+		var diff: int = entry[1]
+		var cost: int = entry[2]
+
+		if not can_enter:
+			var greyed: Button = _add_button(label_text + "（今日次数已用完）", Callable())
+			greyed.disabled = true
+		elif cost > 0 and tickets < cost:
+			var greyed: Button = _add_button(label_text + "（门票不足 %d/%d）" % [tickets, cost], Callable())
+			greyed.disabled = true
+		else:
+			_add_button(label_text, Callable(self, "_enter_mine").bind(diff))
 
 	_add_button("离开", Callable(self, "_close_popup"))
 

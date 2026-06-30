@@ -7,7 +7,7 @@
 [ext_resource type="Script" uid="uid://bq67qfjk550xb" path="res://scripts/ui/progress_ui.gd" id="3_tmet0"]
 [ext_resource type="PackedScene" uid="uid://cyfi7qy3l1lyx" path="res://scenes/mine/gems/gem_l3.tscn" id="4_glmyf"]
 [ext_resource type="PackedScene" uid="uid://cgemstar00001" path="res://scenes/mine/gems/gem_star.tscn" id="5_star"]
-[ext_resource type="Texture2D" path="res://assets/mine/nodes/mine_wall_common.png" id="6_03nme"]
+[ext_resource type="Texture2D" uid="uid://bqrcby2o6j6dy" path="res://assets/mine/nodes/mine_wall_common.png" id="6_03nme"]
 [ext_resource type="Script" uid="uid://duuyrjfhh35cr" path="res://scripts/ui/qte_circle_ui.gd" id="8_d280x"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kjxxc"]
