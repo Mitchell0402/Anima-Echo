@@ -895,7 +895,7 @@ func _identify_item(item_id: String) -> void:
 func _sell_item(item_id: String) -> void:
 	if _runtime == null:
 		return
-	var result: Dictionary = _runtime.get("shop_service").sell_to_customer("buyer_blacksmith", item_id, 1, {"timing": "normal"})
+	var result: Dictionary = _runtime.get("shop_service").sell_to_customer("buyer_blacksmith", item_id, 1, {"price_mode": "base"})
 	if result.get("ok", false):
 		var total: int = int(result.get("total_price", 0))
 		_show_toast("已出售 %s +%d 铜板" % [item_id, total])
@@ -907,14 +907,11 @@ func _sell_item(item_id: String) -> void:
 	_close_popup()
 
 
-# Direct-sell path: skip the QTE, sell at the catalog base_price plus the
-# standard variance (~0.96-1.04). "normal" timing maps to 1.0x in
-# NegotiationService._timing_bonus; the variance alone produces the
-# final price.
+# Direct-sell path: skip the QTE and sell at the exact catalog base_price.
 func _sell_item_direct(item_id: String) -> void:
 	if _runtime == null:
 		return
-	var result: Dictionary = _runtime.get("shop_service").sell_to_customer("buyer_blacksmith", item_id, 1, {"timing": "normal"})
+	var result: Dictionary = _runtime.get("shop_service").sell_to_customer("buyer_blacksmith", item_id, 1, {"price_mode": "base"})
 	_apply_sell_result(item_id, result)
 
 
@@ -1242,7 +1239,7 @@ func _open_star_choice_popup() -> void:
 func _sell_star_crystal() -> void:
 	if _runtime == null:
 		return
-	var result: Dictionary = _runtime.get("shop_service").sell_to_customer("buyer_jeweler", "star_crystal", 1, {"timing": "normal"})
+	var result: Dictionary = _runtime.get("shop_service").sell_to_customer("buyer_jeweler", "star_crystal", 1, {"price_mode": "base"})
 	if result.get("ok", false):
 		var total: int = int(result.get("total_price", 0))
 		_show_toast("已出售星辰矿 +%d 铜板。稳定度暴跌……" % total)

@@ -36,6 +36,7 @@ func _init() -> void:
 	_run_test("project starts from town and keeps mine route", Callable(self, "_test_project_scene_routes"))
 	_run_test("mine scene exposes return route to town", Callable(self, "_test_mine_return_route"))
 	_run_test("core economy supports mine to town progression loop", Callable(self, "_test_core_economy_loop"))
+	_run_test("direct sell uses base price and negotiation can beat it", Callable(self, "_test_direct_sell_uses_base_price"))
 	_run_test("runtime code keeps one inventory and currency mutation boundary", Callable(self, "_test_single_mutation_boundary"))
 	_run_test("main scene points to mining town not the mine route", Callable(self, "_test_main_scene_is_town"))
 	_run_test("town scene script reference is not stale", Callable(self, "_test_town_scene_script_reference"))
@@ -43,6 +44,7 @@ func _init() -> void:
 	_run_test("catalog exposes get_customers matching data file", Callable(self, "_test_catalog_get_customers"))
 	_run_test("inventory manager is_full proxies to runtime capacity", Callable(self, "_test_inventory_manager_is_full_proxies_to_runtime"))
 	_run_test("item database get_stack_limit reads from catalog source of truth", Callable(self, "_test_item_database_get_stack_limit_uses_catalog"))
+	_run_test("ore and raw stone catalog names are localized", Callable(self, "_test_catalog_item_names_are_localized"))
 	_run_test("star crystal exists in catalog and has correct properties", Callable(self, "_test_star_crystal_in_catalog"))
 	_run_test("star geode identify table yields star crystal", Callable(self, "_test_star_geode_identify_table"))
 	_run_test("anomalous geode L4 is removed from catalog", Callable(self, "_test_l4_geode_removed"))
@@ -563,6 +565,55 @@ func _test_core_economy_loop() -> void:
 	runtime.free()
 
 
+func _test_direct_sell_uses_base_price() -> void:
+	var runtime_script = load("res://scripts/core/game_runtime.gd")
+	_assert_true(runtime_script != null, "runtime script loads for direct sell price test")
+	if runtime_script == null:
+		return
+	var runtime: Node = runtime_script.new()
+	var init_result: Dictionary = runtime.initialize_for_new_game()
+	_assert_true(init_result.get("ok", false), "runtime initializes for direct sell price test")
+	if not init_result.get("ok", false):
+		runtime.free()
+		return
+	var catalog: Object = runtime.get("catalog")
+	var warehouse: Object = runtime.get("warehouse")
+	var wallet: Object = runtime.get("wallet")
+	_assert_true(catalog != null, "catalog exists for direct sell price test")
+	_assert_true(warehouse != null, "warehouse exists for direct sell price test")
+	_assert_true(wallet != null, "wallet exists for direct sell price test")
+	if catalog == null or warehouse == null or wallet == null:
+		runtime.shutdown()
+		runtime.free()
+		return
+	var base_price: int = int(catalog.get_item("copper_nugget").get("base_price", 0))
+	_assert_eq(10, base_price, "copper_nugget base price is 10 for direct sell regression")
+	var seeded: Dictionary = warehouse.add_item("copper_nugget", 2)
+	_assert_true(seeded.get("ok", false), "seed two copper nuggets for sell price test")
+	var budget_before: int = int(runtime.get_customer_remaining_budget("buyer_blacksmith"))
+	var balance_before: int = int(wallet.get_balance())
+	var direct_result: Dictionary = runtime.get("shop_service").sell_to_customer("buyer_blacksmith", "copper_nugget", 1, {"price_mode": "base"})
+	_assert_true(direct_result.get("ok", false), "direct base-price sale succeeds")
+	_assert_eq(base_price, int(direct_result.get("total_price", 0)), "direct sale total equals catalog base price")
+	_assert_eq(balance_before + base_price, int(wallet.get_balance()), "direct sale adds exactly base price to wallet")
+	_assert_eq(budget_before - base_price, int(runtime.get_customer_remaining_budget("buyer_blacksmith")), "direct sale consumes exactly base price from buyer budget")
+	_assert_eq(1, int(warehouse.count_item("copper_nugget")), "direct sale removes one copper nugget")
+	var negotiated_result: Dictionary = runtime.get("shop_service").sell_to_customer("buyer_blacksmith", "copper_nugget", 1, {"timing": "perfect"})
+	_assert_true(negotiated_result.get("ok", false), "successful negotiation sale succeeds")
+	_assert_true(int(negotiated_result.get("total_price", 0)) > base_price, "successful negotiation beats direct base price")
+	_assert_eq(0, int(warehouse.count_item("copper_nugget")), "negotiated sale removes final copper nugget")
+	var reseeded: Dictionary = warehouse.add_item("copper_nugget", 1)
+	_assert_true(reseeded.get("ok", false), "seed copper nugget for budget rejection test")
+	runtime.customer_remaining_budget["buyer_blacksmith"] = base_price - 1
+	var balance_before_reject: int = int(wallet.get_balance())
+	var reject_result: Dictionary = runtime.get("shop_service").sell_to_customer("buyer_blacksmith", "copper_nugget", 1, {"price_mode": "base"})
+	_assert_false(reject_result.get("ok", false), "direct sale fails when buyer budget is below base price")
+	_assert_eq(balance_before_reject, int(wallet.get_balance()), "failed sale leaves wallet unchanged")
+	_assert_eq(1, int(warehouse.count_item("copper_nugget")), "failed sale leaves warehouse item in place")
+	runtime.shutdown()
+	runtime.free()
+
+
 func _test_single_mutation_boundary() -> void:
 	var files := _list_files("res://scripts", ".gd")
 	var mutation_terms := [".add_item(", ".remove_item(", ".add_currency(", ".spend_currency(", ".remove_one("]
@@ -582,6 +633,43 @@ func _test_single_mutation_boundary() -> void:
 
 
 # ---- Day 1: Star Crystal & Morality Tests ----
+
+
+func _test_catalog_item_names_are_localized() -> void:
+	var catalog_script = load("res://scripts/core/game_catalog.gd")
+	_assert_true(catalog_script != null, "catalog script loads for localized item names test")
+	if catalog_script == null:
+		return
+	var catalog: Object = catalog_script.new()
+	var load_result: Dictionary = catalog.load_defaults()
+	_assert_true(load_result.get("ok", false), "catalog loads for localized item names test")
+	if not load_result.get("ok", false):
+		catalog = null
+		return
+	var expected_names: Dictionary = {
+		"raw_common_geode": "普通原石",
+		"raw_fine_geode": "精良原石",
+		"raw_rare_geode": "稀有原石",
+		"raw_star_geode": "温暖原石",
+		"copper_nugget": "铜块",
+		"iron_shard": "铁片",
+		"silver_vein": "银脉",
+		"gold_vein": "金脉",
+		"crystal_bloom": "水晶花",
+		"moonlit_crystal": "月光水晶",
+		"star_fragment": "星辰碎片",
+		"memory_core": "记忆核心",
+		"star_crystal": "星辰矿",
+	}
+	for item_id in expected_names.keys():
+		_assert_true(catalog.has_item(str(item_id)), "%s exists in catalog for localized name test" % item_id)
+		if not catalog.has_item(str(item_id)):
+			continue
+		var item: Dictionary = catalog.get_item(str(item_id))
+		var display_name: String = str(item.get("name", ""))
+		_assert_eq(str(expected_names[item_id]), display_name, "%s display name is localized" % item_id)
+		_assert_false(_has_ascii_letter(display_name), "%s display name has no English letters" % item_id)
+	catalog = null
 
 
 func _test_star_crystal_in_catalog() -> void:
@@ -1069,6 +1157,14 @@ func _new_catalog_for_test() -> Object:
 
 func _res_path(path: String) -> String:
 	return "res://" + path
+
+
+func _has_ascii_letter(text: String) -> bool:
+	for i in range(text.length()):
+		var code := text.unicode_at(i)
+		if (code >= 65 and code <= 90) or (code >= 97 and code <= 122):
+			return true
+	return false
 
 
 func _cleanup_autoloads() -> void:
