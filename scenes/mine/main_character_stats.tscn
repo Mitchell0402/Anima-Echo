@@ -37,7 +37,7 @@ script = ExtResource("4_gl7sw")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=38135608]
 position = Vector2(-4, 22)
-zoom = Vector2(0.6, 0.6)
+zoom = Vector2(0.8, 0.8)
 drag_horizontal_enabled = true
 drag_vertical_enabled = true
 drag_left_margin = 0.1

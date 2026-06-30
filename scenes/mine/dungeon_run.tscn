@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://bih7u8ydhibp1"]
+
+[ext_resource type="Script" uid="uid://cpnk73hoci5pc" path="res://scripts/mine/room_manager.gd" id="1_room_manager"]
+[ext_resource type="PackedScene" uid="uid://b3e2t41ye5xky" path="res://scenes/mine/main_character_stats.tscn" id="2_player"]
+
+[node name="DungeonRun" type="Node2D" unique_id=1715037768]
+script = ExtResource("1_room_manager")
+
+[node name="Player" parent="." unique_id=1505714832 instance=ExtResource("2_player")]

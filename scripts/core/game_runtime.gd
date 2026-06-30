@@ -14,10 +14,19 @@ const NpcAffectionScript = preload("res://scripts/narrative/npc_affection.gd")
 const EquipmentSystemScript = preload("res://scripts/player/equipment_system.gd")
 
 const HOTBAR_CAPACITY: int = 12
-const HOTBAR_DEFAULT_MAX_ITEMS: int = 0  # 0 = no cap; the hotbar is bounded only by slot capacity.
+const HOTBAR_DEFAULT_MAX_ITEMS: int = 0
 const WAREHOUSE_CAPACITY: int = 48
 const WAREHOUSE_DEFAULT_MAX_ITEMS: int = 999
 const MINE_SCENE_NAME: String = "testScene"
+const DUNGEON_ROOM_SCENE: String = "res://scenes/mine/dungeon_room.tscn"
+
+# ---- 地牢模式跨场景状态 ----
+var dungeon_layout: Dictionary = {}         # DungeonGenerator.DungeonLayout 序列化
+var dungeon_room_cleared: Dictionary = {}    # String(Vector2i) -> bool
+var dungeon_current_room: Vector2i = Vector2i.ZERO
+var dungeon_entrance_dir: Vector2i = Vector2i.ZERO  # 从哪个方向进入当前房间
+var dungeon_difficulty: int = 1
+var dungeon_player_health: float = 100.0
 
 var catalog: Object
 var event_bus: Object
@@ -39,6 +48,48 @@ var _florist_first_star_gifted: bool = false
 
 signal mine_run_started
 signal mine_run_ended(remaining_untransferred: int)
+
+# 地牢模式：城镇入口传递难度给 dungeon_room
+var _pending_mine_difficulty: int = 1
+
+func set_pending_mine_difficulty(diff: int) -> void:
+	_pending_mine_difficulty = clampi(diff, 1, 5)
+
+func get_pending_mine_difficulty() -> int:
+	return _pending_mine_difficulty
+
+## 生成地牢布局并存储（跨场景持久）
+func generate_dungeon_layout(combat_rooms: int) -> void:
+	var gen := load("res://scripts/mine/dungeon_generator.gd")
+	var layout = gen.generate(combat_rooms)
+	dungeon_layout = {
+		"rooms": layout.rooms,
+		"connections": layout.connections,
+		"boss_cell": layout.boss_cell,
+		"start_cell": layout.start_cell,
+	}
+	dungeon_room_cleared.clear()
+	for cell in layout.rooms:
+		dungeon_room_cleared[str(cell)] = (layout.rooms[cell] == 0)  # START already cleared
+	dungeon_current_room = layout.start_cell
+	dungeon_entrance_dir = Vector2i.ZERO
+	dungeon_player_health = 100.0
+
+func get_dungeon_connections_for(cell: Vector2i) -> Array:
+	var result: Array = []
+	for conn in dungeon_layout.get("connections", []):
+		var d: Dictionary = conn
+		if d["from"] == cell:
+			result.append({"neighbor": d["to"], "dir": d["to"] - cell})
+		elif d["to"] == cell:
+			result.append({"neighbor": d["from"], "dir": d["from"] - cell})
+	return result
+
+func is_dungeon_room_cleared(cell: Vector2i) -> bool:
+	return dungeon_room_cleared.get(str(cell), false)
+
+func mark_dungeon_room_cleared(cell: Vector2i) -> void:
+	dungeon_room_cleared[str(cell)] = true
 
 
 func _ready() -> void:
@@ -104,10 +155,21 @@ func consume_customer_budget(customer_id: String, amount: int) -> Dictionary:
 	return {"ok": true, "remaining": current - amount}
 
 
-# Called when the player enters the mine scene. Clears the hotbar so the
-# player starts each run with an empty backpack.
+# Called when the player enters the mine. Clears hotbar, generates dungeon layout.
 func begin_mine_run() -> void:
 	hotbar.clear()
+
+	# 根据难度决定战斗房间数
+	var croom: int = 4
+	match _pending_mine_difficulty:
+		1: croom = 4
+		2: croom = 4 if randi() % 2 == 0 else 5
+		3: croom = 5
+		4: croom = 5 if randi() % 2 == 0 else 6
+		5: croom = 6
+
+	dungeon_difficulty = _pending_mine_difficulty
+	generate_dungeon_layout(croom)
 	mine_run_started.emit()
 
 
@@ -155,7 +217,8 @@ func is_in_mine_scene() -> bool:
 	var current: Node = tree.current_scene
 	if current == null:
 		return false
-	return str(current.name) == MINE_SCENE_NAME
+	var name: String = str(current.name)
+	return name == MINE_SCENE_NAME or name == "DungeonRoom"
 
 
 func add_mine_tickets(n: int) -> void:

@@ -729,29 +729,29 @@
 	}
   ],
   "night_customers": [
-    {
-      "id": "night_traveler_lux",
-      "name": "Lux the Traveler",
-      "price_multiplier": 1.40,
-      "preferred_tags": ["crystal", "cosmic"],
-      "rejected_tags": ["metal"],
-      "budget": 400
-    },
-    {
-      "id": "night_smuggler_ven",
-      "name": "Ven the Smuggler",
-      "price_multiplier": 1.35,
-      "preferred_tags": ["metal", "ancient"],
-      "rejected_tags": ["safe"],
-      "budget": 500
-    },
-    {
-      "id": "night_collector_iria",
-      "name": "Iria the Oddity Collector",
-      "price_multiplier": 1.55,
-      "preferred_tags": ["jeweler", "star"],
-      "rejected_tags": [],
-      "budget": 600
-    }
+	{
+	  "id": "night_traveler_lux",
+	  "name": "Lux the Traveler",
+	  "price_multiplier": 1.40,
+	  "preferred_tags": ["crystal", "cosmic"],
+	  "rejected_tags": ["metal"],
+	  "budget": 400
+	},
+	{
+	  "id": "night_smuggler_ven",
+	  "name": "Ven the Smuggler",
+	  "price_multiplier": 1.35,
+	  "preferred_tags": ["metal", "ancient"],
+	  "rejected_tags": ["safe"],
+	  "budget": 500
+	},
+	{
+	  "id": "night_collector_iria",
+	  "name": "Iria the Oddity Collector",
+	  "price_multiplier": 1.55,
+	  "preferred_tags": ["jeweler", "star"],
+	  "rejected_tags": [],
+	  "budget": 600
+	}
   ]
 }

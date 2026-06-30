@@ -6,36 +6,34 @@
 [ext_resource type="PackedScene" uid="uid://dpq2mu2tqdg06" path="res://scenes/town/npc_florist.tscn" id="4"]
 [ext_resource type="PackedScene" uid="uid://dd5h0o286tldl" path="res://scenes/town/npc_buyer.tscn" id="5"]
 [ext_resource type="PackedScene" uid="uid://cv5cbiaiy8cca" path="res://scenes/town/npc_elder.tscn" id="6"]
-[ext_resource type="Script" uid="uid://2fyxd5uysg2f" path="res://scripts/town/refine_workstation.gd" id="7"]
-[ext_resource type="Texture2D" path="res://assets/town/props/task_board.png" id="7_v0k1h"]
-[ext_resource type="Texture2D" path="res://assets/town/buildings/refine_station.png" id="town_refine_station"]
-[ext_resource type="Texture2D" path="res://assets/town/buildings/blacksmith.png" id="town_blacksmith"]
-[ext_resource type="Texture2D" path="res://assets/town/buildings/buyer_shop.png" id="town_buyer_shop"]
-[ext_resource type="Texture2D" path="res://assets/town/buildings/elder_house.png" id="town_elder_house"]
-[ext_resource type="Texture2D" path="res://assets/town/buildings/florist.png" id="town_florist"]
-[ext_resource type="Texture2D" path="res://assets/town/buildings/warehouse.png" id="town_warehouse"]
-[ext_resource type="Texture2D" path="res://assets/town/decor/bush_round.png" id="town_bush_round"]
-[ext_resource type="Texture2D" path="res://assets/town/decor/flower_patch_blue.png" id="town_flower_blue"]
-[ext_resource type="Texture2D" path="res://assets/town/decor/flower_patch_red.png" id="town_flower_red"]
-[ext_resource type="Texture2D" path="res://assets/town/decor/grass_clump_a.png" id="town_grass_a"]
-[ext_resource type="Texture2D" path="res://assets/town/decor/grass_clump_b.png" id="town_grass_b"]
-[ext_resource type="Texture2D" path="res://assets/town/props/barrel.png" id="town_barrel"]
-[ext_resource type="Texture2D" path="res://assets/town/props/bench.png" id="town_bench"]
-[ext_resource type="Texture2D" path="res://assets/town/props/crate_stack.png" id="town_crate_stack"]
-[ext_resource type="Texture2D" path="res://assets/town/props/fence_horizontal.png" id="town_fence_h"]
-[ext_resource type="Texture2D" path="res://assets/town/props/fence_vertical.png" id="town_fence_v"]
-[ext_resource type="Texture2D" path="res://assets/town/props/lantern_post.png" id="town_lantern"]
-[ext_resource type="Texture2D" path="res://assets/town/props/minecart_town.png" id="town_minecart"]
-[ext_resource type="Texture2D" path="res://assets/town/props/notice_sign.png" id="town_notice_sign"]
-[ext_resource type="Texture2D" path="res://assets/town/props/well.png" id="town_well"]
-[ext_resource type="Texture2D" path="res://assets/town/trees/oak_large.png" id="town_oak_large"]
-[ext_resource type="Texture2D" path="res://assets/town/trees/oak_small.png" id="town_oak_small"]
-[ext_resource type="Texture2D" path="res://assets/town/trees/pine_large.png" id="town_pine_large"]
-[ext_resource type="Texture2D" path="res://assets/town/trees/pine_small.png" id="town_pine_small"]
-[ext_resource type="Texture2D" path="res://assets/town/trees/stump.png" id="town_stump"]
+[ext_resource type="Texture2D" uid="uid://co7u0pdbgwgkq" path="res://assets/town/props/task_board.png" id="7_v0k1h"]
 [ext_resource type="PackedScene" uid="uid://c3ypvuc2p0k1h" path="res://scenes/town/town_player.tscn" id="9"]
 [ext_resource type="PackedScene" uid="uid://bmn1kwqo8xppp" path="res://scenes/town/mine_entrance.tscn" id="10"]
 [ext_resource type="PackedScene" uid="uid://b3q4pwyhfxnnn" path="res://scenes/town/bed.tscn" id="11"]
+[ext_resource type="Texture2D" uid="uid://cgdglv4wtktg7" path="res://assets/town/props/barrel.png" id="town_barrel"]
+[ext_resource type="Texture2D" uid="uid://cpf5nxaxjpksv" path="res://assets/town/props/bench.png" id="town_bench"]
+[ext_resource type="Texture2D" uid="uid://cmbx85nof66bj" path="res://assets/town/buildings/blacksmith.png" id="town_blacksmith"]
+[ext_resource type="Texture2D" uid="uid://da882pel0qn45" path="res://assets/town/decor/bush_round.png" id="town_bush_round"]
+[ext_resource type="Texture2D" uid="uid://2rmo1c0vg1oj" path="res://assets/town/buildings/buyer_shop.png" id="town_buyer_shop"]
+[ext_resource type="Texture2D" uid="uid://drd0g75brffrf" path="res://assets/town/props/crate_stack.png" id="town_crate_stack"]
+[ext_resource type="Texture2D" uid="uid://b2fd3mqglhls8" path="res://assets/town/buildings/elder_house.png" id="town_elder_house"]
+[ext_resource type="Texture2D" uid="uid://i14pkgayrm1w" path="res://assets/town/props/fence_horizontal.png" id="town_fence_h"]
+[ext_resource type="Texture2D" uid="uid://c0u8jtgv04n5e" path="res://assets/town/props/fence_vertical.png" id="town_fence_v"]
+[ext_resource type="Texture2D" uid="uid://dk1iojbcqrn1n" path="res://assets/town/buildings/florist.png" id="town_florist"]
+[ext_resource type="Texture2D" uid="uid://c4wwyf8775uj5" path="res://assets/town/decor/flower_patch_blue.png" id="town_flower_blue"]
+[ext_resource type="Texture2D" uid="uid://bhq1md2bc30gn" path="res://assets/town/decor/flower_patch_red.png" id="town_flower_red"]
+[ext_resource type="Texture2D" uid="uid://ewnentpkgnal" path="res://assets/town/decor/grass_clump_a.png" id="town_grass_a"]
+[ext_resource type="Texture2D" uid="uid://jios5a2u5ty" path="res://assets/town/decor/grass_clump_b.png" id="town_grass_b"]
+[ext_resource type="Texture2D" uid="uid://twp4scnjuu81" path="res://assets/town/props/lantern_post.png" id="town_lantern"]
+[ext_resource type="Texture2D" uid="uid://k4x7n416v3i7" path="res://assets/town/props/minecart_town.png" id="town_minecart"]
+[ext_resource type="Texture2D" uid="uid://ceuwopr2nbcy1" path="res://assets/town/props/notice_sign.png" id="town_notice_sign"]
+[ext_resource type="Texture2D" uid="uid://bajeor6y3oqxa" path="res://assets/town/trees/oak_large.png" id="town_oak_large"]
+[ext_resource type="Texture2D" uid="uid://cj35gq3m14m50" path="res://assets/town/trees/oak_small.png" id="town_oak_small"]
+[ext_resource type="Texture2D" uid="uid://b3aabw1narg7y" path="res://assets/town/trees/pine_large.png" id="town_pine_large"]
+[ext_resource type="Texture2D" uid="uid://cvuwkaprep21l" path="res://assets/town/trees/pine_small.png" id="town_pine_small"]
+[ext_resource type="Texture2D" uid="uid://g7gcdiu8nxxv" path="res://assets/town/trees/stump.png" id="town_stump"]
+[ext_resource type="Texture2D" uid="uid://d7ujfbghkx3w" path="res://assets/town/buildings/warehouse.png" id="town_warehouse"]
+[ext_resource type="Texture2D" uid="uid://ge2rtmpnesu" path="res://assets/town/props/well.png" id="town_well"]
 
 [node name="MiningTown" type="Node2D" unique_id=1470820021]
 script = ExtResource("1")
@@ -47,109 +45,109 @@ offset_bottom = 941.0
 texture = ExtResource("2")
 expand_mode = 1
 
-[node name="GeneratedTownLayer" type="Node2D" parent="."]
+[node name="GeneratedTownLayer" type="Node2D" parent="." unique_id=2130177927]
 
-[node name="ElderHouse" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="ElderHouse" type="Sprite2D" parent="GeneratedTownLayer" unique_id=1969730933]
 position = Vector2(888, 238)
 texture = ExtResource("town_elder_house")
 
-[node name="BlacksmithBuilding" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="BlacksmithBuilding" type="Sprite2D" parent="GeneratedTownLayer" unique_id=2080521854]
 position = Vector2(480, 226)
 texture = ExtResource("town_blacksmith")
 
-[node name="FloristBuilding" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="FloristBuilding" type="Sprite2D" parent="GeneratedTownLayer" unique_id=1411728474]
 position = Vector2(768, 590)
 texture = ExtResource("town_florist")
 
-[node name="BuyerShop" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="BuyerShop" type="Sprite2D" parent="GeneratedTownLayer" unique_id=58363570]
 position = Vector2(1238, 316)
 texture = ExtResource("town_buyer_shop")
 
-[node name="WarehouseBuilding" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="WarehouseBuilding" type="Sprite2D" parent="GeneratedTownLayer" unique_id=1822427469]
 position = Vector2(1052, 524)
 texture = ExtResource("town_warehouse")
 
-[node name="Well" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="Well" type="Sprite2D" parent="GeneratedTownLayer" unique_id=1015154304]
 position = Vector2(654, 552)
 texture = ExtResource("town_well")
 
-[node name="Bench" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="Bench" type="Sprite2D" parent="GeneratedTownLayer" unique_id=1713486037]
 position = Vector2(704, 430)
 texture = ExtResource("town_bench")
 
-[node name="LanternPost" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="LanternPost" type="Sprite2D" parent="GeneratedTownLayer" unique_id=610485977]
 position = Vector2(598, 440)
 texture = ExtResource("town_lantern")
 
-[node name="NoticeSign" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="NoticeSign" type="Sprite2D" parent="GeneratedTownLayer" unique_id=1287355066]
 position = Vector2(558, 374)
 texture = ExtResource("town_notice_sign")
 
-[node name="TownMinecart" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="TownMinecart" type="Sprite2D" parent="GeneratedTownLayer" unique_id=705580838]
 position = Vector2(388, 246)
 texture = ExtResource("town_minecart")
 
-[node name="Barrel" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="Barrel" type="Sprite2D" parent="GeneratedTownLayer" unique_id=911341648]
 position = Vector2(438, 314)
 texture = ExtResource("town_barrel")
 
-[node name="CrateStack" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="CrateStack" type="Sprite2D" parent="GeneratedTownLayer" unique_id=1893661194]
 position = Vector2(984, 526)
 texture = ExtResource("town_crate_stack")
 
-[node name="FenceHorizontalA" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="FenceHorizontalA" type="Sprite2D" parent="GeneratedTownLayer" unique_id=1048523830]
 position = Vector2(772, 516)
 texture = ExtResource("town_fence_h")
 
-[node name="FenceHorizontalB" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="FenceHorizontalB" type="Sprite2D" parent="GeneratedTownLayer" unique_id=185046554]
 position = Vector2(836, 516)
 texture = ExtResource("town_fence_h")
 
-[node name="FenceVerticalA" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="FenceVerticalA" type="Sprite2D" parent="GeneratedTownLayer" unique_id=34548130]
 position = Vector2(716, 558)
 texture = ExtResource("town_fence_v")
 
-[node name="OakLarge" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="OakLarge" type="Sprite2D" parent="GeneratedTownLayer" unique_id=1331402185]
 position = Vector2(176, 192)
 texture = ExtResource("town_oak_large")
 
-[node name="OakSmall" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="OakSmall" type="Sprite2D" parent="GeneratedTownLayer" unique_id=1572354745]
 position = Vector2(1116, 654)
 texture = ExtResource("town_oak_small")
 
-[node name="PineLarge" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="PineLarge" type="Sprite2D" parent="GeneratedTownLayer" unique_id=1921399259]
 position = Vector2(1368, 194)
 texture = ExtResource("town_pine_large")
 
-[node name="PineSmall" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="PineSmall" type="Sprite2D" parent="GeneratedTownLayer" unique_id=1297876620]
 position = Vector2(224, 690)
 texture = ExtResource("town_pine_small")
 
-[node name="Stump" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="Stump" type="Sprite2D" parent="GeneratedTownLayer" unique_id=306634847]
 position = Vector2(322, 662)
 texture = ExtResource("town_stump")
 
-[node name="BushRoundA" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="BushRoundA" type="Sprite2D" parent="GeneratedTownLayer" unique_id=1597102289]
 position = Vector2(648, 638)
 texture = ExtResource("town_bush_round")
 
-[node name="BushRoundB" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="BushRoundB" type="Sprite2D" parent="GeneratedTownLayer" unique_id=780856271]
 position = Vector2(1192, 442)
 texture = ExtResource("town_bush_round")
 
-[node name="FlowerPatchBlue" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="FlowerPatchBlue" type="Sprite2D" parent="GeneratedTownLayer" unique_id=630031713]
 position = Vector2(730, 650)
 texture = ExtResource("town_flower_blue")
 
-[node name="FlowerPatchRed" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="FlowerPatchRed" type="Sprite2D" parent="GeneratedTownLayer" unique_id=1592348768]
 position = Vector2(812, 652)
 texture = ExtResource("town_flower_red")
 
-[node name="GrassClumpA" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="GrassClumpA" type="Sprite2D" parent="GeneratedTownLayer" unique_id=714152063]
 position = Vector2(548, 508)
 texture = ExtResource("town_grass_a")
 
-[node name="GrassClumpB" type="Sprite2D" parent="GeneratedTownLayer"]
+[node name="GrassClumpB" type="Sprite2D" parent="GeneratedTownLayer" unique_id=1659748974]
 position = Vector2(1168, 590)
 texture = ExtResource("town_grass_b")
 
