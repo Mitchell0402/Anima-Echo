@@ -1,4 +1,4 @@
-## 按鼠标左键前进到下一条，按 Esc 结束对话返回交互面板。
+## 按任意键或鼠标左键前进到下一条，按 Esc 结束对话返回交互面板。
 extends CanvasLayer
 class_name DialogueUI
 
@@ -137,7 +137,7 @@ func _show_current_line() -> void:
 
 	# Show a hint at the end of the text area
 	if _line_index < _lines.size() - 1:
-		_text_label.text += "\n\n(鼠标左键下一页)"
+		_text_label.text += "\n\n(按任意键或点击继续)"
 	else:
 		_text_label.text += "\n\n(Esc 结束对话)"
 
@@ -161,9 +161,16 @@ func _close() -> void:
 func _input(event: InputEvent) -> void:
 	if not visible:
 		return
+	# Esc 优先：直接关闭对话
+	if event.is_action_pressed("ui_cancel"):
+		_close()
+		get_viewport().set_input_as_handled()
+		return
+	# 鼠标左键或任意非修饰键推进
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		advance()
 		get_viewport().set_input_as_handled()
-	elif event.is_action_pressed("ui_cancel"):
-		_close()
+	elif event is InputEventKey and event.pressed and not event.echo \
+			and event.keycode not in [KEY_SHIFT, KEY_CTRL, KEY_ALT, KEY_META]:
+		advance()
 		get_viewport().set_input_as_handled()

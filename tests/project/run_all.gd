@@ -66,6 +66,11 @@ func _init() -> void:
 	# Day 5: NPC Affinity Quests
 	_run_test("catalog has 12 npc tasks with correct flags", Callable(self, "_test_catalog_npc_tasks"))
 	_run_test("npc affection modify_affection triggers threshold", Callable(self, "_test_npc_affection_modify"))
+	# Day 6: Dialogue input — any key advances, Esc closes, modifier keys ignored
+	_run_test("dialogue UI advances on any non-modifier key", Callable(self, "_test_dialogue_advances_on_any_key"))
+	_run_test("dialogue UI advances on left mouse button", Callable(self, "_test_dialogue_advances_on_left_click"))
+	_run_test("dialogue UI closes on Esc and fires on_done", Callable(self, "_test_dialogue_closes_on_esc"))
+	_run_test("dialogue UI ignores modifier-only key presses", Callable(self, "_test_dialogue_ignores_modifier_keys"))
 
 	if _failures.is_empty():
 		print("RESULT: PASS %d assertions" % _assertions)
@@ -1126,7 +1131,6 @@ func _test_catalog_npc_tasks() -> void:
 	_assert_eq(4, npc_ids.size(), "npc tasks cover all 4 npcs")
 	cat.free()
 
-
 func _test_npc_affection_modify() -> void:
 	var aff: Node = _new_affection_for_test()
 	var triggered: bool = false
@@ -1139,6 +1143,149 @@ func _test_npc_affection_modify() -> void:
 	aff.modify_affection("elder", 30)
 	_assert_eq(100, int(aff.get_affection("elder")), "modify_affection clamps at 100")
 	aff.free()
+
+
+# ---- Day 6: Dialogue Input Tests ----
+
+# A helper that builds a fresh DialogueUI, attaches it to root, opens it with
+# the given lines, and returns it. The UI is visible=true after this returns
+# (matches what mining_town_scene does when it calls _dialogue_ui.open()).
+func _new_open_dialogue_ui(lines: Array[String]) -> Node:
+	var script: GDScript = load("res://scripts/narrative/dialogue_ui.gd")
+	var ui: Node = script.new()
+	ui.name = "DialogueUI_test"
+	root.add_child(ui)
+	ui.visible = true
+	ui.open("TestNPC", "", lines, Callable())
+	# open() rewinds _line_index to 0; the typewriter state machine is at
+	# the start of line 0, so the first input should fast-forward within
+	# line 0, the second input should advance to line 1, etc.
+	return ui
+
+
+func _test_dialogue_advances_on_any_key() -> void:
+	var ui: Node = _new_open_dialogue_ui(["first", "second", "third"] as Array[String])
+	# After open(): _line_index=0, _showing_full=false (typewriter is at
+	# the start of line 0). advance() with _showing_full=false fast-
+	# forwards within the current line; advance() with _showing_full=true
+	# moves to the next line. _show_current_line() then resets
+	# _showing_full=false on the new line — so the player needs two
+	# presses per line: one to skip the typewriter, one to advance.
+	var enter := InputEventKey.new()
+	enter.keycode = KEY_ENTER
+	enter.pressed = true
+	enter.echo = false
+	ui._input(enter)  # skip typewriter of line 0
+	_assert_eq(0, int(ui.get("_line_index")), "first Enter does not advance line (still typing)")
+	_assert_true(bool(ui.get("_showing_full")), "first Enter fast-forwards line 0")
+	ui._input(enter)  # advance to line 1
+	_assert_eq(1, int(ui.get("_line_index")), "second Enter advances to line 1")
+	_assert_false(bool(ui.get("_showing_full")), "new line 1 resets typewriter to typing")
+	ui._input(enter)  # skip typewriter of line 1
+	_assert_eq(1, int(ui.get("_line_index")), "third Enter does not advance past line 1 (typewriter reset)")
+	ui._input(enter)  # advance to line 2 (last)
+	_assert_eq(2, int(ui.get("_line_index")), "fourth Enter advances to line 2 (last line)")
+	ui._input(enter)  # skip typewriter of line 2
+	_assert_eq(2, int(ui.get("_line_index")), "fifth Enter does not advance (typewriter on last line)")
+	ui._input(enter)  # last-line advance -> close
+	_assert_false(bool(ui.get("visible")), "sixth Enter closes the dialogue (last line advanced)")
+	# A different non-modifier key (Space) follows the same path as Enter.
+	var ui2: Node = _new_open_dialogue_ui(["a", "b"] as Array[String])
+	var space := InputEventKey.new()
+	space.keycode = KEY_SPACE
+	space.pressed = true
+	space.echo = false
+	ui2._input(space)  # skip typewriter of line 0
+	ui2._input(space)  # advance to line 1
+	_assert_eq(1, int(ui2.get("_line_index")), "Space key advances to line 1")
+	ui2.queue_free()
+
+
+func _test_dialogue_advances_on_left_click() -> void:
+	var ui: Node = _new_open_dialogue_ui(["a", "b"] as Array[String])
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	ui._input(click)  # skip typewriter
+	ui._input(click)  # advance to line 1
+	_assert_eq(1, int(ui.get("_line_index")), "left click advances to line 1")
+	# A right click should NOT advance.
+	var right := InputEventMouseButton.new()
+	right.button_index = MOUSE_BUTTON_RIGHT
+	right.pressed = true
+	ui._input(right)
+	_assert_eq(1, int(ui.get("_line_index")), "right click does not advance dialogue")
+	ui.queue_free()
+
+
+func _test_dialogue_closes_on_esc() -> void:
+	var done_called := [false]
+	var script: GDScript = load("res://scripts/narrative/dialogue_ui.gd")
+	var ui: Node = script.new()
+	ui.name = "DialogueUI_esc_test"
+	root.add_child(ui)
+	ui.visible = true
+	ui.open("TestNPC", "", ["only line"] as Array[String], func() -> void: done_called[0] = true)
+	var esc := InputEventKey.new()
+	esc.keycode = KEY_ESCAPE
+	esc.pressed = true
+	esc.echo = false
+	ui._input(esc)
+	_assert_false(bool(ui.get("visible")), "Esc closes the dialogue UI")
+	_assert_true(done_called[0], "Esc fires the on_done callback")
+	# Esc must take priority over the "any key advances" branch — if it
+	# didn't, the Esc keypress would first call advance() and then close,
+	# skipping past the remaining lines. Verify with a 2-line dialogue
+	# that Esc after the first advance still closes on the right line.
+	var ui2: Node = script.new()
+	ui2.name = "DialogueUI_esc_test2"
+	root.add_child(ui2)
+	ui2.visible = true
+	ui2.open("TestNPC", "", ["a", "b"] as Array[String], Callable())
+	var enter := InputEventKey.new()
+	enter.keycode = KEY_ENTER
+	enter.pressed = true
+	enter.echo = false
+	ui2._input(enter)  # skip typewriter of line 0
+	ui2._input(esc)    # Esc while on line 0 (after typewriter)
+	_assert_false(bool(ui2.get("visible")), "Esc closes dialogue without first advancing to line 1")
+	ui2.queue_free()
+	ui.queue_free()
+
+
+func _test_dialogue_ignores_modifier_keys() -> void:
+	var ui: Node = _new_open_dialogue_ui(["a", "b"] as Array[String])
+	# Typewriter skip first so the next press would normally advance.
+	var enter := InputEventKey.new()
+	enter.keycode = KEY_ENTER
+	enter.pressed = true
+	enter.echo = false
+	ui._input(enter)  # skip typewriter; _line_index still 0
+	var baseline_index: int = int(ui.get("_line_index"))
+	# Shift alone should not advance.
+	var shift := InputEventKey.new()
+	shift.keycode = KEY_SHIFT
+	shift.pressed = true
+	shift.echo = false
+	ui._input(shift)
+	_assert_eq(baseline_index, int(ui.get("_line_index")), "Shift alone does not advance dialogue")
+	# Ctrl alone should not advance.
+	var ctrl := InputEventKey.new()
+	ctrl.keycode = KEY_CTRL
+	ctrl.pressed = true
+	ctrl.echo = false
+	ui._input(ctrl)
+	_assert_eq(baseline_index, int(ui.get("_line_index")), "Ctrl alone does not advance dialogue")
+	# Echo events (held-key repeat) should also be ignored so that holding
+	# a key down does not race past the player's read.
+	var echo := InputEventKey.new()
+	echo.keycode = KEY_A
+	echo.pressed = true
+	echo.echo = true
+	ui._input(echo)
+	_assert_eq(baseline_index, int(ui.get("_line_index")), "key echo (held repeat) does not advance dialogue")
+	ui.queue_free()
+
 
 
 func _new_equipment_for_test() -> Object:
