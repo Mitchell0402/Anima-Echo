@@ -13,8 +13,6 @@ const STORY_TASKS_PER_DAY: int = 2
 var _story_unlock_queue: Array[String] = []  # pending story task IDs waiting to be unlocked
 var _last_queue_day: int = -1                 # day_count when queue was last processed
 
-signal story_tasks_all_done
-
 
 func _init(game_catalog: Object = null, transaction_service: Object = null, game_event_bus: Object = null) -> void:
 	catalog = game_catalog

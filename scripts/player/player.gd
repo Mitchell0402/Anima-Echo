@@ -17,16 +17,18 @@ const ATTACK_COOLDOWN: float = 0.4
 const ATTACK_DURATION: float = 0.25
 const ATTACK_RANGE: float = 80.0
 const ATTACK_ANGLE: float = 120.0
-const ATTACK_DAMAGE: float = 3.0
-const ATTACK_KNOCKBACK: float = 60.0
+const ATTACK_DAMAGE: float = 12.0
+const ATTACK_KNOCKBACK: float = 300.0
+const ATTACK_DASH_SPEED: float = 150.0   # 攻击时的冲刺速度
 var _attack_cooldown: float = 0.0
-var _attack_timer: float = 0.0
 var _last_aim_direction: Vector2 = Vector2.DOWN
-var _attack_hitbox: Area2D = null
+var _hit_enemies: Array = []  # 当前攻击已命中的敌人，防止重复扣血
 
-# 受击击退
+# 受击击退 & 无敌
 var _knockback: Vector2 = Vector2.ZERO
 var _hurt_timer: float = 0.0
+const INVINCIBLE_DURATION: float = 0.3
+var _invincible_timer: float = 0.0
 
 # 掉落用宝石场景（按等级）
 const GEM_SCENES := {
@@ -42,6 +44,14 @@ signal died
 
 func _ready() -> void:
 	current_health = max_health
+	# 配置攻击检测区域（scene 中已有的 attack_range Area2D）
+	var ar: Area2D = get_node_or_null("attack_range")
+	if ar:
+		ar.collision_layer = 0
+		ar.collision_mask = 2   # enemy layer
+		ar.monitoring = false
+		if not ar.body_entered.is_connected(_on_attack_body_entered):
+			ar.body_entered.connect(_on_attack_body_entered)
 	# 地牢模式：跨场景恢复血量
 	var rt: Node = get_node_or_null("/root/GameRuntime")
 	if rt and rt.get("dungeon_current_room") != null:
@@ -91,24 +101,27 @@ func exit_hidden() -> void:
 		state = State.FREE
 
 # ---- 受击 / 击退 ----
-## 被攻击：躲藏/死亡中免疫；否则打断当前状态进入 HURT，存储击退向量并随机掉落一件物品。
+## 被攻击：躲藏/死亡/无敌中免疫；否则打断当前状态进入 HURT，存储击退向量并随机掉落一件物品。
 func take_hit(source_pos: Vector2, force: float, duration: float = 0.35) -> void:
 	if state == State.HIDDEN or state == State.DEAD:
+		return
+	if _invincible_timer > 0.0:
 		return
 	# 被攻击时清除攻击状态
 	if state == State.ATTACK:
 		_end_attack()
 	state = State.HURT
 	_hurt_timer = duration
+	_invincible_timer = INVINCIBLE_DURATION
 	var away: Vector2 = (global_position - source_pos)
 	if away.length() < 0.01:
 		away = Vector2.DOWN
-	_knockback = away.normalized() * force
+	_knockback = away.normalized() * force * 1.5
 	_drop_random_item()
 
-## 扣血：死亡后免疫；归零触发 die()。
+## 扣血：无敌/死亡中免疫；归零触发 die()。
 func take_damage(amount: float) -> void:
-	if state == State.DEAD:
+	if state == State.DEAD or _invincible_timer > 0.0:
 		return
 	current_health = max(0.0, current_health - amount)
 	damaged.emit(amount)
@@ -126,7 +139,7 @@ func die() -> void:
 		return
 	# 结束当前挖矿/攻击，再置死亡冻结
 	if state == State.MINING or state == State.ATTACK:
-		_destroy_attack_hitbox()
+		_end_attack()
 		state = State.FREE
 	state = State.DEAD
 	velocity = Vector2.ZERO
@@ -226,12 +239,13 @@ func force_free() -> void:
 # ---- 攻击系统 ----
 
 func _process(delta: float) -> void:
-	if state == State.ATTACK:
-		_attack_timer -= delta
-		if _attack_timer <= 0.0:
-			_end_attack()
-	elif _attack_cooldown > 0.0:
+	# 攻击冷却（无论当前状态都递减）
+	if _attack_cooldown > 0.0:
 		_attack_cooldown -= delta
+
+	# 无敌计时
+	if _invincible_timer > 0.0:
+		_invincible_timer -= delta
 
 	# 记录瞄准方向（玩家最后移动方向）
 	var input_dir := Input.get_vector("left", "right", "up", "down")
@@ -249,83 +263,77 @@ func _input(event: InputEvent) -> void:
 
 func _start_attack() -> void:
 	state = State.ATTACK
-	_attack_timer = ATTACK_DURATION
 	_attack_cooldown = ATTACK_COOLDOWN
-	velocity = Vector2.ZERO
+	velocity = _last_aim_direction * ATTACK_DASH_SPEED
 
 	# 动画
 	var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D")
+	var has_anim: bool = false
 	if sprite:
-		var dir: String = "f"
+		var dir: String = "l"
 		var angle := _last_aim_direction.angle()
 		if angle >= -PI / 4 and angle < PI / 4: dir = "r"
-		elif angle >= PI / 4 and angle < 3 * PI / 4: dir = "b"
-		elif angle <= -PI / 4 and angle > -3 * PI / 4: dir = "l"
+		elif angle >= PI / 4 and angle < 3 * PI / 4: dir = "f"
+		elif angle <= -PI / 4 and angle > -3 * PI / 4: dir = "b"
 		if sprite.sprite_frames and sprite.sprite_frames.has_animation("attack_" + dir):
+			has_anim = true
+			if sprite.animation_finished.is_connected(_on_attack_animation_finished):
+				sprite.animation_finished.disconnect(_on_attack_animation_finished)
+			sprite.animation_finished.connect(_on_attack_animation_finished, CONNECT_ONE_SHOT)
 			sprite.play("attack_" + dir)
 		else:
 			sprite.modulate = Color(1.2, 1.0, 0.8)
 
-	# 攻击碰撞盒
-	_create_attack_hitbox()
-	_perform_attack_damage()
+	# 没有攻击动画时用 timer 兜底结束
+	if not has_anim:
+		get_tree().create_timer(ATTACK_DURATION).timeout.connect(_end_attack)
+
+	# 攻击检测：持续整个攻击动画期间
+	var ar: Area2D = get_node_or_null("attack_range")
+	if ar:
+		_hit_enemies.clear()
+		ar.position = _last_aim_direction * (ATTACK_RANGE * 0.5)
+		ar.monitoring = true
+
+
+func _on_attack_animation_finished() -> void:
+	_end_attack()
 
 
 func _end_attack() -> void:
-	_destroy_attack_hitbox()
+	velocity = Vector2.ZERO
+	# 关闭攻击检测
+	var ar: Area2D = get_node_or_null("attack_range")
+	if ar:
+		ar.monitoring = false
+
 	var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D")
 	if sprite:
 		sprite.modulate = Color.WHITE
 	if state == State.ATTACK:
 		state = State.FREE
+	# 通知移动控制器刷新动画状态
+	var mc: Node = get_node_or_null("MoveController")
+	if mc and mc.has_method("on_attack_ended"):
+		mc.on_attack_ended()
 
 
-func _create_attack_hitbox() -> void:
-	if _attack_hitbox != null:
+## 攻击动画持续期间，任何敌人进入 attack_range 都会被命中（每刀每个敌人只命中一次）
+func _on_attack_body_entered(body: Node2D) -> void:
+	if state != State.ATTACK:
 		return
-	_attack_hitbox = Area2D.new()
-	_attack_hitbox.name = "AttackHitbox"
-	_attack_hitbox.collision_layer = 0
-	_attack_hitbox.collision_mask = 4  # enemy layer
-
-	var col := CollisionShape2D.new()
-	# 使用圆形近似扇形
-	var shape := CircleShape2D.new()
-	shape.radius = ATTACK_RANGE
-	col.shape = shape
-	_attack_hitbox.add_child(col)
-
-	_attack_hitbox.global_position = global_position + _last_aim_direction * (ATTACK_RANGE * 0.5)
-	add_child(_attack_hitbox)
-
-	# 短暂存在（0.1s）
-	get_tree().create_timer(0.1).timeout.connect(_destroy_attack_hitbox)
-
-
-func _destroy_attack_hitbox() -> void:
-	if _attack_hitbox != null and is_instance_valid(_attack_hitbox):
-		_attack_hitbox.queue_free()
-	_attack_hitbox = null
-
-
-func _perform_attack_damage() -> void:
-	if _attack_hitbox == null:
+	if body == self:
+		return
+	if _hit_enemies.has(body):
+		return
+	if not body.has_method("take_damage"):
 		return
 
-	# 查找范围内所有敌人
-	var bodies: Array = _attack_hitbox.get_overlapping_bodies()
-	for body in bodies:
-		if body == self:
-			continue
-		if body.has_method("take_damage"):
-			var dist: float = global_position.distance_to(body.global_position)
-			# 角度检查：只在扇形内
-			var to_enemy: Vector2 = (body.global_position - global_position).normalized()
-			var angle_diff: float = _last_aim_direction.angle_to(to_enemy)
-			if abs(angle_diff) < deg_to_rad(ATTACK_ANGLE / 2.0):
-				var kb_dir: Vector2 = to_enemy
-				body.take_damage(ATTACK_DAMAGE)
-				if body.has_method("apply_knockback"):
-					body.apply_knockback(kb_dir, ATTACK_KNOCKBACK)
-		if body.has_method("push_back"):
-			body.push_back(ATTACK_KNOCKBACK)
+	# 扇形角度检查
+	var to_enemy: Vector2 = (body.global_position - global_position).normalized()
+	var angle_diff: float = _last_aim_direction.angle_to(to_enemy)
+	if abs(angle_diff) < deg_to_rad(ATTACK_ANGLE / 2.0):
+		_hit_enemies.append(body)
+		body.take_damage(ATTACK_DAMAGE)
+		if body.has_method("apply_knockback"):
+			body.apply_knockback(to_enemy, ATTACK_KNOCKBACK)

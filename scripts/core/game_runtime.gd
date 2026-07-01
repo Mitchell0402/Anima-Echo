@@ -217,8 +217,8 @@ func is_in_mine_scene() -> bool:
 	var current: Node = tree.current_scene
 	if current == null:
 		return false
-	var name: String = str(current.name)
-	return name == MINE_SCENE_NAME or name == "DungeonRoom"
+	var scene_name: String = str(current.name)
+	return scene_name == MINE_SCENE_NAME or scene_name == "DungeonRoom"
 
 
 func add_mine_tickets(n: int) -> void:

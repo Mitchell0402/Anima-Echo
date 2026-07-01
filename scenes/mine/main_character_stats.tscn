@@ -15,6 +15,9 @@
 radius = 50.0
 height = 204.0
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_j4sjc"]
+size = Vector2(414, 338)
+
 [node name="MainCharacter" type="CharacterBody2D" unique_id=1349554660 groups=["player"]]
 z_index = 2
 scale = Vector2(0.5, 0.5)
@@ -49,7 +52,7 @@ drag_bottom_margin = 0.1
 position = Vector2(-4, -92)
 scale = Vector2(8, 8)
 sprite_frames = ExtResource("5_myn43")
-animation = &"death_r"
+animation = &"attack_r"
 
 [node name="HealthBar" type="Node2D" parent="." unique_id=138953096]
 position = Vector2(0, -340)
@@ -82,3 +85,9 @@ script = ExtResource("10_weightbar")
 
 [node name="TrailEffect" type="Node2D" parent="." unique_id=2117173799]
 script = ExtResource("11_trail")
+
+[node name="attack_range" type="Area2D" parent="." unique_id=35666180]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="attack_range" unique_id=1923883822]
+position = Vector2(0, -90)
+shape = SubResource("RectangleShape2D_j4sjc")

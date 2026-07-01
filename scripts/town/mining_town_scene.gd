@@ -35,7 +35,6 @@ var _dialogue_npc_id := ""  # NPC id whose dialogue is currently open
 var _popup_npc_id := ""  # NPC id whose interaction popup is currently open
 var _dialogues_cache: Dictionary = {}
 var _shown_daily_indices: Dictionary = {}  # "npcId_stage" -> int (last index shown)
-var _last_narrative_stage: int = 0
 var _task_board: Node2D
 var _board_prompt: Label
 var _mine_entrance: Node
@@ -539,15 +538,15 @@ func _get_task_service_and_build() -> void:
 	# List deliverable tasks first (clickable), then pending (greyed).
 	var deliverable: Array = task_service.list_deliverable_tasks() if task_service.has_method("list_deliverable_tasks") else []
 	for task in deliverable:
-		var name: String = str(task.get("name", ""))
+		var task_name: String = str(task.get("name", ""))
 		var description: String = str(task.get("description", ""))
-		var label: String = "[交付] %s — %s" % [name, description]
+		var label: String = "[交付] %s — %s" % [task_name, description]
 		var bound: Callable = Callable(self, "_deliver_task").bind(str(task.get("id", "")))
 		_add_button(label, bound)
 	var pending: Array = task_service.list_pending_tasks() if task_service.has_method("list_pending_tasks") else []
 	for task in pending:
-		var name: String = str(task.get("name", ""))
-		var label: String = "[未满足] %s" % name
+		var task_name: String = str(task.get("name", ""))
+		var label: String = "[未满足] %s" % task_name
 		var greyed: Button = _add_button(label, Callable())
 		greyed.disabled = true
 
@@ -631,7 +630,7 @@ func _enter_mine(difficulty: int = 1) -> void:
 	if _runtime != null and _runtime.has_method("begin_mine_run"):
 		_runtime.begin_mine_run()
 
-	# 将难度存入 GameRuntime 供 dungeon_run 读取
+	# 将难度存入 GameRuntime 供 dungeon_room 读取
 	if _runtime.has_method("set_pending_mine_difficulty"):
 		_runtime.set_pending_mine_difficulty(difficulty)
 
@@ -1162,7 +1161,7 @@ func _refresh_task_panel() -> void:
 		var objectives: Array = task.get("objectives", [])
 		for obj_variant in objectives:
 			var obj: Dictionary = obj_variant
-			var obj_type: String = str(obj.get("type", ""))
+			var _obj_type: String = str(obj.get("type", ""))
 			var obj_id: String = str(obj.get("id", obj.get("event", "")))
 			var target: int = int(obj.get("count", obj.get("target", 1)))
 			var current: int = int(progress.get(obj_id, 0))
@@ -1763,7 +1762,7 @@ func _open_equipment_shop() -> void:
 			var greyed2: Button = _add_button(label_text, Callable())
 			greyed2.disabled = true
 		else:
-			var btn: Button = _add_button("购买 > " + label_text, Callable(self, "_buy_equipment").bind(eid, cost))
+			var _btn: Button = _add_button("购买 > " + label_text, Callable(self, "_buy_equipment").bind(eid, cost))
 	if all.is_empty():
 		_add_button("（暂无可用装备）", Callable())
 	_add_button("返回", Callable(self, "_open_popup").bind("blacksmith"))
@@ -1781,8 +1780,8 @@ func _buy_equipment(eid: String, cost: int) -> void:
 		_show_toast(str(result.get("error", "购买失败")))
 		return
 	wallet.spend_currency(cost)
-	var name: String = str(eq.get_equip_name(eid))
-	_show_toast("购买了（%s）！已自动装备。" % name)
+	var eq_name: String = str(eq.get_equip_name(eid))
+	_show_toast("购买了（%s）！已自动装备。" % eq_name)
 	_refresh_hud("")
 	_open_equipment_shop()
 

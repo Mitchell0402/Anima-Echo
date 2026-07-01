@@ -33,7 +33,7 @@ func _on_body_entered(body: Node2D) -> void:
 
 func _collect() -> void:
 	print("[Gem] 💎 原石被收集！价值: ", gem_value)
-	queue_free()
+	call_deferred("queue_free")
 
 func _spawn_animation() -> void:
 	scale = Vector2(0.3, 0.3)

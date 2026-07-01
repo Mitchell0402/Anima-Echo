@@ -11,7 +11,7 @@ var _shoot_interval: float = 2.0
 
 
 func _ready() -> void:
-	max_health = 3.0
+	max_health = 36.0
 	contact_damage = 0.0          # 无接触伤害
 	move_speed = 100.0
 	knockback_resistance = 0.3
@@ -67,7 +67,7 @@ func _shoot_at_player(_player: CharacterBody2D, dir: Vector2) -> void:
 			body.take_damage(PROJECTILE_DAMAGE)
 			if body.has_method("take_hit"):
 				body.take_hit(proj.global_position, 150.0)
-		proj.queue_free()
+		proj.call_deferred("queue_free")
 	)
 
 	get_parent().add_child(proj)

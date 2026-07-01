@@ -125,7 +125,6 @@ func _make_walls(connections: Array, _room_type: int) -> void:
 	var hw: float = ROOM_W / 2.0
 	var hh: float = ROOM_H / 2.0
 	var wt: float = WALL_THICKNESS
-	var ds: float = DOOR_SIZE / 2.0
 
 	var cdirs: Array = []
 	for conn in connections:
@@ -354,10 +353,10 @@ func _create_minimap(current_cell: Vector2i) -> void:
 	var map_rows := max_y - min_y + 1
 	var total_w := map_cols * MINIMAP_CELL
 	var total_h := map_rows * MINIMAP_CELL
-	var scale := minf(MINIMAP_W / total_w, MINIMAP_H / total_h)
-	var draw_w := total_w * scale
-	var draw_h := total_h * scale
-	var cell_sz := MINIMAP_CELL * scale
+	var map_scale := minf(MINIMAP_W / total_w, MINIMAP_H / total_h)
+	var draw_w := total_w * map_scale
+	var draw_h := total_h * map_scale
+	var cell_sz := MINIMAP_CELL * map_scale
 
 	# CanvasLayer 让地图不被相机移动影响
 	var cl := CanvasLayer.new()
@@ -399,7 +398,7 @@ func _create_minimap(current_cell: Vector2i) -> void:
 		"current_cell": current_cell,
 		"min_x": min_x, "min_y": min_y,
 		"cell_sz": cell_sz,
-		"scale": scale,
+		"scale": map_scale,
 		"draw_w": draw_w,
 		"draw_h": draw_h,
 	}
@@ -559,8 +558,11 @@ const ENEMY_SCENES := {
 		"scenes": [
 			"res://scenes/mine/enemies/mine_fly.tscn",
 			"res://scenes/mine/enemies/rubble_gaper.tscn",
+			"res://scenes/mine/enemies/blast_crystal.tscn",
+			"res://scenes/mine/enemies/crystal_trite.tscn",
+			"res://scenes/mine/enemies/specter_miner.tscn",
 		],
-		"count": [3, 5],
+		"count": [3, 6],
 	},
 	2: {
 		"scenes": [
@@ -601,6 +603,12 @@ const ENEMY_SCENES := {
 	},
 }
 
+const BOSS_SCENES := {
+	"res://scenes/mine/bosses/mine_core_golem.tscn": [1, 2],
+	"res://scenes/mine/bosses/crystal_broodmother.tscn": [3, 4],
+	"res://scenes/mine/bosses/abyss_gazer.tscn": [5],
+}
+
 const ORE_SCENES := {
 	"small": "res://scenes/mine/small_mine.tscn",
 	"deep": "res://scenes/mine/deep_mine.tscn",
@@ -609,6 +617,11 @@ const ORE_SCENES := {
 
 func _spawn_enemies(room_type: int) -> int:
 	var diff: int = _runtime.dungeon_difficulty
+
+	# Boss 房间：刷 Boss
+	if room_type == 2:
+		return _spawn_boss(diff)
+
 	var cfg: Dictionary = ENEMY_SCENES.get(diff, ENEMY_SCENES[1])
 	var pool: Array = cfg["scenes"]
 	var crange: Array = cfg["count"]
@@ -635,6 +648,83 @@ func _spawn_enemies(room_type: int) -> int:
 	return spawned
 
 
+func _spawn_boss(diff: int) -> int:
+	var scene_path: String = ""
+	for path in BOSS_SCENES:
+		if BOSS_SCENES[path].has(diff):
+			scene_path = path
+			break
+
+	if scene_path.is_empty():
+		var candidates: Array = []
+		for path in BOSS_SCENES:
+			var ad: Array = BOSS_SCENES[path]
+			if diff >= ad[0] and diff <= ad[-1]:
+				candidates.append(path)
+		if candidates.is_empty():
+			candidates = BOSS_SCENES.keys()
+		scene_path = candidates[randi() % candidates.size()]
+
+	var scene: PackedScene = load(scene_path)
+	if scene == null:
+		return 0
+	var boss: Node = scene.instantiate()
+	boss.global_position = Vector2.ZERO
+	if boss.has_signal("died"):
+		boss.died.connect(_on_boss_died)
+	add_child(boss)
+	_create_boss_hp_bar(boss)
+	return 1
+
+
+func _create_boss_hp_bar(boss: Node) -> void:
+	var bar_bg := ColorRect.new()
+	bar_bg.name = "BossHPBg"
+	bar_bg.size = Vector2(200, 12)
+	bar_bg.position = Vector2(-100, -ROOM_H / 2.0 + 40)
+	bar_bg.color = Color(0.2, 0.2, 0.2, 0.8)
+	add_child(bar_bg)
+
+	var bar_fg := ColorRect.new()
+	bar_fg.name = "BossHPFg"
+	bar_fg.size = Vector2(200, 12)
+	bar_fg.position = Vector2(-100, -ROOM_H / 2.0 + 40)
+	bar_fg.color = Color(1.0, 0.2, 0.2, 0.9)
+	add_child(bar_fg)
+
+	# 标签
+	var lbl := Label.new()
+	lbl.name = "BossHPLabel"
+	lbl.text = str(boss.name) if boss else "Boss"
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.position = Vector2(-100, -ROOM_H / 2.0 + 54)
+	lbl.size = Vector2(200, 20)
+	lbl.add_theme_color_override("font_color", Color(1.0, 0.6, 0.2, 0.9))
+	lbl.add_theme_font_size_override("font_size", 12)
+	add_child(lbl)
+
+	# 定时更新血条
+	_update_boss_hp_bar(boss)
+
+
+func _update_boss_hp_bar(boss: Node) -> void:
+	if not is_instance_valid(boss):
+		return
+	var fg: ColorRect = get_node_or_null("BossHPFg")
+	if fg == null:
+		return
+	var hp: float = 0.0
+	var max_hp: float = 1.0
+	if boss.has_method("_get_health"):
+		hp = boss._get_health()
+	elif boss.get("max_health") != null:
+		max_hp = float(boss.get("max_health"))
+		if boss.get("current_health") != null:
+			hp = float(boss.get("current_health"))
+	fg.size.x = 200.0 * max(0.0, hp / max_hp)
+	get_tree().create_timer(0.1).timeout.connect(_update_boss_hp_bar.bind(boss))
+
+
 func _on_enemy_died() -> void:
 	var count: int = get_meta("enemy_count", 0) - 1
 	set_meta("enemy_count", count)
@@ -650,13 +740,89 @@ func _on_room_cleared() -> void:
 		rt.mark_dungeon_room_cleared(cell)
 
 	_lock_doors(false)
-	_spawn_ore_nodes()
+	call_deferred("_spawn_ore_nodes")
 
 	print("[DungeonRoom] 房间已清除: ", cell)
 
 
+func _on_boss_died() -> void:
+	var count: int = get_meta("enemy_count", 0) - 1
+	set_meta("enemy_count", count)
+
+	if count <= 0:
+		_on_boss_room_cleared()
+
+
+func _on_boss_room_cleared() -> void:
+	var cell: Vector2i = get_meta("room_cell", Vector2i.ZERO)
+	var rt: Node = get_node_or_null("/root/GameRuntime")
+	if rt and cell != Vector2i.ZERO:
+		rt.mark_dungeon_room_cleared(cell)
+
+	# Boss 房间不锁门（本来就没锁），但清除后显示
+	print("[DungeonRoom] Boss 房间已清除: ", cell)
+
+	# Boss 奖励（deferred 以避免物理回调中 add_child）
+	call_deferred("_spawn_boss_ore_nodes")
+	call_deferred("_make_boss_exit")
+
+	# 清理血条（deferred）
+	var fg: Node = get_node_or_null("BossHPFg")
+	if fg: fg.call_deferred("queue_free")
+	var bg: Node = get_node_or_null("BossHPBg")
+	if bg: bg.call_deferred("queue_free")
+	var lbl: Node = get_node_or_null("BossHPLabel")
+	if lbl: lbl.call_deferred("queue_free")
+
+
+func _spawn_boss_ore_nodes() -> void:
+	var count: int = 3
+	var center := Vector2.ZERO
+
+	for _i in range(count):
+		var pos: Vector2 = center + Vector2(randf_range(-160, 160), randf_range(-100, 100))
+		# Boss 房间全用深层矿
+		var scene: PackedScene = load(ORE_SCENES["deep"])
+		if scene == null:
+			continue
+		var ore: Node = scene.instantiate()
+		ore.global_position = pos
+		add_child(ore)
+
+
+func _make_boss_exit() -> void:
+	var area := Area2D.new()
+	area.name = "BossMinecartExit"
+	area.position = Vector2(0, ROOM_H / 2.0 - 48)
+
+	var col := CollisionShape2D.new()
+	var c := CircleShape2D.new()
+	c.radius = 48.0
+	col.shape = c
+	area.add_child(col)
+
+	var spr := Sprite2D.new()
+	var img := Image.create(48, 48, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0.8, 0.3, 0.1, 0.9))
+	spr.texture = ImageTexture.create_from_image(img)
+	area.add_child(spr)
+
+	var lbl := Label.new()
+	lbl.text = "按E返回城镇"
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.position = Vector2(-60, 36)
+	lbl.size = Vector2(120, 20)
+	lbl.add_theme_color_override("font_color", Color.WHITE)
+	lbl.add_theme_font_size_override("font_size", 10)
+	area.add_child(lbl)
+
+	area.body_entered.connect(_on_exit_entered)
+	area.body_exited.connect(_on_exit_exited)
+	add_child(area)
+
+
 func _spawn_ore_nodes() -> void:
-	var count: int = randi_range(1, 3)
+	var count: int = 1
 	var center := Vector2.ZERO
 
 	for _i in range(count):
@@ -701,4 +867,8 @@ func _on_door_entered(target_dir: Vector2i) -> void:
 
 	rt.dungeon_current_room = target
 	rt.dungeon_entrance_dir = target_dir
+	call_deferred("_do_change_scene")
+
+
+func _do_change_scene() -> void:
 	get_tree().change_scene_to_file("res://scenes/mine/dungeon_room.tscn")

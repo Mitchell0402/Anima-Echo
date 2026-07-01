@@ -10,7 +10,7 @@ var _warn_timer: float = 0.0
 
 
 func _ready() -> void:
-	max_health = 2.0
+	max_health = 30.0
 	contact_damage = 15.0
 	move_speed = 80.0
 	knockback_resistance = 0.5

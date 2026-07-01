@@ -3,14 +3,14 @@ extends CharacterBody2D
 ## 敌人基类 — 所有 5 种小怪 + Boss 的公共基础。
 ## 子类覆写 _update_ai(delta) 定义行为。
 
-@export var max_health: float = 2.0
+@export var max_health: float = 24.0
 @export var move_speed: float = 100.0
 @export var contact_damage: float = 10.0
 @export var knockback_resistance: float = 0.3
 @export var enemy_color: Color = Color.RED
 @export var enemy_size: Vector2 = Vector2(32, 32)
 
-var current_health: float = 2.0
+var current_health: float = 24.0
 var _knockback: Vector2 = Vector2.ZERO
 var _flash_timer: float = 0.0
 var _stun_timer: float = 0.0
@@ -35,7 +35,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	# 击退衰减
 	if _knockback.length() > 0.1:
-		_knockback = _knockback.move_toward(Vector2.ZERO, 400.0 * delta)
+		_knockback = _knockback.move_toward(Vector2.ZERO, 200.0 * delta)
 		velocity = _knockback
 		move_and_slide()
 		return
@@ -109,7 +109,7 @@ func _spawn_coin_drop() -> void:
 		pass
 	# 直接加铜板到 wallet
 	if rt and rt.wallet:
-		rt.wallet.add_coins(coins)
+		rt.wallet.add_currency(coins)
 
 
 func _update_ai(_delta: float) -> void:

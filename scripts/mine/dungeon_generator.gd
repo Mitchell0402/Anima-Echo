@@ -26,10 +26,10 @@ class DungeonLayout:
 		return result
 
 
-static func generate(combat_rooms: int, seed: int = -1) -> DungeonLayout:
+static func generate(combat_rooms: int, rng_seed: int = -1) -> DungeonLayout:
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
-	if seed >= 0:
-		rng.seed = seed
+	if rng_seed >= 0:
+		rng.seed = rng_seed
 	else:
 		rng.randomize()
 

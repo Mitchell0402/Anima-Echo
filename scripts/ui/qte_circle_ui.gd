@@ -40,7 +40,7 @@ func _process(delta: float) -> void:
 	queue_redraw()
 	emit_signal("pointer_moved", _current_angle_deg)
 	# Auto-fail if the pointer crosses out of the success zone.
-	var zone_end: float = fmod(_success_zone_start_deg + _success_zone_size_deg, 360.0)
+	var _zone_end: float = fmod(_success_zone_start_deg + _success_zone_size_deg, 360.0)
 	# We only detect "just passed zone_end" by tracking the previous angle.
 	# Simpler: stop the QTE if the pointer has gone more than 1 full
 	# rotation without the player calling success. The callers below
