@@ -86,13 +86,16 @@ func preview_move(direction: Vector2, delta: float, is_running: bool = false) ->
 	direction = _to_cardinal_direction(direction)
 	if direction == Vector2.ZERO:
 		_set_idle_frame()
+		SfxSystem.stop_walk()
 		return false
 	facing = _direction_to_facing(direction)
 	_advance_move_animation(delta, is_running)
 	var current_speed: float = run_speed if is_running else speed
 	var target := position + direction * current_speed * delta
 	if walkable_map != null and not walkable_map.is_walkable(target):
+		SfxSystem.stop_walk()
 		return false
+	SfxSystem.play_walk(is_running)
 	position = target
 	moved.emit(position)
 	return true
@@ -159,6 +162,7 @@ func _advance_move_animation(delta: float, is_running: bool) -> void:
 func _set_idle_frame() -> void:
 	_animation_elapsed = 0.0
 	_animation_frame = 0
+	SfxSystem.stop_walk()
 	if _animated_sprite != null:
 		_play_animated_state("idle")
 		return

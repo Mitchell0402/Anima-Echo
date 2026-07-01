@@ -25,6 +25,7 @@ MCPInputService="*res://addons/godot_mcp/mcp_input_service.gd"
 MCPGameInspector="*res://addons/godot_mcp/mcp_game_inspector_service.gd"
 StabilitySystem="*res://scripts/core/stability_system.gd"
 DayNightCycle="*res://scripts/core/day_night_cycle.gd"
+SfxSystem="*res://scripts/core/sfx_system.gd"
 
 [display]
 

@@ -32,18 +32,21 @@ func _physics_process(delta: float) -> void:
 		_play_hurt_animation(body.hurt_velocity())
 		body.tick_hurt(delta, HURT_DECEL)
 		_stop_trail()
+		SfxSystem.stop_walk()
 		return
 
 	# 死亡：停止移动、不覆盖动画（保留 death 动画播放）
 	if body.has_method("is_dead") and body.is_dead():
 		body.velocity = Vector2.ZERO
 		_stop_trail()
+		SfxSystem.stop_walk()
 		return
 
 	# 攻击中：只执行冲刺速度，不接受输入，动画由 player.gd 控制
 	if body.has_method("is_attacking") and body.is_attacking():
 		body.move_and_slide()
 		_stop_trail()
+		SfxSystem.stop_walk()
 		return
 
 	# 被锁定（挖矿/躲藏）时停止移动，但仍保持脚本运行
@@ -51,6 +54,7 @@ func _physics_process(delta: float) -> void:
 		body.velocity = Vector2.ZERO
 		handle_animation(Vector2.ZERO, false)
 		_stop_trail()
+		SfxSystem.stop_walk()
 		return
 
 	var input_dir := _to_cardinal_direction(Input.get_vector("left", "right", "up", "down"))
@@ -68,6 +72,12 @@ func _physics_process(delta: float) -> void:
 
 	body.move_and_slide()
 	handle_animation(input_dir, is_running)
+
+	# 行走音效
+	if input_dir != Vector2.ZERO:
+		SfxSystem.play_walk(is_running)
+	else:
+		SfxSystem.stop_walk()
 
 	# 拖尾特效：移动时发射粒子，静止时停止
 	if input_dir != Vector2.ZERO:

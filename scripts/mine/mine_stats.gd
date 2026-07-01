@@ -105,6 +105,7 @@ func _spawn_gems_for_segment(segment_index: int) -> void:
 
 func _spawn_single_gem(_segment_index: int, gem_index: int) -> void:
 	var gem_level = _roll_gem_level()
+	SfxSystem.play_stone_level(gem_level)
 	var gem_scene = _get_gem_scene(gem_level)
 	
 	if not gem_scene:
