@@ -160,6 +160,7 @@ func _start_mining() -> void:
 		progress_ui.setup(stats.total_segments)
 		progress_ui.show_bar()
 	print("[Mine] 开始开采 | 进度: %.2f/%.2f" % [stats.current_progress, stats.get_max_progress()])
+	SfxSystem.play_mining()
 	mining_started.emit()
 
 
@@ -174,6 +175,7 @@ func _stop_mining(should_rollback: bool) -> void:
 	if progress_ui:
 		progress_ui.hide_bar()
 	_release_player()
+	SfxSystem.stop_mining()
 	mining_stopped.emit(should_rollback)
 
 
@@ -279,6 +281,7 @@ func _on_mining_completed() -> void:
 	if qte_ui and qte_ui.has_method("hide_qte"):
 		qte_ui.hide_qte()
 	_release_player()
+	SfxSystem.stop_mining()
 	if progress_ui:
 		progress_ui.hide_bar()
 	get_parent().call_deferred("queue_free")

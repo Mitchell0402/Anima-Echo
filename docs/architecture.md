@@ -32,6 +32,7 @@ The display system is a strict three-layer model. See [decisions/0004-display-sy
 - `ItemDatabase`: compatibility item icon, stack limit, display-name, description, and stack-key helper for the hotbar/inventory UI. Stack limits and descriptions are read from `GameRuntime.catalog` (not held locally).
 - `StabilitySystem`: town stability 0–100. Selling star crystal → -15, gifting → +15, gifting normal → +2. Daily decay 3. Affects enemy spawn/detection range and town visual tint.
 - `DayNightCycle`: day counter + time period (上午/下午/傍晚). Mine→town return advances time: 上午→下午→傍晚. 2 mine entries per day. 傍晚 closes mine. Sleep→next morning resets entries and refreshes daily tasks.
+- `SfxSystem`: centralized audio playback for mining loop, walk/run footsteps, stone-level drop sounds, mine scene background, and random monster growls. Auto-detects mine scenes via scene path markers to start/stop ambient audio. Script at `scripts/core/sfx_system.gd`.
 - `MCPScreenshot`, `MCPInputService`, `MCPGameInspector`: Godot MCP helper autoloads from `addons/godot_mcp`.
 
 ## Godot MCP Tooling Boundary
@@ -89,7 +90,7 @@ Because `GameRuntime` is an autoload, hotbar state, warehouse state, wallet bala
 
 ## Directory Boundaries
 
-- `scripts/core`: runtime state, catalog, wallet, hotbar, warehouse, transaction boundary, event bus, weight system, oxygen system, and noise system.
+- `scripts/core`: runtime state, catalog, wallet, hotbar, warehouse, transaction boundary, event bus, weight system, oxygen system, noise system, and audio/sfx system.
 - `scripts/economy`: identification, shop, negotiation, and task rules.
 - `scripts/items`: item database, gem pickup behavior, and hotbar compatibility.
 - `scripts/player`: mine player state, stats, movement, and death handling.

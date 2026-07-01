@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://51fe3aspqovy"
+path="res://.godot/imported/原石Level 2.wav-24060bd4591c28778548f16cb7b71907.sample"
+
+[deps]
+
+source_file="res://assets/sfx/原石Level 2.wav"
+dest_files=["res://.godot/imported/原石Level 2.wav-24060bd4591c28778548f16cb7b71907.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
