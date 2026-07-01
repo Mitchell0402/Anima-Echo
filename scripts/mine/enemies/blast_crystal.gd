@@ -9,7 +9,7 @@ var _explode_damage: float = 20.0
 
 
 func _ready() -> void:
-	max_health = 1.0
+	max_health = 15.0
 	contact_damage = 0.0       # 不自爆时无接触伤害
 	move_speed = 180.0
 	knockback_resistance = 0.1

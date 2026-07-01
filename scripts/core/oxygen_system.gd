@@ -24,14 +24,16 @@ signal oxygen_depleted
 
 var current_oxygen: float = 100.0
 var _player: CharacterBody2D = null
-var _weight: Node = null
+## 负重系统已禁用
+## var _weight: Node = null
 var _last_scene_path: String = ""
 var _scene_active: bool = false
 var _was_depleted: bool = false
 
 
 func _ready() -> void:
-	_weight = get_node_or_null("/root/WeightSystem")
+	## 负重系统已禁用
+	## _weight = get_node_or_null("/root/WeightSystem")
 	current_oxygen = tank_capacity
 
 
@@ -62,7 +64,9 @@ func _process(delta: float) -> void:
 
 	# 正常消耗
 	var state_mult: float = _resolve_state_multiplier()
-	var weight_mult: float = _weight.get_oxygen_multiplier() if _weight else 1.0
+	## 负重氧气倍率已禁用，固定 1.0
+	## var weight_mult: float = _weight.get_oxygen_multiplier() if _weight else 1.0
+	var weight_mult: float = 1.0
 	var rate: float = base_rate * state_mult * weight_mult
 
 	current_oxygen = max(0.0, current_oxygen - rate * delta)

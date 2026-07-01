@@ -103,7 +103,7 @@ func _spawn_gems_for_segment(segment_index: int) -> void:
 	if gem_star_scene and randf() < star_geode_drop_rate:
 		_spawn_star_geode()
 
-func _spawn_single_gem(segment_index: int, gem_index: int) -> void:
+func _spawn_single_gem(_segment_index: int, gem_index: int) -> void:
 	var gem_level = _roll_gem_level()
 	var gem_scene = _get_gem_scene(gem_level)
 	

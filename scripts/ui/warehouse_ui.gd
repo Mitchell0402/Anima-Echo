@@ -124,7 +124,7 @@ func _build() -> void:
 	add_child(_panel)
 	# Title + grid + footer layout.
 	var root: VBoxContainer = VBoxContainer.new()
-	root.add_theme_constant_override("separation", PANEL_PADDING)
+	root.add_theme_constant_override("separation", int(PANEL_PADDING))
 	_panel.add_child(root)
 	var title: Label = Label.new()
 	title.text = "仓库"
@@ -299,11 +299,11 @@ func _on_slot_hover(slot: Panel) -> void:
 		return
 	var item: Dictionary = runtime.get("catalog").get_item(_hovered_item_id)
 	var db: Node = get_node_or_null("/root/ItemDatabase")
-	var name: String = str(item.get("name", _hovered_item_id))
+	var item_name: String = str(item.get("name", _hovered_item_id))
 	var description: String = ""
 	if db != null and db.has_method("get_description"):
 		description = db.get_description(_hovered_item_id)
-	_tooltip_name.text = name
+	_tooltip_name.text = item_name
 	_tooltip_desc.text = description
 	# Only sellable categories (mineral) show a base_price. Raw stones
 	# are not sold by any customer, so showing a price would be

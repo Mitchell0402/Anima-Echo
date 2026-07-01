@@ -104,7 +104,8 @@ func _collect() -> void:
 	
 	var player = target_player
 	if not player:
-		queue_free()
+		is_collected = true
+		call_deferred("queue_free")
 		return
 	
 	var inventory = player.get_node_or_null("InventoryManager")
@@ -140,7 +141,7 @@ func _collect() -> void:
 		print("[Gem] 💎 L%d 原石已收集！价值: %d" % [gem_level, gem_value])
 		if inventory != null:
 			print("[背包] 当前物品数: %d/%d" % [inventory.get_item_count(), inventory.MAX_SLOTS])
-		queue_free()
+		call_deferred("queue_free")
 	else:
 		is_flying_to_player = false
 		target_player = null

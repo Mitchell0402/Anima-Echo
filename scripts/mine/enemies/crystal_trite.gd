@@ -11,11 +11,10 @@ var _state_timer: float = 0.0
 var _jump_target: Vector2 = Vector2.ZERO
 var _jump_start: Vector2 = Vector2.ZERO
 var _jump_duration: float = 0.5
-var _projectile_scene: PackedScene = null
 
 
 func _ready() -> void:
-	max_health = 2.0
+	max_health = 24.0
 	contact_damage = 0.0
 	move_speed = 0.0
 	knockback_resistance = 0.2
@@ -88,7 +87,7 @@ func _spawn_projectile(pos: Vector2, dir: Vector2, speed: float, damage: float) 
 			body.take_damage(damage)
 			if body.has_method("take_hit"):
 				body.take_hit(proj.global_position, 200.0)
-		proj.queue_free()
+		proj.call_deferred("queue_free")
 	)
 
 	get_parent().add_child(proj)

@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://cmo8xv85twvp8"]
+
+[ext_resource type="Script" uid="uid://cbysv4p8nbf7w" path="res://scripts/mine/bosses/mine_core_golem.gd" id="1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_golem"]
+size = Vector2(48, 56)
+
+[node name="MineCoreGolem" type="CharacterBody2D" groups=["enemy"]]
+collision_layer = 2
+script = ExtResource("1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 0)
+shape = SubResource("RectangleShape2D_golem")

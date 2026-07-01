@@ -15,16 +15,17 @@ const OVERLOAD_MAX: float = 180.0
 var _bg: ColorRect
 var _fill: ColorRect
 var _label: Label
-var _weight: Node
 
 
 func _ready() -> void:
-	_weight = get_node_or_null("/root/WeightSystem")
-	_build()
-	if _weight:
-		if not _weight.weight_changed.is_connected(_on_weight_changed):
-			_weight.weight_changed.connect(_on_weight_changed)
-		_on_weight_changed(_weight.current_weight, HEAVY_MAX)
+	## 负重系统已禁用 — HUD 不显示
+	## _weight = get_node_or_null("/root/WeightSystem")
+	## _build()
+	## if _weight:
+	## 	if not _weight.weight_changed.is_connected(_on_weight_changed):
+	## 		_weight.weight_changed.connect(_on_weight_changed)
+	## 	_on_weight_changed(_weight.current_weight, HEAVY_MAX)
+	pass
 
 
 func _build() -> void:

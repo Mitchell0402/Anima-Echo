@@ -12,7 +12,7 @@ var _charge_dir: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
-	max_health = 1.0
+	max_health = 24.0
 	contact_damage = 10.0
 	move_speed = 120.0
 	knockback_resistance = 0.0

@@ -1,17 +1,16 @@
-[gd_scene load_steps=3 format=3 uid="uid://dgnrubble001"]
+[gd_scene format=3 uid="uid://dgnrubble001"]
 
-[ext_resource type="Script" path="res://scripts/mine/enemies/rubble_gaper.gd" id="1"]
+[ext_resource type="Script" uid="uid://pk7ug38guwdq" path="res://scripts/mine/enemies/rubble_gaper.gd" id="1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rubble"]
 size = Vector2(28, 36)
 
-[node name="RubbleGaper" type="CharacterBody2D" groups=["enemy"]]
+[node name="RubbleGaper" type="CharacterBody2D" unique_id=1922173365 groups=["enemy"]]
 collision_layer = 2
-collision_mask = 1
 script = ExtResource("1")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2053448382]
 position = Vector2(0, -4)
 shape = SubResource("RectangleShape2D_rubble")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1744765272]

@@ -272,7 +272,6 @@ func _deliver_task_items(request: Dictionary) -> Dictionary:
 		"requirements": requirements.duplicate(true),
 	})
 	return {"ok": true}
-	return {"ok": true}
 
 
 func _grant_task_rewards(request: Dictionary) -> Dictionary:

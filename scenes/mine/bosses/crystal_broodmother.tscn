@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://nw9yr26jqoek1"]
+
+[ext_resource type="Script" uid="uid://cp1xrgp5uov70" path="res://scripts/mine/bosses/crystal_broodmother.gd" id="1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_brood"]
+size = Vector2(44, 44)
+
+[node name="CrystalBroodmother" type="CharacterBody2D" groups=["enemy"]]
+collision_layer = 2
+script = ExtResource("1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 0)
+shape = SubResource("RectangleShape2D_brood")

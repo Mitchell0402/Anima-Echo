@@ -48,7 +48,7 @@ func reward_gift_star() -> void:
 func reward_gift_normal() -> void:
 	_modify(GENEROUS_BONUS, "normal_gift")
 
-func _modify(delta: float, reason: String) -> void:
+func _modify(delta: float, _reason: String) -> void:
 	var previous: float = stability
 	stability = clampf(previous + delta, MIN_STABILITY, MAX_STABILITY)
 	if stability != previous:

@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://lr8tv10psebmx"]
+
+[ext_resource type="Script" uid="uid://cvkj3hbgq5lnm" path="res://scripts/mine/bosses/abyss_gazer.gd" id="1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gazer"]
+size = Vector2(40, 40)
+
+[node name="AbyssGazer" type="CharacterBody2D" groups=["enemy"]]
+collision_layer = 2
+script = ExtResource("1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 0)
+shape = SubResource("RectangleShape2D_gazer")

@@ -8,11 +8,12 @@ extends Node
 @onready var stats: Node = $"../Stats"
 @onready var animated_sprite: AnimatedSprite2D = $"../AnimatedSprite2D"
 @onready var _noise: Node = get_node_or_null("/root/NoiseSystem")
-@onready var _weight: Node = get_node_or_null("/root/WeightSystem")
+## 负重系统已禁用
+## @onready var _weight: Node = get_node_or_null("/root/WeightSystem")
 @onready var _trail: Node = $"../TrailEffect"
 
 const WALK_SPEED_FACTOR: float = 0.5  # 默认步行速度相对于全速的比例
-const HURT_DECEL: float = 1200.0          # 击退速度衰减
+const HURT_DECEL: float = 300.0          # 击退速度衰减
 
 var current_direction: String = "f"  # f, b, l, r
 var current_state: String = "idle"   # idle, walk, run, hurt
@@ -36,6 +37,12 @@ func _physics_process(delta: float) -> void:
 	# 死亡：停止移动、不覆盖动画（保留 death 动画播放）
 	if body.has_method("is_dead") and body.is_dead():
 		body.velocity = Vector2.ZERO
+		_stop_trail()
+		return
+
+	# 攻击中：只执行冲刺速度，不接受输入，动画由 player.gd 控制
+	if body.has_method("is_attacking") and body.is_attacking():
+		body.move_and_slide()
 		_stop_trail()
 		return
 
@@ -71,8 +78,9 @@ func _physics_process(delta: float) -> void:
 	# 慢走 2.5 / 跑步 15；躲藏或挖矿时不发声（can_move 已在上方 return）
 	if input_dir != Vector2.ZERO and _noise:
 		var loudness: float = _noise.WALK * 0.5 if not is_running else _noise.RUN
-		if _weight:
-			loudness *= _weight.get_noise_multiplier()
+		## 负重噪音增益已禁用
+		## if _weight:
+		## 	loudness *= _weight.get_noise_multiplier()
 		var eq: Object = get_node_or_null("/root/GameRuntime")
 		if eq:
 			var esys: Object = eq.get("equipment_system")
@@ -143,6 +151,10 @@ func update_animation() -> void:
 			animated_sprite.play(animation_name)
 	else:
 		print("动画不存在: ", animation_name)
+
+## 强制要求下一帧刷新动画（攻击/受击结束后调用）
+func on_attack_ended() -> void:
+	current_state = ""
 
 ## 启动拖尾粒子发射
 func _start_trail() -> void:
